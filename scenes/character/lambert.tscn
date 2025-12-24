@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://w3h4tq6tgppn"]
+
+[ext_resource type="Script" uid="uid://cqau1b63nbt6y" path="res://scripts/character/lambert.gd" id="1_i5xml"]
+[ext_resource type="Texture2D" uid="uid://px2ji6aj38gw" path="res://assets/images/role/lambert/base.png" id="2_18sn7"]
+[ext_resource type="Texture2D" uid="uid://csfw832n7bim1" path="res://assets/images/role/lambert/sedation.PNG" id="3_pyr3l"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_i5xml")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(635, 405)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_18sn7")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(5, -212)
+texture = ExtResource("3_pyr3l")

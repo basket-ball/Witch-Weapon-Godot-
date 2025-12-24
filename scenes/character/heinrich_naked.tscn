@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://bxrpp3omb7eq7"]
+
+[ext_resource type="Script" uid="uid://dxmq7j1s01dm5" path="res://scripts/character/heinrich_naked.gd" id="1_uf3j3"]
+[ext_resource type="Texture2D" uid="uid://bm3j12gvwy0u3" path="res://assets/images/role/heinrich/naked/base.png" id="2_uf3j3"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_uf3j3")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(640.00006, 396.00003)
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("2_uf3j3")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-21.875, -198.958)

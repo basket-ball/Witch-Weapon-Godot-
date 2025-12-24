@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://dwcl73jinhvg8"]
+
+[ext_resource type="Script" uid="uid://c6cq60m3gya02" path="res://scripts/character/anne_uniform.gd" id="1_2h7ly"]
+[ext_resource type="Texture2D" uid="uid://c5j8ccxvsigtb" path="res://assets/images/role/anne/uniform/base.png" id="2_yik7s"]
+[ext_resource type="Texture2D" uid="uid://c8l2t4bahu1ol" path="res://assets/images/role/anne/uniform/normal1.png" id="3_is5vg"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_2h7ly")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(715, 395)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_yik7s")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-78, -150)
+texture = ExtResource("3_is5vg")

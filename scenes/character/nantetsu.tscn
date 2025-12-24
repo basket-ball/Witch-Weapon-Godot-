@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://bsv1y42r02jhg"]
+
+[ext_resource type="Script" uid="uid://bcmmsuje1jyfk" path="res://scripts/character/nantetsu.gd" id="1_hxab6"]
+[ext_resource type="Texture2D" uid="uid://y2p2jqwm2sv7" path="res://assets/images/role/nantetsu/base.png" id="2_yj7qw"]
+[ext_resource type="Texture2D" uid="uid://vs3yr3xtnos4" path="res://assets/images/role/nantetsu/serious.png" id="3_7w1u1"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_hxab6")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(624, 392)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_yj7qw")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(17, -213)
+texture = ExtResource("3_7w1u1")

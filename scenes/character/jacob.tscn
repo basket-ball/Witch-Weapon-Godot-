@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://cefc0ckwjbm4d"]
+
+[ext_resource type="Script" uid="uid://cbldbgy26j52s" path="res://scripts/character/jacob.gd" id="1_5flu7"]
+[ext_resource type="Texture2D" uid="uid://dpes34akd7cbv" path="res://assets/images/role/jacob/base.png" id="2_notkw"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_5flu7")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(660, 386)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_notkw")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-21.875, -198.958)

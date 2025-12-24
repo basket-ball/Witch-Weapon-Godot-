@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://50re7t3oe16l"]
+
+[ext_resource type="Script" uid="uid://clvqm4td5gvcv" path="res://scripts/character/akikounglass.gd" id="1_yc3d0"]
+[ext_resource type="Texture2D" uid="uid://bm7cj3jgtkutl" path="res://assets/images/role/akikounglass/base.png" id="2_hrf6r"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_yc3d0")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(628, 400)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_hrf6r")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-21.875, -198.958)

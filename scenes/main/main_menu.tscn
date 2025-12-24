@@ -1,0 +1,215 @@
+[gd_scene load_steps=19 format=3 uid="uid://b6ldhc4dldn1j"]
+
+[ext_resource type="Script" uid="uid://um4c4un4ltp6" path="res://scripts/main/main_menu.gd" id="1_sd5it"]
+[ext_resource type="Texture2D" uid="uid://cad1e353svt3l" path="res://assets/gui/main_menu/story_bg2.png" id="2_w6ykx"]
+[ext_resource type="Texture2D" uid="uid://oklf2gkiesgu" path="res://assets/gui/main_menu/story_bg3.png" id="3_hiibk"]
+[ext_resource type="Texture2D" uid="uid://cocj41jxqt5p6" path="res://assets/gui/main_menu/Main_normal.png" id="5_75pso"]
+[ext_resource type="FontFile" uid="uid://ckp1oydq2vsvy" path="res://assets/gui/font/方正粗圆_GBK.ttf" id="5_cnht7"]
+[ext_resource type="Texture2D" uid="uid://7epr6x34vivd" path="res://assets/gui/main_menu/Main_pressed.png" id="6_cnht7"]
+[ext_resource type="Texture2D" uid="uid://dv76b0hsk42tv" path="res://assets/gui/main_menu/Side_normal.png" id="7_s2sug"]
+[ext_resource type="Texture2D" uid="uid://covbn6sp4yh5r" path="res://assets/gui/main_menu/Side_pressed.png" id="8_ygj4d"]
+[ext_resource type="PackedScene" uid="uid://b3uub0sowa8g7" path="res://scenes/main/main_story_list.tscn" id="9_75pso"]
+[ext_resource type="PackedScene" uid="uid://ckymphh2diif0" path="res://scenes/main/side_story_list.tscn" id="10_cnht7"]
+[ext_resource type="AudioStream" uid="uid://d1k84r4y7j36o" path="res://assets/audio/music/unkown/UI_Main_Funk.mp3" id="11_bgm"]
+[ext_resource type="Texture2D" path="res://assets/gui/settings/setting_in_btn.png" id="12_settings_btn"]
+[ext_resource type="PackedScene" uid="uid://cgko5uvkl13mb" path="res://scenes/setting/settings.tscn" id="13_settings_scene"]
+
+[sub_resource type="FontVariation" id="FontVariation_xfho0"]
+base_font = ExtResource("5_cnht7")
+variation_transform = Transform2D(1, 0.245, 0, 1, 0, 0)
+
+[sub_resource type="LabelSettings" id="LabelSettings_s1tvc"]
+font = SubResource("FontVariation_xfho0")
+font_size = 28
+
+[sub_resource type="LabelSettings" id="LabelSettings_ygokn"]
+font = SubResource("FontVariation_xfho0")
+font_size = 28
+font_color = Color(0.545098, 0.541176, 0.541176, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_kpcq7"]
+font = SubResource("FontVariation_xfho0")
+font_size = 28
+
+[sub_resource type="LabelSettings" id="LabelSettings_31vgd"]
+font = SubResource("FontVariation_xfho0")
+font_size = 28
+font_color = Color(0.545098, 0.541176, 0.541176, 1)
+
+[node name="Control2" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_sd5it")
+metadata/_edit_vertical_guides_ = [640.0]
+metadata/_edit_horizontal_guides_ = [360.0]
+
+[node name="ColorRect" type="ColorRect" parent="."]
+z_index = -2
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.368627, 0.368627, 0.368627, 1)
+
+[node name="StoryBg1" type="Sprite2D" parent="."]
+z_index = -2
+position = Vector2(816, 360)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_w6ykx")
+
+[node name="StoryBg2" type="Sprite2D" parent="."]
+z_index = -2
+position = Vector2(720, 360)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("3_hiibk")
+
+[node name="MainStoryButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 37.0
+offset_top = 22.0
+offset_right = 136.0
+offset_bottom = 60.0
+
+[node name="IconLight" type="Sprite2D" parent="MainStoryButton"]
+position = Vector2(17, 19)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("5_75pso")
+
+[node name="LabelLight" type="Label" parent="MainStoryButton/IconLight"]
+anchors_preset = -1
+anchor_left = -0.154949
+anchor_top = -0.0648148
+anchor_right = -0.154949
+anchor_bottom = -0.0648148
+offset_left = 23.9584
+offset_top = -16.6667
+offset_right = 88.9584
+offset_bottom = 20.3333
+text = "主线"
+label_settings = SubResource("LabelSettings_s1tvc")
+metadata/_edit_use_anchors_ = true
+
+[node name="IconGray" type="Sprite2D" parent="MainStoryButton"]
+visible = false
+position = Vector2(17, 19)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("6_cnht7")
+
+[node name="LabelGray" type="Label" parent="MainStoryButton/IconGray"]
+anchors_preset = -1
+anchor_left = -0.309897
+anchor_top = -0.12963
+anchor_right = -0.309897
+anchor_bottom = -0.12963
+offset_left = 28.9167
+offset_top = -14.3333
+offset_right = 93.9167
+offset_bottom = 22.6667
+text = "主线"
+label_settings = SubResource("LabelSettings_ygokn")
+metadata/_edit_use_anchors_ = true
+
+[node name="SideStoryButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 178.0
+offset_top = 22.0
+offset_right = 278.0
+offset_bottom = 60.0
+
+[node name="IconLight" type="Sprite2D" parent="SideStoryButton"]
+visible = false
+position = Vector2(18, 19)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("7_s2sug")
+
+[node name="LabelLight" type="Label" parent="SideStoryButton/IconLight"]
+anchors_preset = -1
+anchor_left = -0.33142
+anchor_top = -0.126218
+anchor_right = -0.33142
+anchor_bottom = -0.126218
+offset_left = 30.2683
+offset_top = -14.2037
+offset_right = 95.2683
+offset_bottom = 22.7963
+text = "番外"
+label_settings = SubResource("LabelSettings_kpcq7")
+metadata/_edit_use_anchors_ = true
+
+[node name="IconGray" type="Sprite2D" parent="SideStoryButton"]
+position = Vector2(18, 19)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("8_ygj4d")
+
+[node name="LabelGray" type="Label" parent="SideStoryButton/IconGray"]
+anchors_preset = -1
+anchor_left = -0.478478
+anchor_top = -0.186525
+anchor_right = -0.478478
+anchor_bottom = -0.186525
+offset_left = 35.2683
+offset_top = -11.912
+offset_right = 100.268
+offset_bottom = 25.088
+text = "番外"
+label_settings = SubResource("LabelSettings_31vgd")
+metadata/_edit_use_anchors_ = true
+
+[node name="MainStoryList" parent="." instance=ExtResource("9_75pso")]
+z_index = 1
+layout_mode = 0
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_bottom = 40.0
+grow_horizontal = 1
+grow_vertical = 1
+
+[node name="SideStoryList" parent="." instance=ExtResource("10_cnht7")]
+z_index = 1
+visible = false
+layout_mode = 1
+offset_right = -1280.0
+offset_bottom = -659.0
+
+[node name="StorySceneLayer" type="CanvasLayer" parent="."]
+
+[node name="BGMPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("11_bgm")
+volume_db = -5.0
+autoplay = true
+
+[node name="BlackOverlay" type="ColorRect" parent="."]
+visible = false
+z_index = 999
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="SettingsButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1200.0
+offset_top = 20.0
+offset_right = 1264.0
+offset_bottom = 84.0
+pivot_offset = Vector2(32, 32)
+modulate = Color(1, 1, 1, 1)
+self_modulate = Color(1, 1, 1, 1)
+texture_normal = ExtResource("12_settings_btn")
+
+[node name="SettingsPanel" parent="." instance=ExtResource("13_settings_scene")]
+visible = false
+z_index = 1000
+
+[connection signal="pressed" from="MainStoryButton" to="." method="_on_main_story_button_pressed"]
+[connection signal="pressed" from="SideStoryButton" to="." method="_on_side_story_button_pressed"]
+[connection signal="pressed" from="SettingsButton" to="." method="_on_settings_button_pressed"]
+[connection signal="back_pressed" from="SettingsPanel" to="." method="_on_settings_back_pressed"]

@@ -1,0 +1,100 @@
+[gd_scene load_steps=13 format=3 uid="uid://tfmmwjuxwu4x"]
+
+[ext_resource type="Texture2D" uid="uid://b3qd1crtpnviw" path="res://assets/gui/textui/skipbtn.png" id="1_4id8c"]
+[ext_resource type="PackedScene" uid="uid://fvvgkymg70tb" path="res://scenes/dialog/Dialog.tscn" id="2_gilmg"]
+[ext_resource type="PackedScene" uid="uid://4jspf5rp5ghc" path="res://scenes/dialog/NameBox.tscn" id="3_3heji"]
+[ext_resource type="Script" uid="uid://c2itefawl8p1o" path="res://scripts/dialog/NovelInterface.gd" id="4_script"]
+[ext_resource type="Texture2D" uid="uid://bwt63lhys6pil" path="res://assets/gui/scrollbar/vertical_hover_bar.png" id="5_hover_bar"]
+[ext_resource type="Texture2D" uid="uid://c34t1rkqp8lsy" path="res://assets/gui/scrollbar/vertical_hover_thumb.png" id="6_hover_thumb"]
+[ext_resource type="Texture2D" uid="uid://cw0mvjffy8qw6" path="res://assets/gui/scrollbar/vertical_idle_thumb.png" id="8_idle_thumb"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_2x4lf"]
+texture = ExtResource("8_idle_thumb")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_4id8c"]
+texture = ExtResource("6_hover_thumb")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_kh2ww"]
+texture = ExtResource("6_hover_thumb")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_is5rg"]
+content_margin_left = 7.0
+content_margin_top = 5.0
+content_margin_right = 7.0
+content_margin_bottom = 5.0
+texture = ExtResource("5_hover_bar")
+
+[sub_resource type="Theme" id="Theme_2x4lf"]
+VScrollBar/styles/grabber = SubResource("StyleBoxTexture_2x4lf")
+VScrollBar/styles/grabber_highlight = SubResource("StyleBoxTexture_4id8c")
+VScrollBar/styles/grabber_pressed = SubResource("StyleBoxTexture_kh2ww")
+VScrollBar/styles/scroll = SubResource("StyleBoxTexture_is5rg")
+
+[node name="NovelInterface" type="Node2D"]
+script = ExtResource("4_script")
+
+[node name="BackgroundColor" type="ColorRect" parent="."]
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0, 0, 0, 1)
+
+[node name="BG" type="Sprite2D" parent="."]
+position = Vector2(640, 360)
+scale = Vector2(1.25, 1.25)
+
+[node name="SkipButton" type="TextureButton" parent="."]
+z_index = 5
+offset_left = 1134.0
+offset_top = 11.0
+offset_right = 1260.0
+offset_bottom = 71.0
+scale = Vector2(0.96, 0.96)
+texture_normal = ExtResource("1_4id8c")
+
+[node name="Dialog" parent="." instance=ExtResource("2_gilmg")]
+z_index = 5
+
+[node name="NameBox" parent="." instance=ExtResource("3_3heji")]
+z_index = 5
+
+[node name="AudioPlayer" type="AudioStreamPlayer" parent="."]
+
+[node name="EntranceOverlay" type="ColorRect" parent="."]
+z_index = 1000
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="LogInterface" type="Control" parent="."]
+visible = false
+z_index = 2000
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 1
+
+[node name="LogMask" type="ColorRect" parent="LogInterface"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0, 0, 0, 0.8)
+
+[node name="LogScrollContainer" type="ScrollContainer" parent="LogInterface"]
+z_index = 1
+layout_mode = 0
+offset_left = 68.0
+offset_top = 74.0
+offset_right = 1253.0
+offset_bottom = 624.0
+theme = SubResource("Theme_2x4lf")
+horizontal_scroll_mode = 0
+
+[node name="LogContent" type="VBoxContainer" parent="LogInterface/LogScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3

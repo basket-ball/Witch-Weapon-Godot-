@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://qrre3xeakx5a"
+path="res://.godot/imported/Normal Stage.mp3-5ebccd8c673fa20f422638e117c40147.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/Normal Stage.mp3"
+dest_files=["res://.godot/imported/Normal Stage.mp3-5ebccd8c673fa20f422638e117c40147.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

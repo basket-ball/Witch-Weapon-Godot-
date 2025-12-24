@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://dt6f56ebn8abp"]
+
+[ext_resource type="Script" uid="uid://bbvcib1douaj4" path="res://scripts/character/baizhu_battle.gd" id="1_jnoqb"]
+[ext_resource type="Texture2D" uid="uid://b04gkydns8rg5" path="res://assets/images/role/baizhu/battle/base.png" id="2_jnoqb"]
+[ext_resource type="Texture2D" uid="uid://cyrarnk8c62ku" path="res://assets/images/role/baizhu/battle/normal.png" id="3_2nc6t"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_jnoqb")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(641, 408)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_jnoqb")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-1, -185)
+texture = ExtResource("3_2nc6t")

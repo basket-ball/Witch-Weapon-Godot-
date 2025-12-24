@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://6h2o5yar8jke"]
+
+[ext_resource type="Script" uid="uid://bfv2a3rgq8hm2" path="res://scripts/character/beatrice_battle.gd" id="1_nt1dw"]
+[ext_resource type="Texture2D" uid="uid://dq5fatknbf70f" path="res://assets/images/role/beatrice/battle/base.png" id="2_adymb"]
+[ext_resource type="Texture2D" uid="uid://ic6fsj3addj3" path="res://assets/images/role/beatrice/battle/normal.png" id="3_m2463"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_nt1dw")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+metadata/_edit_group_ = true
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(643, 396)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_adymb")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-4, -211)
+texture = ExtResource("3_m2463")

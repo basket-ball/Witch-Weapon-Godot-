@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://bo854gakrhna7"]
+
+[ext_resource type="Script" uid="uid://dbs7et2y6rdem" path="res://scripts/character/servent.gd" id="1_1j6uw"]
+[ext_resource type="Texture2D" uid="uid://bosqgc5ouiwsr" path="res://assets/images/role/servent/base.png" id="2_qlyn5"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_1j6uw")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(653, 397.00003)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_qlyn5")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-21.875, -198.958)

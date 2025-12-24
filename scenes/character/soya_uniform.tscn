@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://lh684klx1oxr"]
+
+[ext_resource type="Script" uid="uid://dpcgcb4xdagsn" path="res://scripts/character/soya_uniform.gd" id="1_yxbr8"]
+[ext_resource type="Texture2D" uid="uid://cec262mcubbia" path="res://assets/images/role/soya/uniform/base.png" id="2_oysv7"]
+[ext_resource type="Texture2D" uid="uid://tvvksxr02g6d" path="res://assets/images/role/soya/uniform/normal.png" id="3_wsy74"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_yxbr8")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(650, 418)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_oysv7")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-11, -115)
+texture = ExtResource("3_wsy74")

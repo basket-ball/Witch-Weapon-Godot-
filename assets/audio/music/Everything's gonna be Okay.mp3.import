@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://bkurd343pfrx1"
+path="res://.godot/imported/Everything's gonna be Okay.mp3-6ca4a1e954c04b443fa5f57e5a49da4f.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/Everything's gonna be Okay.mp3"
+dest_files=["res://.godot/imported/Everything's gonna be Okay.mp3-6ca4a1e954c04b443fa5f57e5a49da4f.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

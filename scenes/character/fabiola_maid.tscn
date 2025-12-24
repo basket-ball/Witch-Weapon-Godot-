@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://bcdnk5psyr11f"]
+
+[ext_resource type="Script" uid="uid://c130podxkj6wu" path="res://scripts/character/fabiola_maid.gd" id="1_lvwlx"]
+[ext_resource type="Texture2D" uid="uid://dsxk344bv66qx" path="res://assets/images/role/fabiola/maid/base.png" id="2_vywj2"]
+[ext_resource type="Texture2D" uid="uid://j5w2yfo716ji" path="res://assets/images/role/fabiola/maid/normal.png" id="3_4ncjf"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_lvwlx")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(656, 421)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_vywj2")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-11, -198)
+texture = ExtResource("3_4ncjf")

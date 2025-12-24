@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://dxwe8k7ickie0"
+path="res://.godot/imported/Black Market.mp3-5f7e5de2cd1d86353b15dfa9beeb246b.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/Black Market.mp3"
+dest_files=["res://.godot/imported/Black Market.mp3-5f7e5de2cd1d86353b15dfa9beeb246b.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

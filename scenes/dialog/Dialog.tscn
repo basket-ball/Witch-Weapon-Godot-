@@ -1,0 +1,64 @@
+[gd_scene load_steps=10 format=3 uid="uid://fvvgkymg70tb"]
+
+[ext_resource type="Texture2D" uid="uid://c1b7b25rpc7j4" path="res://assets/gui/textui/TextboxBG.png" id="1_2vtbe"]
+[ext_resource type="Texture2D" uid="uid://dly4hyx5326py" path="res://assets/gui/textui/log.png" id="2_2mmj5"]
+[ext_resource type="Texture2D" uid="uid://blt0oglfs4wec" path="res://assets/gui/textui/next.png" id="3_vylcp"]
+[ext_resource type="Texture2D" uid="uid://cdx4tyhq00mvq" path="res://assets/gui/textui/auto.png" id="4_nub04"]
+[ext_resource type="Script" uid="uid://cqo2cc62dthgs" path="res://scripts/dialog/next_button.gd" id="5_h28je"]
+[ext_resource type="FontFile" uid="uid://kfj8mkiu5cf0" path="res://assets/gui/font/HYQiHei-50S.otf" id="6_csuq7"]
+[ext_resource type="Script" uid="uid://dimh85derwu5h" path="res://scripts/dialog/show_text.gd" id="7_v0bgp"]
+
+[sub_resource type="FontVariation" id="FontVariation_o0bq0"]
+base_font = ExtResource("6_csuq7")
+
+[sub_resource type="LabelSettings" id="LabelSettings_xuoxi"]
+line_spacing = 18.0
+font = SubResource("FontVariation_o0bq0")
+font_size = 32
+outline_size = 9
+outline_color = Color(0.15625, 0.145451, 0.128174, 1)
+
+[node name="Dialog" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="TextBoxBG" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 559.0
+offset_right = 1311.0
+offset_bottom = 716.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("1_2vtbe")
+
+[node name="LogButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1205.0
+offset_top = 568.00006
+offset_right = 1248.0
+offset_bottom = 616.00006
+scale = Vector2(0.96, 0.96)
+texture_normal = ExtResource("2_2mmj5")
+
+[node name="NextButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1209.0
+offset_top = 659.0
+offset_right = 1244.0
+offset_bottom = 687.0
+scale = Vector2(0.96, 0.96)
+texture_normal = ExtResource("3_vylcp")
+texture_hover = ExtResource("4_nub04")
+script = ExtResource("5_h28je")
+
+[node name="ShowText" type="Label" parent="."]
+layout_mode = 0
+offset_left = 301.0
+offset_top = 589.0
+offset_right = 1012.0
+offset_bottom = 687.0
+scale = Vector2(0.96, 0.96)
+label_settings = SubResource("LabelSettings_xuoxi")
+autowrap_mode = 3
+justification_flags = 162
+script = ExtResource("7_v0bgp")

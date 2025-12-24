@@ -1,0 +1,196 @@
+[gd_scene load_steps=13 format=3 uid="uid://ckymphh2diif0"]
+
+[ext_resource type="Texture2D" uid="uid://sbx2bsq06xs3" path="res://assets/gui/main_menu/storyui_connect.png" id="1_0bg23"]
+[ext_resource type="Script" uid="uid://bk6nj1mbv1u8m" path="res://scripts/main/side_story_list.gd" id="1_bd3rg"]
+[ext_resource type="Texture2D" uid="uid://d0upq6jsxo1jg" path="res://assets/gui/main_menu/line_contect.png" id="2_axbom"]
+[ext_resource type="FontFile" uid="uid://bajyd14et5o6v" path="res://assets/gui/font/方正兰亭准黑_GBK.ttf" id="2_bd3rg"]
+[ext_resource type="Texture2D" uid="uid://cclthvpetg4xi" path="res://assets/gui/main_menu/storyui_back.png" id="3_qm5de"]
+[ext_resource type="Texture2D" uid="uid://bj50jchaaraol" path="res://assets/gui/main_menu/Story00_Main_01.png" id="4_axbom"]
+[ext_resource type="Texture2D" uid="uid://m6t653rg0c34" path="res://assets/gui/main_menu/Story00_Independence_03.png" id="5_rgnka"]
+[ext_resource type="Texture2D" uid="uid://705v0cjlcfdu" path="res://assets/gui/main_menu/juqing_bottm_xian.png" id="8_3info"]
+
+[sub_resource type="FontVariation" id="FontVariation_qy2pb"]
+base_font = ExtResource("2_bd3rg")
+variation_embolden = 0.8
+
+[sub_resource type="LabelSettings" id="LabelSettings_rgnka"]
+font = SubResource("FontVariation_qy2pb")
+font_size = 29
+
+[sub_resource type="FontVariation" id="FontVariation_movbp"]
+base_font = ExtResource("2_bd3rg")
+variation_embolden = 0.8
+
+[sub_resource type="LabelSettings" id="LabelSettings_36egv"]
+font = SubResource("FontVariation_movbp")
+font_size = 29
+
+[node name="SideStoryList" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bd3rg")
+
+[node name="Side01" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Line2D" type="Line2D" parent="Side01"]
+visible = false
+z_index = -1
+position = Vector2(0, 2)
+points = PackedVector2Array(233, 370, 261, 370, 273, 347, 515, 347)
+width = 2.0
+
+[node name="LineContect" type="TextureRect" parent="Side01/Line2D"]
+offset_left = 253.0
+offset_top = 346.0
+offset_right = 282.0
+offset_bottom = 372.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_axbom")
+
+[node name="BackNet" type="TextureRect" parent="Side01"]
+self_modulate = Color(1, 1, 1, 0)
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 8.78
+anchor_top = 9.3
+anchor_right = 8.78
+anchor_bottom = 9.3
+offset_left = -376.2
+offset_top = -324.0
+offset_right = 406.8
+offset_bottom = 351.0
+scale = Vector2(0.96, 0.96)
+mouse_filter = 2
+texture = ExtResource("8_3info")
+
+[node name="Num" type="TextureRect" parent="Side01/BackNet"]
+z_index = -1
+layout_mode = 0
+offset_left = 154.167
+offset_top = 285.417
+offset_right = 291.167
+offset_bottom = 367.417
+texture = ExtResource("1_0bg23")
+
+[node name="Label" type="Label" parent="Side01/BackNet/Num"]
+layout_mode = 0
+offset_left = 61.4583
+offset_top = 25.0
+offset_right = 97.4583
+offset_bottom = 61.0
+text = "01"
+label_settings = SubResource("LabelSettings_rgnka")
+
+[node name="TextureRect" type="TextureRect" parent="Side01/BackNet"]
+layout_mode = 0
+offset_left = 287.542
+offset_top = 249.583
+offset_right = 494.542
+offset_bottom = 427.583
+pivot_offset = Vector2(102.215, 91.565)
+texture = ExtResource("4_axbom")
+
+[node name="TextureButton" type="TextureButton" parent="Side01/BackNet/TextureRect"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = -14.9999
+offset_top = -9.99997
+offset_right = 206.0
+offset_bottom = 204.0
+texture_normal = ExtResource("3_qm5de")
+
+[node name="Side02" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 346.0
+offset_right = 386.0
+offset_bottom = 40.0
+
+[node name="Line2D" type="Line2D" parent="Side02"]
+visible = false
+z_index = -1
+position = Vector2(0, 2)
+points = PackedVector2Array(233, 370, 261, 370, 273, 347, 515, 347)
+width = 2.0
+
+[node name="LineContect" type="TextureRect" parent="Side02/Line2D"]
+offset_left = 253.0
+offset_top = 346.0
+offset_right = 282.0
+offset_bottom = 372.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_axbom")
+
+[node name="BackNet" type="TextureRect" parent="Side02"]
+self_modulate = Color(1, 1, 1, 0)
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 8.78
+anchor_top = 9.3
+anchor_right = 8.78
+anchor_bottom = 9.3
+offset_left = -376.2
+offset_top = -324.0
+offset_right = 406.8
+offset_bottom = 351.0
+scale = Vector2(0.96, 0.96)
+mouse_filter = 2
+texture = ExtResource("8_3info")
+
+[node name="Num" type="TextureRect" parent="Side02/BackNet"]
+z_index = -1
+layout_mode = 0
+offset_left = 154.167
+offset_top = 285.417
+offset_right = 291.167
+offset_bottom = 367.417
+texture = ExtResource("1_0bg23")
+
+[node name="Label" type="Label" parent="Side02/BackNet/Num"]
+layout_mode = 0
+offset_left = 59.375
+offset_top = 25.0
+offset_right = 100.375
+offset_bottom = 61.0
+text = "02"
+label_settings = SubResource("LabelSettings_36egv")
+
+[node name="TextureRect" type="TextureRect" parent="Side02/BackNet"]
+layout_mode = 0
+offset_left = 287.917
+offset_top = 249.583
+offset_right = 494.917
+offset_bottom = 427.583
+pivot_offset = Vector2(102.215, 91.565)
+texture = ExtResource("5_rgnka")
+
+[node name="TextureButton" type="TextureButton" parent="Side02/BackNet/TextureRect"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = -14.9999
+offset_top = -9.99997
+offset_right = 206.0
+offset_bottom = 204.0
+texture_normal = ExtResource("3_qm5de")
+
+[node name="BackgroundColor" type="ColorRect" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0, 0, 0, 0.9)
+
+[node name="BackArea" type="TextureButton" parent="BackgroundColor"]
+layout_mode = 0
+offset_right = 780.0
+offset_bottom = 720.0

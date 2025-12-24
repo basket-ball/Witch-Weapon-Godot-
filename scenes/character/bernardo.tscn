@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://ba3pcmnropvqf"]
+
+[ext_resource type="Script" uid="uid://cjvorr50jxd21" path="res://scripts/character/bernardo.gd" id="1_sjqoj"]
+[ext_resource type="Texture2D" uid="uid://c6osplw1nnti7" path="res://assets/images/role/bernardo/base.png" id="3_d5ta8"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_sjqoj")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(663, 384)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("3_d5ta8")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-21.875, -198.958)

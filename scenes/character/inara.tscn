@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://76nxcsxjx688"]
+
+[ext_resource type="Script" uid="uid://gy7m5ps10swc" path="res://scripts/character/CharacterNode.gd" id="1_0y8f8"]
+[ext_resource type="Texture2D" uid="uid://c6ooxehphs2bl" path="res://assets/images/role/inara/base.png" id="2_4jno2"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_0y8f8")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(651.00006, 416)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_4jno2")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-21.875, -198.958)

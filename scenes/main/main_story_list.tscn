@@ -1,0 +1,792 @@
+[gd_scene load_steps=20 format=3 uid="uid://b3uub0sowa8g7"]
+
+[ext_resource type="Script" uid="uid://ybr273dlpq5k" path="res://scripts/main/main_story_list.gd" id="1_gk3on"]
+[ext_resource type="Texture2D" uid="uid://sbx2bsq06xs3" path="res://assets/gui/main_menu/storyui_connect.png" id="2_i6drg"]
+[ext_resource type="Texture2D" uid="uid://d0upq6jsxo1jg" path="res://assets/gui/main_menu/line_contect.png" id="2_qy2pb"]
+[ext_resource type="FontFile" uid="uid://bajyd14et5o6v" path="res://assets/gui/font/方正兰亭准黑_GBK.ttf" id="3_qy2pb"]
+[ext_resource type="Texture2D" uid="uid://cclthvpetg4xi" path="res://assets/gui/main_menu/storyui_back.png" id="4_gk3on"]
+[ext_resource type="Texture2D" uid="uid://bj50jchaaraol" path="res://assets/gui/main_menu/Story00_Main_01.png" id="5_3info"]
+[ext_resource type="Texture2D" uid="uid://b2q0f3e8bvwrn" path="res://assets/gui/main_menu/Story00_Main_02.png" id="6_sp6lr"]
+[ext_resource type="Texture2D" uid="uid://d2nlsj7xrayny" path="res://assets/gui/main_menu/Story00_Main_03.png" id="7_mrd60"]
+[ext_resource type="Texture2D" uid="uid://705v0cjlcfdu" path="res://assets/gui/main_menu/juqing_bottm_xian.png" id="8_3info"]
+[ext_resource type="Texture2D" uid="uid://keqtbkkicwnl" path="res://assets/gui/main_menu/Activity_Story_001.png" id="8_7vmgm"]
+[ext_resource type="Texture2D" uid="uid://b4t80hxg1o8wy" path="res://assets/gui/main_menu/Activity_Story_002.png" id="9_4p3t2"]
+[ext_resource type="Texture2D" uid="uid://cx7y6hagyfqcs" path="res://assets/gui/main_menu/Story00_Independence_01.png" id="10_rogk6"]
+[ext_resource type="Texture2D" uid="uid://bfm1gvdaugg4e" path="res://assets/gui/main_menu/connect_point.png" id="11_gk3on"]
+[ext_resource type="Texture2D" uid="uid://ptncdikjdmsg" path="res://assets/gui/main_menu/Activity_Story_003.png" id="11_lhp7x"]
+[ext_resource type="Texture2D" uid="uid://n1c7214bxfv0" path="res://assets/gui/main_menu/Activity_Story_004.png" id="12_3mt2b"]
+[ext_resource type="Texture2D" uid="uid://85fs72u570pw" path="res://assets/gui/main_menu/Activity_Story_006.png" id="13_d2r1w"]
+[ext_resource type="Texture2D" uid="uid://buigowaqd2nxb" path="res://assets/gui/main_menu/Activity_Story_008.png" id="14_v8ot7"]
+
+[sub_resource type="FontVariation" id="FontVariation_gk3on"]
+base_font = ExtResource("3_qy2pb")
+variation_embolden = 0.8
+
+[sub_resource type="LabelSettings" id="LabelSettings_eosva"]
+font = SubResource("FontVariation_gk3on")
+font_size = 29
+
+[node name="StoryList" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_gk3on")
+metadata/_edit_horizontal_guides_ = [372.0]
+metadata/_edit_vertical_guides_ = [351.0]
+
+[node name="Story01" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Line2D" type="Line2D" parent="Story01"]
+visible = false
+z_index = -1
+position = Vector2(0, 2)
+points = PackedVector2Array(233, 370, 261, 370, 273, 347, 515, 347)
+width = 2.0
+
+[node name="LineContect" type="TextureRect" parent="Story01/Line2D"]
+offset_left = 253.0
+offset_top = 346.0
+offset_right = 282.0
+offset_bottom = 372.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_qy2pb")
+
+[node name="BackNet" type="TextureRect" parent="Story01"]
+self_modulate = Color(1, 1, 1, 0)
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 8.78
+anchor_top = 9.3
+anchor_right = 8.78
+anchor_bottom = 9.3
+offset_left = -376.2
+offset_top = -324.0
+offset_right = 406.8
+offset_bottom = 351.0
+scale = Vector2(0.96, 0.96)
+mouse_filter = 2
+texture = ExtResource("8_3info")
+
+[node name="Num" type="TextureRect" parent="Story01/BackNet"]
+z_index = -1
+layout_mode = 0
+offset_left = 154.167
+offset_top = 285.417
+offset_right = 291.167
+offset_bottom = 367.417
+texture = ExtResource("2_i6drg")
+
+[node name="Label" type="Label" parent="Story01/BackNet/Num"]
+layout_mode = 0
+offset_left = 61.4583
+offset_top = 25.0
+offset_right = 97.4583
+offset_bottom = 61.0
+text = "01"
+label_settings = SubResource("LabelSettings_eosva")
+
+[node name="TextureRect" type="TextureRect" parent="Story01/BackNet"]
+layout_mode = 0
+offset_left = 287.542
+offset_top = 249.583
+offset_right = 494.542
+offset_bottom = 427.583
+pivot_offset = Vector2(102.215, 91.565)
+texture = ExtResource("5_3info")
+
+[node name="TextureButton" type="TextureButton" parent="Story01/BackNet/TextureRect"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = -14.9999
+offset_top = -9.99997
+offset_right = 206.0
+offset_bottom = 204.0
+texture_normal = ExtResource("4_gk3on")
+
+[node name="Story02" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 346.0
+offset_right = 386.0
+offset_bottom = 40.0
+
+[node name="Line2D" type="Line2D" parent="Story02"]
+visible = false
+z_index = -1
+position = Vector2(0, 2)
+points = PackedVector2Array(233, 370, 261, 370, 273, 347, 515, 347)
+width = 2.0
+
+[node name="LineContect" type="TextureRect" parent="Story02/Line2D"]
+offset_left = 253.0
+offset_top = 346.0
+offset_right = 282.0
+offset_bottom = 372.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_qy2pb")
+
+[node name="BackNet" type="TextureRect" parent="Story02"]
+self_modulate = Color(1, 1, 1, 0)
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 8.78
+anchor_top = 9.3
+anchor_right = 8.78
+anchor_bottom = 9.3
+offset_left = -376.2
+offset_top = -324.0
+offset_right = 406.8
+offset_bottom = 351.0
+scale = Vector2(0.96, 0.96)
+mouse_filter = 2
+texture = ExtResource("8_3info")
+
+[node name="Num" type="TextureRect" parent="Story02/BackNet"]
+z_index = -1
+layout_mode = 0
+offset_left = 154.167
+offset_top = 285.417
+offset_right = 291.167
+offset_bottom = 367.417
+texture = ExtResource("2_i6drg")
+
+[node name="Label" type="Label" parent="Story02/BackNet/Num"]
+layout_mode = 0
+offset_left = 59.375
+offset_top = 25.0
+offset_right = 100.375
+offset_bottom = 61.0
+text = "02"
+label_settings = SubResource("LabelSettings_eosva")
+
+[node name="TextureRect" type="TextureRect" parent="Story02/BackNet"]
+layout_mode = 0
+offset_left = 287.917
+offset_top = 249.583
+offset_right = 494.917
+offset_bottom = 427.583
+pivot_offset = Vector2(102.215, 91.565)
+texture = ExtResource("6_sp6lr")
+
+[node name="TextureButton" type="TextureButton" parent="Story02/BackNet/TextureRect"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = -14.9999
+offset_top = -9.99997
+offset_right = 206.0
+offset_bottom = 204.0
+texture_normal = ExtResource("4_gk3on")
+
+[node name="Story03" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 692.0
+offset_right = 732.0
+offset_bottom = 40.0
+
+[node name="Line2D" type="Line2D" parent="Story03"]
+visible = false
+z_index = -1
+position = Vector2(0, 2)
+points = PackedVector2Array(233, 370, 261, 370, 273, 347, 515, 347)
+width = 2.0
+
+[node name="LineContect" type="TextureRect" parent="Story03/Line2D"]
+offset_left = 253.0
+offset_top = 346.0
+offset_right = 282.0
+offset_bottom = 372.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_qy2pb")
+
+[node name="BackNet" type="TextureRect" parent="Story03"]
+self_modulate = Color(1, 1, 1, 0)
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 8.78
+anchor_top = 9.3
+anchor_right = 8.78
+anchor_bottom = 9.3
+offset_left = -376.2
+offset_top = -324.0
+offset_right = 406.8
+offset_bottom = 351.0
+scale = Vector2(0.96, 0.96)
+mouse_filter = 2
+texture = ExtResource("8_3info")
+
+[node name="Num" type="TextureRect" parent="Story03/BackNet"]
+z_index = -1
+layout_mode = 0
+offset_left = 154.167
+offset_top = 285.417
+offset_right = 291.167
+offset_bottom = 367.417
+texture = ExtResource("2_i6drg")
+
+[node name="Label" type="Label" parent="Story03/BackNet/Num"]
+layout_mode = 0
+offset_left = 59.375
+offset_top = 25.0
+offset_right = 100.375
+offset_bottom = 61.0
+text = "03"
+label_settings = SubResource("LabelSettings_eosva")
+
+[node name="TextureRect" type="TextureRect" parent="Story03/BackNet"]
+layout_mode = 0
+offset_left = 287.917
+offset_top = 249.583
+offset_right = 494.917
+offset_bottom = 427.583
+pivot_offset = Vector2(102.215, 91.565)
+texture = ExtResource("7_mrd60")
+
+[node name="TextureButton" type="TextureButton" parent="Story03/BackNet/TextureRect"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = -15.0001
+offset_top = -9.99997
+offset_right = 206.0
+offset_bottom = 204.0
+texture_normal = ExtResource("4_gk3on")
+
+[node name="Story04" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 1038.0
+offset_right = 1078.0
+offset_bottom = 40.0
+
+[node name="Line2D" type="Line2D" parent="Story04"]
+visible = false
+z_index = -1
+position = Vector2(0, 2)
+points = PackedVector2Array(233, 370, 261, 370, 273, 347, 515, 347)
+width = 2.0
+
+[node name="LineContect" type="TextureRect" parent="Story04/Line2D"]
+offset_left = 253.0
+offset_top = 346.0
+offset_right = 282.0
+offset_bottom = 372.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_qy2pb")
+
+[node name="BackNet" type="TextureRect" parent="Story04"]
+self_modulate = Color(1, 1, 1, 0)
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 8.78
+anchor_top = 9.3
+anchor_right = 8.78
+anchor_bottom = 9.3
+offset_left = -376.2
+offset_top = -324.0
+offset_right = 406.8
+offset_bottom = 351.0
+scale = Vector2(0.96, 0.96)
+mouse_filter = 2
+texture = ExtResource("8_3info")
+
+[node name="Num" type="TextureRect" parent="Story04/BackNet"]
+z_index = -1
+layout_mode = 0
+offset_left = 154.167
+offset_top = 285.417
+offset_right = 291.167
+offset_bottom = 367.417
+texture = ExtResource("2_i6drg")
+
+[node name="Label" type="Label" parent="Story04/BackNet/Num"]
+layout_mode = 0
+offset_left = 58.3333
+offset_top = 25.0
+offset_right = 100.333
+offset_bottom = 61.0
+text = "04"
+label_settings = SubResource("LabelSettings_eosva")
+
+[node name="TextureRect" type="TextureRect" parent="Story04/BackNet"]
+layout_mode = 0
+offset_left = 287.917
+offset_top = 249.583
+offset_right = 494.917
+offset_bottom = 427.583
+pivot_offset = Vector2(102.215, 91.565)
+texture = ExtResource("8_7vmgm")
+
+[node name="TextureButton" type="TextureButton" parent="Story04/BackNet/TextureRect"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = -15.0
+offset_top = -9.99997
+offset_right = 206.0
+offset_bottom = 204.0
+texture_normal = ExtResource("4_gk3on")
+
+[node name="Story05" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 1384.0
+offset_right = 1424.0
+offset_bottom = 40.0
+
+[node name="Line2D" type="Line2D" parent="Story05"]
+visible = false
+z_index = -1
+position = Vector2(240, -184)
+points = PackedVector2Array(167, 351, 157, 351, 145, 374, 118, 374, 13, 557, -6, 557)
+width = 2.0
+
+[node name="ConnectPoint" type="TextureRect" parent="Story05/Line2D"]
+offset_left = 110.0
+offset_top = 368.0
+offset_right = 126.0
+offset_bottom = 382.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("11_gk3on")
+
+[node name="LineContect3" type="TextureRect" parent="Story05/Line2D"]
+offset_left = 137.0
+offset_top = 350.0
+offset_right = 166.0
+offset_bottom = 376.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_qy2pb")
+
+[node name="BackNet" type="TextureRect" parent="Story05"]
+self_modulate = Color(1, 1, 1, 0)
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 8.78
+anchor_top = 9.3
+anchor_right = 8.78
+anchor_bottom = 9.3
+offset_left = -376.2
+offset_top = -324.0
+offset_right = 406.8
+offset_bottom = 351.0
+scale = Vector2(0.96, 0.96)
+mouse_filter = 2
+texture = ExtResource("8_3info")
+
+[node name="Num" type="TextureRect" parent="Story05/BackNet"]
+z_index = -1
+layout_mode = 0
+offset_left = 154.167
+offset_top = 285.417
+offset_right = 291.167
+offset_bottom = 367.417
+texture = ExtResource("2_i6drg")
+
+[node name="Label" type="Label" parent="Story05/BackNet/Num"]
+layout_mode = 0
+offset_left = 58.3332
+offset_top = 25.0
+offset_right = 100.333
+offset_bottom = 61.0
+text = "05"
+label_settings = SubResource("LabelSettings_eosva")
+
+[node name="TextureRect" type="TextureRect" parent="Story05/BackNet"]
+layout_mode = 0
+offset_left = 287.917
+offset_top = 249.583
+offset_right = 494.917
+offset_bottom = 427.583
+pivot_offset = Vector2(102.215, 91.565)
+texture = ExtResource("9_4p3t2")
+
+[node name="TextureButton" type="TextureButton" parent="Story05/BackNet/TextureRect"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = -14.9999
+offset_top = -9.99997
+offset_right = 206.0
+offset_bottom = 204.0
+texture_normal = ExtResource("4_gk3on")
+
+[node name="Story06" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 1624.0
+offset_top = -184.0
+offset_right = 1664.0
+offset_bottom = -144.0
+
+[node name="Line2D" type="Line2D" parent="Story06"]
+visible = false
+z_index = -1
+position = Vector2(106, 184)
+points = PackedVector2Array(12, 190, 120, 372, 145, 372, 157, 349, 167, 349)
+width = 2.0
+
+[node name="LineContect2" type="TextureRect" parent="Story06/Line2D"]
+offset_left = 137.0
+offset_top = 348.0
+offset_right = 166.0
+offset_bottom = 374.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_qy2pb")
+
+[node name="BackNet" type="TextureRect" parent="Story06"]
+self_modulate = Color(1, 1, 1, 0)
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 8.78
+anchor_top = 9.3
+anchor_right = 8.78
+anchor_bottom = 9.3
+offset_left = -376.2
+offset_top = -324.0
+offset_right = 406.8
+offset_bottom = 351.0
+scale = Vector2(0.96, 0.96)
+mouse_filter = 2
+texture = ExtResource("8_3info")
+
+[node name="Num" type="TextureRect" parent="Story06/BackNet"]
+z_index = -1
+layout_mode = 0
+offset_left = 154.167
+offset_top = 285.417
+offset_right = 291.167
+offset_bottom = 367.417
+texture = ExtResource("2_i6drg")
+
+[node name="Label" type="Label" parent="Story06/BackNet/Num"]
+layout_mode = 0
+offset_left = 58.3333
+offset_top = 25.0
+offset_right = 100.333
+offset_bottom = 61.0
+text = "07"
+label_settings = SubResource("LabelSettings_eosva")
+
+[node name="TextureRect" type="TextureRect" parent="Story06/BackNet"]
+layout_mode = 0
+offset_left = 287.917
+offset_top = 249.583
+offset_right = 494.917
+offset_bottom = 427.583
+pivot_offset = Vector2(102.215, 91.565)
+texture = ExtResource("10_rogk6")
+
+[node name="TextureButton" type="TextureButton" parent="Story06/BackNet/TextureRect"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = -15.0
+offset_top = -9.99998
+offset_right = 206.0
+offset_bottom = 204.0
+texture_normal = ExtResource("4_gk3on")
+
+[node name="Story07" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 1730.0
+offset_right = 1770.0
+offset_bottom = 40.0
+
+[node name="Line2D" type="Line2D" parent="Story07"]
+visible = false
+z_index = -1
+position = Vector2(0, 2)
+points = PackedVector2Array(233, 370, 261, 370, 273, 347, 515, 347)
+width = 2.0
+
+[node name="LineContect" type="TextureRect" parent="Story07/Line2D"]
+offset_left = 253.0
+offset_top = 346.0
+offset_right = 282.0
+offset_bottom = 372.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_qy2pb")
+
+[node name="BackNet" type="TextureRect" parent="Story07"]
+self_modulate = Color(1, 1, 1, 0)
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 8.78
+anchor_top = 9.3
+anchor_right = 8.78
+anchor_bottom = 9.3
+offset_left = -376.2
+offset_top = -324.0
+offset_right = 406.8
+offset_bottom = 351.0
+scale = Vector2(0.96, 0.96)
+mouse_filter = 2
+texture = ExtResource("8_3info")
+
+[node name="Num" type="TextureRect" parent="Story07/BackNet"]
+z_index = -1
+layout_mode = 0
+offset_left = 154.167
+offset_top = 285.417
+offset_right = 291.167
+offset_bottom = 367.417
+texture = ExtResource("2_i6drg")
+
+[node name="Label" type="Label" parent="Story07/BackNet/Num"]
+layout_mode = 0
+offset_left = 58.3334
+offset_top = 25.0
+offset_right = 100.333
+offset_bottom = 61.0
+text = "06"
+label_settings = SubResource("LabelSettings_eosva")
+
+[node name="TextureRect" type="TextureRect" parent="Story07/BackNet"]
+layout_mode = 0
+offset_left = 287.917
+offset_top = 249.583
+offset_right = 494.917
+offset_bottom = 427.583
+pivot_offset = Vector2(102.215, 91.565)
+texture = ExtResource("11_lhp7x")
+
+[node name="TextureButton" type="TextureButton" parent="Story07/BackNet/TextureRect"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = -15.0
+offset_top = -9.99997
+offset_right = 206.0
+offset_bottom = 204.0
+texture_normal = ExtResource("4_gk3on")
+
+[node name="Story08" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 2076.0
+offset_right = 2116.0
+offset_bottom = 40.0
+
+[node name="Line2D" type="Line2D" parent="Story08"]
+visible = false
+z_index = -1
+position = Vector2(0, 2)
+points = PackedVector2Array(233, 370, 261, 370, 273, 347, 515, 347)
+width = 2.0
+
+[node name="LineContect" type="TextureRect" parent="Story08/Line2D"]
+offset_left = 253.0
+offset_top = 346.0
+offset_right = 282.0
+offset_bottom = 372.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_qy2pb")
+
+[node name="BackNet" type="TextureRect" parent="Story08"]
+self_modulate = Color(1, 1, 1, 0)
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 8.78
+anchor_top = 9.3
+anchor_right = 8.78
+anchor_bottom = 9.3
+offset_left = -376.2
+offset_top = -324.0
+offset_right = 406.8
+offset_bottom = 351.0
+scale = Vector2(0.96, 0.96)
+mouse_filter = 2
+texture = ExtResource("8_3info")
+
+[node name="Num" type="TextureRect" parent="Story08/BackNet"]
+z_index = -1
+layout_mode = 0
+offset_left = 154.167
+offset_top = 285.417
+offset_right = 291.167
+offset_bottom = 367.417
+texture = ExtResource("2_i6drg")
+
+[node name="Label" type="Label" parent="Story08/BackNet/Num"]
+layout_mode = 0
+offset_left = 58.3333
+offset_top = 25.0
+offset_right = 100.333
+offset_bottom = 61.0
+text = "08"
+label_settings = SubResource("LabelSettings_eosva")
+
+[node name="TextureRect" type="TextureRect" parent="Story08/BackNet"]
+layout_mode = 0
+offset_left = 287.917
+offset_top = 249.583
+offset_right = 494.917
+offset_bottom = 427.583
+pivot_offset = Vector2(102.215, 91.565)
+texture = ExtResource("12_3mt2b")
+
+[node name="TextureButton" type="TextureButton" parent="Story08/BackNet/TextureRect"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = -15.0
+offset_top = -9.99997
+offset_right = 206.0
+offset_bottom = 204.0
+texture_normal = ExtResource("4_gk3on")
+
+[node name="Story09" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 2422.0
+offset_right = 2462.0
+offset_bottom = 40.0
+
+[node name="Line2D" type="Line2D" parent="Story09"]
+visible = false
+z_index = -1
+position = Vector2(0, 2)
+points = PackedVector2Array(233, 370, 261, 370, 273, 347, 515, 347)
+width = 2.0
+
+[node name="LineContect" type="TextureRect" parent="Story09/Line2D"]
+offset_left = 253.0
+offset_top = 346.0
+offset_right = 282.0
+offset_bottom = 372.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_qy2pb")
+
+[node name="BackNet" type="TextureRect" parent="Story09"]
+self_modulate = Color(1, 1, 1, 0)
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 8.78
+anchor_top = 9.3
+anchor_right = 8.78
+anchor_bottom = 9.3
+offset_left = -376.2
+offset_top = -324.0
+offset_right = 406.8
+offset_bottom = 351.0
+scale = Vector2(0.96, 0.96)
+mouse_filter = 2
+texture = ExtResource("8_3info")
+
+[node name="Num" type="TextureRect" parent="Story09/BackNet"]
+z_index = -1
+layout_mode = 0
+offset_left = 154.167
+offset_top = 285.417
+offset_right = 291.167
+offset_bottom = 367.417
+texture = ExtResource("2_i6drg")
+
+[node name="Label" type="Label" parent="Story09/BackNet/Num"]
+layout_mode = 0
+offset_left = 58.3335
+offset_top = 25.0
+offset_right = 99.3335
+offset_bottom = 61.0
+text = "09"
+label_settings = SubResource("LabelSettings_eosva")
+
+[node name="TextureRect" type="TextureRect" parent="Story09/BackNet"]
+layout_mode = 0
+offset_left = 287.917
+offset_top = 249.583
+offset_right = 494.917
+offset_bottom = 427.583
+pivot_offset = Vector2(102.215, 91.565)
+texture = ExtResource("13_d2r1w")
+
+[node name="TextureButton" type="TextureButton" parent="Story09/BackNet/TextureRect"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = -14.9995
+offset_top = -9.99997
+offset_right = 206.0
+offset_bottom = 204.0
+texture_normal = ExtResource("4_gk3on")
+
+[node name="Story10" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 2768.0
+offset_right = 2808.0
+offset_bottom = 40.0
+
+[node name="BackNet" type="TextureRect" parent="Story10"]
+self_modulate = Color(1, 1, 1, 0)
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 8.78
+anchor_top = 9.3
+anchor_right = 8.78
+anchor_bottom = 9.3
+offset_left = -376.2
+offset_top = -324.0
+offset_right = 406.8
+offset_bottom = 351.0
+scale = Vector2(0.96, 0.96)
+mouse_filter = 2
+texture = ExtResource("8_3info")
+
+[node name="Num" type="TextureRect" parent="Story10/BackNet"]
+z_index = -1
+layout_mode = 0
+offset_left = 154.167
+offset_top = 285.417
+offset_right = 291.167
+offset_bottom = 367.417
+texture = ExtResource("2_i6drg")
+
+[node name="Label" type="Label" parent="Story10/BackNet/Num"]
+layout_mode = 0
+offset_left = 61.4583
+offset_top = 25.0
+offset_right = 97.4583
+offset_bottom = 61.0
+text = "10"
+label_settings = SubResource("LabelSettings_eosva")
+
+[node name="TextureRect" type="TextureRect" parent="Story10/BackNet"]
+layout_mode = 0
+offset_left = 287.917
+offset_top = 249.583
+offset_right = 494.917
+offset_bottom = 427.583
+pivot_offset = Vector2(102.215, 91.565)
+texture = ExtResource("14_v8ot7")
+
+[node name="TextureButton" type="TextureButton" parent="Story10/BackNet/TextureRect"]
+show_behind_parent = true
+layout_mode = 0
+offset_left = -14.9998
+offset_top = -9.99997
+offset_right = 206.0
+offset_bottom = 204.0
+texture_normal = ExtResource("4_gk3on")
+
+[node name="BackgroundColor" type="ColorRect" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0, 0, 0, 0.9)
+
+[node name="BackArea" type="TextureButton" parent="BackgroundColor"]
+layout_mode = 0
+offset_right = 780.0
+offset_bottom = 720.0

@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://dbvdsjrgxe74q"]
+
+[ext_resource type="Script" uid="uid://bp382tgs8rdgw" path="res://scripts/character/soldier_2.gd" id="1_je4cl"]
+[ext_resource type="Texture2D" uid="uid://dhlu7y73amf8b" path="res://assets/images/role/soldier/2/base.png" id="2_us1sk"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_je4cl")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(690, 386.00003)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_us1sk")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-25, -178)

@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://dkiacw8xe1y3a"]
+
+[ext_resource type="Script" uid="uid://dggn5b7ra22mt" path="res://scripts/character/iluka_battle.gd" id="1_h05g4"]
+[ext_resource type="Texture2D" uid="uid://mt30ydk3yib3" path="res://assets/images/role/iluka/battle/base.png" id="2_l5fhv"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_h05g4")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(580, 364.00003)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_l5fhv")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(6, -192)

@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://c6tggg2jathdi"]
+
+[ext_resource type="Script" uid="uid://bwe0kxu5fyd2y" path="res://scripts/character/cassell.gd" id="1_dfljo"]
+[ext_resource type="Texture2D" uid="uid://dv84kakqvyfv1" path="res://assets/images/role/cassell/base.png" id="2_jfgdq"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_dfljo")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(680, 386)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_jfgdq")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-21.875, -198.958)

@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://dotpdcx30mg7j"]
+
+[ext_resource type="Script" uid="uid://cksiw5ihkyv0u" path="res://scripts/character/senate_giles.gd" id="1_vp8um"]
+[ext_resource type="Texture2D" uid="uid://c4s6ov2r331gy" path="res://assets/images/role/senate/giles/base.png" id="3_7d1s0"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_vp8um")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(657.00006, 401.00003)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("3_7d1s0")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(6, -192)

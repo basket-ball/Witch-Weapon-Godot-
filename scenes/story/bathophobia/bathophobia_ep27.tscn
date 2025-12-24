@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://d0c8aouvgtt01"]
+
+[ext_resource type="PackedScene" uid="uid://tfmmwjuxwu4x" path="res://scenes/dialog/NovelInterface.tscn" id="1_novel"]
+[ext_resource type="Script" path="res://scripts/story/bathophobia/bathophobia_ep27.gd" id="2_script"]
+
+[node name="BathophobiaEp27" type="Node2D"]
+script = ExtResource("2_script")
+
+[node name="NovelInterface" parent="." instance=ExtResource("1_novel")]

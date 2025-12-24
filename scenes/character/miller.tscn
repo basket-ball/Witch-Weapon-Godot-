@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://teijmsfo7uen"]
+
+[ext_resource type="Script" uid="uid://borj0yyfwlmbf" path="res://scripts/character/miller.gd" id="1_gmwo5"]
+[ext_resource type="Texture2D" uid="uid://clj0q50gg31f7" path="res://assets/images/role/miller/base.png" id="2_vuuw8"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_gmwo5")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(640, 397)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_vuuw8")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(6, -192)

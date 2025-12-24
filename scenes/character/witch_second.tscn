@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://bwymoyoxellti"]
+
+[ext_resource type="Script" uid="uid://dlk8ultjavpu4" path="res://scripts/character/witch_second.gd" id="1_gwph8"]
+[ext_resource type="Texture2D" uid="uid://13h0jtxkifjw" path="res://assets/images/role/witch/second/base.png" id="2_oi2kx"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_gwph8")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(687.00006, 478.00003)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_oi2kx")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(6, -192)

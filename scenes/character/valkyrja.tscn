@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://dxd8cgt8mrjng"]
+
+[ext_resource type="Script" uid="uid://ccxu3vnbxuil" path="res://scripts/character/valkyrja.gd" id="1_kimwp"]
+[ext_resource type="Texture2D" uid="uid://cq67fp8ar11w1" path="res://assets/images/role/valkyrja/base.png" id="2_rnrc5"]
+[ext_resource type="Texture2D" uid="uid://fw0wfpntsgs2" path="res://assets/images/role/valkyrja/normal.png" id="3_0dxnd"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_kimwp")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(654.00006, 433)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_rnrc5")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-15, -189)
+texture = ExtResource("3_0dxnd")

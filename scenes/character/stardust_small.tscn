@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://bybcm562d7y0a"]
+
+[ext_resource type="Script" uid="uid://p3v6dh27gr81" path="res://scripts/character/stardust_small.gd" id="1_y38sa"]
+[ext_resource type="Texture2D" uid="uid://ck2eckspyaa6p" path="res://assets/images/role/stardust/small/base.png" id="2_cgrlo"]
+[ext_resource type="Texture2D" uid="uid://ce7fjlqy0pclv" path="res://assets/images/role/stardust/small/normal1.png" id="3_nvd3m"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_y38sa")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(646, 422)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_cgrlo")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-6, -134)
+texture = ExtResource("3_nvd3m")

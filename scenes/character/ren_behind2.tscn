@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://ck6j6agc7xpg4"]
+
+[ext_resource type="Script" uid="uid://dblyar2c4keif" path="res://scripts/character/ren_behind2.gd" id="1_bcb25"]
+[ext_resource type="Texture2D" uid="uid://bbd7cj72fi63q" path="res://assets/images/role/ren/behind2/base.png" id="2_1vd50"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_bcb25")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(653, 367.00003)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_1vd50")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-21.875, -198.958)

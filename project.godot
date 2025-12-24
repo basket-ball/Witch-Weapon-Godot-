@@ -1,0 +1,29 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Witch Weapon"
+run/main_scene="res://scenes/start/start.tscn"
+config/features=PackedStringArray("4.5", "GL Compatibility")
+boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/show_image=false
+config/icon="res://assets/gui/window_icon.png"
+
+[autoload]
+
+clickeffect="*res://scripts/global/click_effect.gd"
+GameConfig="*res://scripts/global/game_config.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"

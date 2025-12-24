@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://bk3jjy5wbg0av"]
+
+[ext_resource type="Script" uid="uid://cj3faheny12h" path="res://scripts/character/ren_fishnet.gd" id="1_fd2rh"]
+[ext_resource type="Texture2D" uid="uid://brf5eitddt4kw" path="res://assets/images/role/ren/fishnet/base.png" id="2_kuwwd"]
+[ext_resource type="Texture2D" uid="uid://csv24378bh816" path="res://assets/images/role/ren/fishnet/normal1.png" id="3_s5b23"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_fd2rh")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(652, 421)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_kuwwd")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-12, -197)
+texture = ExtResource("3_s5b23")

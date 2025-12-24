@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://co7t6ooy4e232"]
+
+[ext_resource type="Script" uid="uid://dtd4wu676fo7m" path="res://scripts/character/raphael.gd" id="1_botgh"]
+[ext_resource type="Texture2D" uid="uid://8hrkoc8wmoy4" path="res://assets/images/role/raphael/base.png" id="2_x5cye"]
+[ext_resource type="Texture2D" uid="uid://djsywuh6b38dq" path="res://assets/images/role/raphael/normal1.png" id="3_kr4p6"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_botgh")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(650, 416)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_x5cye")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-10, -187)
+texture = ExtResource("3_kr4p6")

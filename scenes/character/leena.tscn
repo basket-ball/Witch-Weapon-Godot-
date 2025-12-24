@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://bq2bocuo6wo0m"]
+
+[ext_resource type="Script" uid="uid://k6wkesx6hgxv" path="res://scripts/character/leena.gd" id="2_tosu8"]
+[ext_resource type="Texture2D" uid="uid://ctsae8rluftcf" path="res://assets/images/role/leena/base.png" id="3_ie2td"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("2_tosu8")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(602, 383)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("3_ie2td")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-21.875, -198.958)

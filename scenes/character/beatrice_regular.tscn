@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://m8v4lg4om4hm"]
+
+[ext_resource type="Script" uid="uid://etrjhxan22md" path="res://scripts/character/beatrice_regular.gd" id="1_e0hvf"]
+[ext_resource type="Texture2D" uid="uid://18inxihssuo3" path="res://assets/images/role/beatrice/regular/base.png" id="2_tbnar"]
+[ext_resource type="Texture2D" uid="uid://4p6yx0k2mpy6" path="res://assets/images/role/beatrice/regular/smile1.png" id="3_2adf8"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_e0hvf")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(643, 396)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_tbnar")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-3, -211)
+texture = ExtResource("3_2adf8")

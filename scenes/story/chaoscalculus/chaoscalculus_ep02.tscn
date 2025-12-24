@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://bjalxj0wfccwh"]
+
+[ext_resource type="PackedScene" uid="uid://tfmmwjuxwu4x" path="res://scenes/dialog/NovelInterface.tscn" id="1_novel"]
+[ext_resource type="Script" uid="uid://c2d0t4mxndmi0" path="res://scripts/story/chaoscalculus/chaoscalculus_ep02.gd" id="2_script"]
+
+[node name="ChaosCalculusEp02" type="Node2D"]
+script = ExtResource("2_script")
+
+[node name="NovelInterface" parent="." instance=ExtResource("1_novel")]

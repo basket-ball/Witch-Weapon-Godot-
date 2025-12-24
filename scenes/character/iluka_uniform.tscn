@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://7djci6s8opbw"]
+
+[ext_resource type="Script" uid="uid://buy4kwdfq1j2c" path="res://scripts/character/iluka_uniform.gd" id="1_uq4gn"]
+[ext_resource type="Texture2D" uid="uid://bvip7jxq7tge6" path="res://assets/images/role/iluka/uniform/base.png" id="2_cambf"]
+[ext_resource type="Texture2D" uid="uid://d5r168v5d15h" path="res://assets/images/role/iluka/uniform/normal.png" id="3_cn3cr"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_uq4gn")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(656, 460)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_cambf")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-16, -159)
+texture = ExtResource("3_cn3cr")

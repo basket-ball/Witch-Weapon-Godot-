@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://72lhs6j1ag7s"
+path="res://.godot/imported/Witch's Confession.mp3-c8918d3a237c2a9b26be387607dc8e2a.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/Witch's Confession.mp3"
+dest_files=["res://.godot/imported/Witch's Confession.mp3-c8918d3a237c2a9b26be387607dc8e2a.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

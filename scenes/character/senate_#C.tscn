@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://cabo85pysislk"]
+
+[ext_resource type="Script" uid="uid://dn4c7wlpini86" path="res://scripts/character/senate_#c.gd" id="1_fbvch"]
+[ext_resource type="Texture2D" uid="uid://c6g525yxh52yq" path="res://assets/images/role/senate/#C/base.png" id="2_fbvch"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_fbvch")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(651, 402)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_fbvch")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(6, -192)

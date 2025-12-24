@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://dkt33g4b7xvqb"]
+
+[ext_resource type="Script" uid="uid://b7pklcnwch8a6" path="res://scripts/character/liliu_uniform_2.gd" id="1_1g4bw"]
+[ext_resource type="Texture2D" uid="uid://slq0oi7lqgf0" path="res://assets/images/role/liliu/uniform2/base.png" id="3_n0mfv"]
+[ext_resource type="Texture2D" uid="uid://cp4xyla0rdme6" path="res://assets/images/role/liliu/uniform2/normal1.png" id="4_2fakj"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_1g4bw")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(600.00006, 395.00003)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("3_n0mfv")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(41.041687, -198.00002)
+texture = ExtResource("4_2fakj")

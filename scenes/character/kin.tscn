@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://cwmtu5yp7e0ah"]
+
+[ext_resource type="Script" uid="uid://dvpi7kdt4rq83" path="res://scripts/character/kin.gd" id="1_6j4g5"]
+[ext_resource type="Texture2D" uid="uid://ba7vlvggk860d" path="res://assets/images/role/kin/base.png" id="2_hal72"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_6j4g5")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(657.99994, 385)
+scale = Vector2(1.04, 1.04)
+texture = ExtResource("2_hal72")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-21.875, -198.958)

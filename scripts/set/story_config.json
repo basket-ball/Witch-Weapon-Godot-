@@ -1,0 +1,212 @@
+{
+  "chapter1": {
+	"title": "人生的终结，命运的起始",
+	"episodes": {
+	  "『异质物』": "res://scenes/story/chapter1/chapter1_ep01.tscn",
+	  "劫持？": "res://scenes/story/chapter1/chapter1_ep02.tscn",
+	  "搏命，失败": "res://scenes/story/chapter1/chapter1_ep03.tscn",
+	  "灭世": "res://scenes/story/chapter1/chapter1_ep04.tscn",
+	  "不见了！": "res://scenes/story/chapter1/chapter1_ep05.tscn",
+	  "战斗吧水手服": "res://scenes/story/chapter1/chapter1_ep06.tscn"
+	}
+  },
+  "chapter2": {
+	"title": "想保护的她，被守护的你",
+	"episodes": {
+	  "秘密情报局": "res://scenes/story/chapter2/chapter2_ep01.tscn",
+	  "『时空相位波动』": "res://scenes/story/chapter2/chapter2_ep02.tscn",
+	  "另一个莉琉？": "res://scenes/story/chapter2/chapter2_ep03.tscn",
+	  "确认身份": "res://scenes/story/chapter2/chapter2_ep04.tscn",
+	  "『实验对象』": "res://scenes/story/chapter2/chapter2_ep05.tscn",
+	  "紧急事态": "res://scenes/story/chapter2/chapter2_ep06.tscn",
+	  "奋力尝试": "res://scenes/story/chapter2/chapter2_ep07.tscn",
+	  "惊人的事实": "res://scenes/story/chapter2/chapter2_ep08.tscn",
+	  "新的身份": "res://scenes/story/chapter2/chapter2_ep09.tscn",
+	  "伪造的资料": "res://scenes/story/chapter2/chapter2_ep10.tscn",
+	  "安妮的过去": "res://scenes/story/chapter2/chapter2_ep11.tscn",
+	  "『学园都市』": "res://scenes/story/chapter2/chapter2_ep12.tscn",
+	  "基础知识培训": "res://scenes/story/chapter2/chapter2_ep13.tscn",
+	  "生活能力培训": "res://scenes/story/chapter2/chapter2_ep14.tscn",
+	  "女子高生": "res://scenes/story/chapter2/chapter2_ep15.tscn",
+	  "爱衣的兴趣": "res://scenes/story/chapter2/chapter2_ep16.tscn",
+	  "女孩子的食谱": "res://scenes/story/chapter2/chapter2_ep17.tscn",
+	  "结识学姐": "res://scenes/story/chapter2/chapter2_ep18.tscn",
+	  "紧急任务": "res://scenes/story/chapter2/chapter2_ep19.tscn",
+	  "变电所事件": "res://scenes/story/chapter2/chapter2_ep20.tscn",
+	  "伊露卡，战斗！": "res://scenes/story/chapter2/chapter2_ep21.tscn",
+	  "『魔导书』": "res://scenes/story/chapter2/chapter2_ep22.tscn",
+	  "马萨达堡的人": "res://scenes/story/chapter2/chapter2_ep23.tscn",
+	  "『教团』": "res://scenes/story/chapter2/chapter2_ep24.tscn",
+	  "通缉令": "res://scenes/story/chapter2/chapter2_ep25.tscn",
+	  "爱衣的考核": "res://scenes/story/chapter2/chapter2_ex01.tscn",
+	  "我是女孩子": "res://scenes/story/chapter2/chapter2_ex02.tscn",
+	  "新的身体": "res://scenes/story/chapter2/chapter2_ex03.tscn",
+	  "伊露卡的日常": "res://scenes/story/chapter2/chapter2_ex04.tscn"
+	}
+  },
+  "chapter3": {
+	"title": "神魂的治愈，身体的诅咒",
+	"episodes": {
+	  "『联合议会』": "res://scenes/story/chapter3/chapter3_ep01.tscn",
+	  "『异质物』分级": "res://scenes/story/chapter3/chapter3_ep02.tscn",
+	  "信息扰乱工程": "res://scenes/story/chapter3/chapter3_ep03.tscn",
+	  "在学校里闲逛": "res://scenes/story/chapter3/chapter3_ep04.tscn",
+	  "新的任务": "res://scenes/story/chapter3/chapter3_ep05.tscn",
+	  "爱衣的人体实验": "res://scenes/story/chapter3/chapter3_ep06.tscn",
+	  "结识大小姐": "res://scenes/story/chapter3/chapter3_ep07.tscn",
+	  "倪克斯与拉斐尔": "res://scenes/story/chapter3/chapter3_ep08.tscn",
+	  "变装，女仆！": "res://scenes/story/chapter3/chapter3_ep09.tscn",
+	  "暴力潜入？": "res://scenes/story/chapter3/chapter3_ep10.tscn",
+	  "不明『异质物』": "res://scenes/story/chapter3/chapter3_ep11.tscn",
+	  "『魔导器』": "res://scenes/story/chapter3/chapter3_ep12.tscn",
+	  "恋爱的感觉": "res://scenes/story/chapter3/chapter3_ep13.tscn",
+	  "来自古代的魔女": "res://scenes/story/chapter3/chapter3_ep14.tscn",
+	  "『共鸣』": "res://scenes/story/chapter3/chapter3_ep15.tscn",
+	  "突破重围": "res://scenes/story/chapter3/chapter3_ep16.tscn",
+	  "睡眠成问题": "res://scenes/story/chapter3/chapter3_ep17.tscn",
+	}
+  },
+  "bathophobia": {
+	"title": "深潜症",
+	"episodes": {
+	  "事件报告": "res://scenes/story/bathophobia/bathophobia_ep01.tscn",
+	  "观测者": "res://scenes/story/bathophobia/bathophobia_ep02.tscn",
+	  "异常样本": "res://scenes/story/bathophobia/bathophobia_ep03.tscn",
+	  "『方舟计划』": "res://scenes/story/bathophobia/bathophobia_ep04.tscn",
+	  "深海少女": "res://scenes/story/bathophobia/bathophobia_ep05.tscn",
+	  "方舟计划": "res://scenes/story/bathophobia/bathophobia_ep06.tscn",
+	  "实验基地": "res://scenes/story/bathophobia/bathophobia_ep07.tscn",
+	  "表演课": "res://scenes/story/bathophobia/bathophobia_ep08.tscn",
+	  "异变突生": "res://scenes/story/bathophobia/bathophobia_ep09.tscn",
+	  "特别顾问": "res://scenes/story/bathophobia/bathophobia_ep10.tscn",
+	  "『因果之隙』": "res://scenes/story/bathophobia/bathophobia_ep11.tscn",
+	  "封闭、坠落": "res://scenes/story/bathophobia/bathophobia_ep12.tscn",
+	  "『那个东西』": "res://scenes/story/bathophobia/bathophobia_ep13.tscn",
+	  "这里是南极？": "res://scenes/story/bathophobia/bathophobia_ep14.tscn",
+	  "白皇后": "res://scenes/story/bathophobia/bathophobia_ep15.tscn",
+	  "废弃基地": "res://scenes/story/bathophobia/bathophobia_ep16.tscn",
+	  "被盯上了": "res://scenes/story/bathophobia/bathophobia_ep17.tscn",
+	  "采集数据": "res://scenes/story/bathophobia/bathophobia_ep18.tscn",
+	  "被困住了": "res://scenes/story/bathophobia/bathophobia_ep19.tscn",
+	  "陷入苦战": "res://scenes/story/bathophobia/bathophobia_ep20.tscn",
+	  "“那位”的任务": "res://scenes/story/bathophobia/bathophobia_ep21.tscn",
+	  "寻找线索": "res://scenes/story/bathophobia/bathophobia_ep22.tscn",
+	  "中央控制室": "res://scenes/story/bathophobia/bathophobia_ep23.tscn",
+	  "“等等我！”": "res://scenes/story/bathophobia/bathophobia_ep24.tscn",
+	  "一个问题": "res://scenes/story/bathophobia/bathophobia_ep25.tscn",
+	  "睡美人": "res://scenes/story/bathophobia/bathophobia_ep26.tscn",
+	  "莉琉的好奇": "res://scenes/story/bathophobia/bathophobia_ep27.tscn",
+	  "病房探望": "res://scenes/story/bathophobia/bathophobia_ep28.tscn",
+	  "独白": "res://scenes/story/bathophobia/bathophobia_ep29.tscn"
+	}
+  },
+  "traumareflex": {
+	"title": "创伤反射",
+	"episodes": {
+	  "第1节": "res://scenes/story/traumareflex/traumareflex_ep01.tscn",
+	  "第2节": "res://scenes/story/traumareflex/traumareflex_ep02.tscn",
+	  "第3节": "res://scenes/story/traumareflex/traumareflex_ep03.tscn",
+	  "第4节": "res://scenes/story/traumareflex/traumareflex_ep04.tscn",
+	  "第5节": "res://scenes/story/traumareflex/traumareflex_ep05.tscn",
+	  "第6节": "res://scenes/story/traumareflex/traumareflex_ep06.tscn",
+	  "第7节": "res://scenes/story/traumareflex/traumareflex_ep07.tscn",
+	  "第8节": "res://scenes/story/traumareflex/traumareflex_ep08.tscn",
+	  "第9节": "res://scenes/story/traumareflex/traumareflex_ep09.tscn",
+	  "第10节": "res://scenes/story/traumareflex/traumareflex_ep10.tscn",
+	  "第11节": "res://scenes/story/traumareflex/traumareflex_ep11.tscn",
+	  "第12节": "res://scenes/story/traumareflex/traumareflex_ep12.tscn",
+	  "第13节": "res://scenes/story/traumareflex/traumareflex_ep13.tscn",
+	  "第14节": "res://scenes/story/traumareflex/traumareflex_ep14.tscn",
+	  "第15节": "res://scenes/story/traumareflex/traumareflex_ep15.tscn"
+	}
+  },
+  "apocalypse": {
+	"title": "启示录",
+	"episodes": {
+	  "第1节": "res://scenes/story/apocalypse/apocalypse_ep01.tscn",
+	  "第2节": "res://scenes/story/apocalypse/apocalypse_ep02.tscn",
+	  "第3节": "res://scenes/story/apocalypse/apocalypse_ep03.tscn",
+	  "第4节": "res://scenes/story/apocalypse/apocalypse_ep04.tscn",
+	  "第5节": "res://scenes/story/apocalypse/apocalypse_ep05.tscn",
+	  "第6节": "res://scenes/story/apocalypse/apocalypse_ep06.tscn",
+	  "第7节": "res://scenes/story/apocalypse/apocalypse_ep07.tscn",
+	  "第8节": "res://scenes/story/apocalypse/apocalypse_ep08.tscn",
+	  "第9节": "res://scenes/story/apocalypse/apocalypse_ep09.tscn",
+	  "第10节": "res://scenes/story/apocalypse/apocalypse_ep10.tscn",
+	  "第11节": "res://scenes/story/apocalypse/apocalypse_ep11.tscn",
+	  "第12节": "res://scenes/story/apocalypse/apocalypse_ep13.tscn",
+	  "第13节": "res://scenes/story/apocalypse/apocalypse_ep13.tscn",
+	  "第14节": "res://scenes/story/apocalypse/apocalypse_ep14.tscn",
+	  "第15节": "res://scenes/story/apocalypse/apocalypse_ep15.tscn",
+	  "第16节": "res://scenes/story/apocalypse/apocalypse_ep16.tscn",
+	  "第17节": "res://scenes/story/apocalypse/apocalypse_ep17.tscn",
+	  "第18节": "res://scenes/story/apocalypse/apocalypse_ep18.tscn",
+	  "第19节": "res://scenes/story/apocalypse/apocalypse_ep19.tscn",
+	  "第20节": "res://scenes/story/apocalypse/apocalypse_ep20.tscn"
+	}
+  },
+  "stardustdescends": {
+	"title": "星尘降临",
+	"episodes": {
+	  "第1节": "res://scenes/story/stardustdescends/stardustdescends_ep01.tscn",
+	  "第2节": "res://scenes/story/stardustdescends/stardustdescends_ep02.tscn",
+	  "第3节": "res://scenes/story/stardustdescends/stardustdescends_ep03.tscn",
+	  "第4节": "res://scenes/story/stardustdescends/stardustdescends_ep04.tscn",
+	  "第5节": "res://scenes/story/stardustdescends/stardustdescends_ep05.tscn",
+	  "第6节": "res://scenes/story/stardustdescends/stardustdescends_ep06.tscn",
+	  "第7节": "res://scenes/story/stardustdescends/stardustdescends_ep07.tscn",
+	  "第8节": "res://scenes/story/stardustdescends/stardustdescends_ep08.tscn",
+	  "第9节": "res://scenes/story/stardustdescends/stardustdescends_ep09.tscn",
+	  "第10节": "res://scenes/story/stardustdescends/stardustdescends_ep10.tscn",
+	  "第11节": "res://scenes/story/stardustdescends/stardustdescends_ep11.tscn",
+	  "第12节": "res://scenes/story/stardustdescends/stardustdescends_ep12.tscn",
+	  "第13节": "res://scenes/story/stardustdescends/stardustdescends_ep13.tscn",
+	  "第14节": "res://scenes/story/stardustdescends/stardustdescends_ep14.tscn",
+	  "第15节": "res://scenes/story/stardustdescends/stardustdescends_ep15.tscn",
+	  "第16节": "res://scenes/story/stardustdescends/stardustdescends_ep16.tscn",
+	  "第17节": "res://scenes/story/stardustdescends/stardustdescends_ep17.tscn",
+	  "第18节": "res://scenes/story/stardustdescends/stardustdescends_ep18.tscn",
+	  "第19节": "res://scenes/story/stardustdescends/stardustdescends_ep19.tscn",
+	  "第20节": "res://scenes/story/stardustdescends/stardustdescends_ep20.tscn",
+	  "第21节": "res://scenes/story/stardustdescends/stardustdescends_ep21.tscn"
+	}
+  },
+  "deathconfession": {
+	"title": "死亡告白",
+	"episodes": {
+	  "第1节": "res://scenes/story/deathconfession/deathconfession_ep01.tscn"
+	}
+  },
+  "chaoscalculus": {
+	"title": "混沌演算",
+	"episodes": {
+	  "第1节": "res://scenes/story/chaoscalculus/chaoscalculus_ep01.tscn",
+	  "第2节": "res://scenes/story/chaoscalculus/chaoscalculus_ep02.tscn"
+	}
+  },
+  "imperialpresence": {
+	"title": "吾皇在此",
+	"episodes": {
+	  "第1节": "res://scenes/story/imperialpresence/imperialpresence_ep01.tscn",
+	  "第2节": "res://scenes/story/imperialpresence/imperialpresence_ep02.tscn",
+	  "第3节": "res://scenes/story/imperialpresence/imperialpresence_ep03.tscn",
+	  "第4节": "res://scenes/story/imperialpresence/imperialpresence_ep04.tscn",
+	  "第5节": "res://scenes/story/imperialpresence/imperialpresence_ep05.tscn"
+	}
+  },
+  "side01": {
+	"title": "2019周年祭",
+	"episodes": {
+	  "第1节": "res://scenes/story/side01/side01_ep1.tscn"
+	}
+  },
+  "side02": {
+	"title": "新年支线",
+	"episodes": {
+	  "第1节": "res://scenes/story/side02/side02_ep1.tscn",
+	  "第2节": "res://scenes/story/side02/side02_ep2.tscn",
+	  "第3节": "res://scenes/story/side02/side02_ep3.tscn",
+	  "第4节": "res://scenes/story/side02/side02_ep4.tscn"
+	}
+  }
+}

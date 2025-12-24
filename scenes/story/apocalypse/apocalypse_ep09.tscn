@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://ce4ibflh3wy77"]
+
+[ext_resource type="Script" uid="uid://o57vvhw563lb" path="res://scripts/story/apocalypse/apocalypse_ep09.gd" id="1_bt8ry"]
+[ext_resource type="PackedScene" uid="uid://tfmmwjuxwu4x" path="res://scenes/dialog/NovelInterface.tscn" id="2_huhmx"]
+
+[node name="ApocalypseEp09" type="Node2D"]
+script = ExtResource("1_bt8ry")
+
+[node name="NovelInterface" parent="." instance=ExtResource("2_huhmx")]

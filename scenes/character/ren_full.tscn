@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://dpf8j06rbmori"]
+
+[ext_resource type="Script" uid="uid://dtuc2c032cou8" path="res://scripts/character/ren_full.gd" id="1_gvs3g"]
+[ext_resource type="Texture2D" uid="uid://bdud181rn4507" path="res://assets/images/role/ren/full/base.png" id="2_5ous2"]
+[ext_resource type="Texture2D" uid="uid://bmgl3rps1xi66" path="res://assets/images/role/ren/full/normal1.png" id="3_k6l4c"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_gvs3g")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(707, 422.00003)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_5ous2")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-70.041626, -201.00002)
+texture = ExtResource("3_k6l4c")

@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://cougyesvb3x3n"]
+
+[ext_resource type="Script" uid="uid://b22iqh4kvoq65" path="res://scripts/character/russell.gd" id="1_smva2"]
+[ext_resource type="Texture2D" uid="uid://ji4ijfng2t52" path="res://assets/images/role/russell/base.png" id="2_iev7j"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_smva2")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(649, 408)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_iev7j")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-21.875, -198.958)

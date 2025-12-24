@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://tmv0iskb2qg4"
+path="res://.godot/imported/Like A Girl.mp3-f390990d0a062bed22f4ba41eb78947e.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/Like A Girl.mp3"
+dest_files=["res://.godot/imported/Like A Girl.mp3-f390990d0a062bed22f4ba41eb78947e.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

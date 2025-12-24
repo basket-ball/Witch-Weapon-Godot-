@@ -1,0 +1,14 @@
+[gd_resource type="LabelSettings" load_steps=3 format=3 uid="uid://dijm0jkrkte7x"]
+
+[ext_resource type="FontFile" uid="uid://bajyd14et5o6v" path="res://assets/gui/font/方正兰亭准黑_GBK.ttf" id="1_ukufs"]
+
+[sub_resource type="FontVariation" id="FontVariation_sd7rw"]
+base_font = ExtResource("1_ukufs")
+variation_embolden = 0.05
+variation_transform = Transform2D(1, 0.25, 0, 1, 0, 0)
+
+[resource]
+line_spacing = 4.0
+font = SubResource("FontVariation_sd7rw")
+font_size = 26
+font_color = Color(0, 0, 0, 1)

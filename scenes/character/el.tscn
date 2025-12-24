@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://dykvtd5jkq41a"]
+
+[ext_resource type="Script" uid="uid://bcr2vns5e6n17" path="res://scripts/character/el.gd" id="1_sik2a"]
+[ext_resource type="Texture2D" uid="uid://bgd3516kyko8e" path="res://assets/images/role/el/base.png" id="2_g30wb"]
+[ext_resource type="Texture2D" uid="uid://1wm7vgma7ank" path="res://assets/images/role/el/normal.png" id="3_i25le"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_sik2a")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(643, 394)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_g30wb")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-3, -202)
+texture = ExtResource("3_i25le")

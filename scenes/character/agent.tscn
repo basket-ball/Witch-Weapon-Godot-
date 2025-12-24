@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://o3w8knfg5h7m"]
+
+[ext_resource type="Script" uid="uid://budop75q1vv3s" path="res://scripts/character/agent.gd" id="1_r55ah"]
+[ext_resource type="Texture2D" uid="uid://c2f61dljc2387" path="res://assets/images/role/agent/base.png" id="2_n8bbf"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_r55ah")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(701, 397)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_n8bbf")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-21.875, -198.958)

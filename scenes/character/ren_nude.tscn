@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://ddch6imfqhfe5"]
+
+[ext_resource type="Script" uid="uid://cgxrngp8ercpx" path="res://scripts/character/ren_nude.gd" id="1_tlmmy"]
+[ext_resource type="Texture2D" uid="uid://bghk8oyt0xyqv" path="res://assets/images/role/ren/nude/base.png" id="2_4oa0v"]
+[ext_resource type="Texture2D" uid="uid://n41kid8lwfqa" path="res://assets/images/role/ren/nude/normal.png" id="3_8sdah"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_tlmmy")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(750, 397.00003)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_4oa0v")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-115.00006, -113.99997)
+scale = Vector2(0.99999994, 0.99999994)
+texture = ExtResource("3_8sdah")

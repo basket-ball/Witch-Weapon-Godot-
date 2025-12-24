@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://kuce2s4hx8ba"]
+
+[ext_resource type="Script" uid="uid://b6vhqeef1g1ti" path="res://scripts/character/augusta.gd" id="1_81a0e"]
+[ext_resource type="Texture2D" uid="uid://huudt6lbcxt4" path="res://assets/images/role/augusta/base.png" id="2_5wbpl"]
+[ext_resource type="Texture2D" uid="uid://bd40p5j8qc2eu" path="res://assets/images/role/augusta/normal.png" id="3_8wnsn"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_81a0e")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(814.00006, 427)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_5wbpl")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-180, -107)
+texture = ExtResource("3_8wnsn")

@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://bb77omy64jenm"]
+
+[ext_resource type="Script" uid="uid://dyj0wwmel7v4t" path="res://scripts/character/shi.gd" id="1_n7nky"]
+[ext_resource type="Texture2D" uid="uid://cj3qp7gopos4a" path="res://assets/images/role/shi/base.png" id="2_lvmuf"]
+[ext_resource type="Texture2D" uid="uid://j2wesmk7mutx" path="res://assets/images/role/shi/normal.png" id="3_yuvq4"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_n7nky")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(636, 389.00003)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_lvmuf")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(4, -205)
+texture = ExtResource("3_yuvq4")

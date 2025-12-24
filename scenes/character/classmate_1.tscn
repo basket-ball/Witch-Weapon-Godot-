@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://b4sdnng4lv01h"]
+
+[ext_resource type="Script" uid="uid://cjd8j276bsvnr" path="res://scripts/character/classmate_1.gd" id="1_7tcrr"]
+[ext_resource type="Texture2D" uid="uid://b6i032jme6j1q" path="res://assets/images/role/classmate/1/base.png" id="2_5hnyd"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_7tcrr")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(662.00006, 433)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_5hnyd")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-25, -178)

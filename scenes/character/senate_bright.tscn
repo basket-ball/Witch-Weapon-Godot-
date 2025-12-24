@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://beg6fpcckhk37"]
+
+[ext_resource type="Script" uid="uid://c3fpu4pl4egx0" path="res://scripts/character/senate_bright.gd" id="1_t205v"]
+[ext_resource type="Texture2D" uid="uid://6nl25eds8wk2" path="res://assets/images/role/senate/bright/base.png" id="2_wig25"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_t205v")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(749, 384)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_wig25")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(6, -192)

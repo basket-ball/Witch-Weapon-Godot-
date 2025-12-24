@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://ck1eyxjmxcxrd"]
+
+[ext_resource type="Script" uid="uid://8k253yy2dbdv" path="res://scripts/character/hamon.gd" id="1_3wm2a"]
+[ext_resource type="Texture2D" uid="uid://c7bjkw71gxijf" path="res://assets/images/role/hamon/base.png" id="2_vfcwh"]
+[ext_resource type="Texture2D" uid="uid://j1ygxnftp87x" path="res://assets/images/role/hamon/normal1.png" id="3_ntv61"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_3wm2a")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(635.00006, 404.00003)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_vfcwh")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(1, -204)
+texture = ExtResource("3_ntv61")

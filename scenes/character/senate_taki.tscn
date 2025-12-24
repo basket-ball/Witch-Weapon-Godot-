@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://b0cqw8mgov7s0"]
+
+[ext_resource type="Script" uid="uid://cuqptqklr8e3c" path="res://scripts/character/senate_taki.gd" id="1_rtyy5"]
+[ext_resource type="Texture2D" uid="uid://dnric0hbxq5nl" path="res://assets/images/role/senate/taki/base.png" id="2_kaeth"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_rtyy5")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(618, 384.00003)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_kaeth")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(6, -192)

@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://cw8kq1oer372o"]
+
+[ext_resource type="Script" uid="uid://bngkljgo5q5go" path="res://scripts/character/ren_medical.gd" id="1_81gr8"]
+[ext_resource type="Texture2D" uid="uid://cuhcygeqwh1ew" path="res://assets/images/role/ren/medical/base.png" id="2_6mlfj"]
+[ext_resource type="Texture2D" uid="uid://cxoxwanymdfi7" path="res://assets/images/role/ren/medical/normal1.png" id="3_a13rj"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_81gr8")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(668.00006, 419)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_6mlfj")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-28, -178)
+texture = ExtResource("3_a13rj")

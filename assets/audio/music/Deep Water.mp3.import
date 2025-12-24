@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://dcv5dlng1ga3v"
+path="res://.godot/imported/Deep Water.mp3-14c89d5f3914c484e1b3ee0ebef7b023.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/Deep Water.mp3"
+dest_files=["res://.godot/imported/Deep Water.mp3-14c89d5f3914c484e1b3ee0ebef7b023.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

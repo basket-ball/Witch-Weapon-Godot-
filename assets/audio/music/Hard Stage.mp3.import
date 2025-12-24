@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://cr262plff5lis"
+path="res://.godot/imported/Hard Stage.mp3-47263c2a5caf42500654fffd61cd8fec.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/Hard Stage.mp3"
+dest_files=["res://.godot/imported/Hard Stage.mp3-47263c2a5caf42500654fffd61cd8fec.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

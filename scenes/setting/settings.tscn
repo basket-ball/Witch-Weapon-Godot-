@@ -1,0 +1,547 @@
+[gd_scene load_steps=16 format=3 uid="uid://cgko5uvkl13mb"]
+
+[ext_resource type="Script" uid="uid://c6c6ua607swe0" path="res://scripts/setting/settings.gd" id="1_settings"]
+[ext_resource type="FontFile" uid="uid://ckp1oydq2vsvy" path="res://assets/gui/font/方正粗圆_GBK.ttf" id="2_font"]
+[ext_resource type="Texture2D" uid="uid://c3opiqrbmruaq" path="res://assets/gui/settings/back_btn_idle.png" id="3_back_idle"]
+[ext_resource type="Texture2D" uid="uid://dyhhk4ebvan1h" path="res://assets/gui/settings/back_btn_click.png" id="4_back_click"]
+[ext_resource type="Texture2D" uid="uid://dkkramn5ubma6" path="res://assets/gui/settings/setting_clicked.png" id="6_setting_clicked"]
+[ext_resource type="Texture2D" uid="uid://dg0u1j5v7vuhq" path="res://assets/gui/settings/thanks_idle.png" id="7_thanks_idle"]
+[ext_resource type="Texture2D" uid="uid://d3uinks8q3rl3" path="res://assets/gui/settings/YANG-301.webp" id="10_yang"]
+[ext_resource type="Texture2D" uid="uid://b8686g535glnv" path="res://assets/gui/settings/不死扶苏233.webp" id="11_fusu"]
+[ext_resource type="Texture2D" uid="uid://488lsr0s1sa6" path="res://assets/gui/settings/樱天澈.webp" id="12_sakura"]
+[ext_resource type="Texture2D" uid="uid://5xfq5tpgqce" path="res://assets/gui/settings/雪凌殇.webp" id="13_snow"]
+[ext_resource type="Texture2D" uid="uid://xwe32ewvyo81" path="res://assets/gui/settings/ageace.webp" id="14_age"]
+[ext_resource type="Texture2D" uid="uid://coc6ap2fff287" path="res://assets/gui/settings/见习食神懒羊羊.webp" id="15_lazy"]
+[ext_resource type="Shader" uid="uid://dade0aiy7255o" path="res://scripts/shader/circle_avatar.gdshader" id="16_circle_shader"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_avatar_shadow"]
+bg_color = Color(0, 0, 0, 0.2)
+corner_radius_top_left = 50
+corner_radius_top_right = 50
+corner_radius_bottom_right = 50
+corner_radius_bottom_left = 50
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_circle"]
+shader = ExtResource("16_circle_shader")
+
+[node name="Settings" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_settings")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.05, 0.1, 0.85)
+
+[node name="MainPanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 50.0
+offset_top = 110.0
+offset_right = -50.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ContentArea" type="ColorRect" parent="MainPanel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.8
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.878431, 0.898039, 0.933333, 1)
+
+[node name="SettingsContent" type="MarginContainer" parent="MainPanel/ContentArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 80
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MainPanel/ContentArea/SettingsContent"]
+layout_mode = 2
+theme_override_constants/separation = 50
+
+[node name="DisplaySettings" type="VBoxContainer" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 15
+
+[node name="DisplayTitle" type="Label" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/DisplaySettings"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "显示"
+
+[node name="ModeLabel" type="Label" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/DisplaySettings"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "窗口模式"
+
+[node name="ModeButtons" type="HBoxContainer" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/DisplaySettings"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BorderlessBtn" type="Button" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/DisplaySettings/ModeButtons"]
+custom_minimum_size = Vector2(100, 35)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "无边框全屏"
+
+[node name="WindowedBtn" type="Button" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/DisplaySettings/ModeButtons"]
+custom_minimum_size = Vector2(100, 35)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "窗口"
+
+[node name="ScreenLabel" type="Label" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/DisplaySettings"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "显示器"
+
+[node name="ScreenList" type="OptionButton" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/DisplaySettings"]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+
+[node name="ResolutionLabel" type="Label" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/DisplaySettings"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "分辨率"
+
+[node name="ResolutionList" type="OptionButton" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/DisplaySettings"]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+
+[node name="AudioSettings" type="VBoxContainer" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 15
+
+[node name="AudioTitle" type="Label" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/AudioSettings"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "声音"
+
+[node name="MasterVolumeLabel" type="Label" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/AudioSettings"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "主音量"
+
+[node name="MasterVolumeSlider" type="HSlider" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/AudioSettings"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+value = 100.0
+
+[node name="MusicVolumeLabel" type="Label" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/AudioSettings"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "音乐"
+
+[node name="MusicVolumeSlider" type="HSlider" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/AudioSettings"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+value = 100.0
+
+[node name="SFXVolumeLabel" type="Label" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/AudioSettings"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "音效"
+
+[node name="SFXVolumeSlider" type="HSlider" parent="MainPanel/ContentArea/SettingsContent/HBoxContainer/AudioSettings"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+value = 100.0
+
+[node name="ThanksContent" type="MarginContainer" parent="MainPanel/ContentArea"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainPanel/ContentArea/ThanksContent"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="ContributorsTitle" type="Label" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.2, 0.2, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "CONTRIBUTORS"
+horizontal_alignment = 1
+
+[node name="ContributorsGrid" type="HBoxContainer" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 40
+
+[node name="Contributor1" type="VBoxContainer" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AvatarContainer" type="Control" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor1"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+
+[node name="Shadow" type="Panel" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor1/AvatarContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_avatar_shadow")
+
+[node name="AvatarButton" type="TextureButton" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor1/AvatarContainer"]
+material = SubResource("ShaderMaterial_circle")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture_normal = ExtResource("11_fusu")
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor1"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.2, 0.2, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+text = "不死扶苏233"
+horizontal_alignment = 1
+
+[node name="Description" type="Label" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor1"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.4, 0.4, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 14
+text = "测试与部分脚本编写"
+horizontal_alignment = 1
+
+[node name="Contributor2" type="VBoxContainer" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AvatarContainer" type="Control" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor2"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+
+[node name="Shadow" type="Panel" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor2/AvatarContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_avatar_shadow")
+
+[node name="AvatarButton" type="TextureButton" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor2/AvatarContainer"]
+material = SubResource("ShaderMaterial_circle")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture_normal = ExtResource("10_yang")
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.2, 0.2, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+text = "YANG-301"
+horizontal_alignment = 1
+
+[node name="Description" type="Label" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.4, 0.4, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 14
+text = "游戏主程序"
+horizontal_alignment = 1
+
+[node name="HSeparator1" type="HSeparator" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer"]
+layout_mode = 2
+
+[node name="ThanksTitle" type="Label" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.2, 0.2, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "SPECIAL THANKS"
+horizontal_alignment = 1
+
+[node name="ThanksGrid" type="HBoxContainer" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 40
+
+[node name="Thanks1" type="VBoxContainer" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AvatarContainer" type="Control" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks1"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+
+[node name="Shadow" type="Panel" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks1/AvatarContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_avatar_shadow")
+
+[node name="AvatarButton" type="TextureButton" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks1/AvatarContainer"]
+material = SubResource("ShaderMaterial_circle")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture_normal = ExtResource("12_sakura")
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks1"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.2, 0.2, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "樱天澈"
+horizontal_alignment = 1
+
+[node name="Thanks2" type="VBoxContainer" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AvatarContainer" type="Control" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks2"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+
+[node name="Shadow" type="Panel" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks2/AvatarContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_avatar_shadow")
+
+[node name="AvatarButton" type="TextureButton" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks2/AvatarContainer"]
+material = SubResource("ShaderMaterial_circle")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture_normal = ExtResource("13_snow")
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.2, 0.2, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "雪凌殇"
+horizontal_alignment = 1
+
+[node name="Thanks3" type="VBoxContainer" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AvatarContainer" type="Control" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks3"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+
+[node name="Shadow" type="Panel" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks3/AvatarContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_avatar_shadow")
+
+[node name="AvatarButton" type="TextureButton" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks3/AvatarContainer"]
+material = SubResource("ShaderMaterial_circle")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture_normal = ExtResource("14_age")
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks3"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.2, 0.2, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "ageace"
+horizontal_alignment = 1
+
+[node name="Thanks4" type="VBoxContainer" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AvatarContainer" type="Control" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks4"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+
+[node name="Shadow" type="Panel" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks4/AvatarContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_avatar_shadow")
+
+[node name="AvatarButton" type="TextureButton" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks4/AvatarContainer"]
+material = SubResource("ShaderMaterial_circle")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture_normal = ExtResource("15_lazy")
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks4"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.2, 0.2, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "见习食神懒羊羊"
+horizontal_alignment = 1
+
+[node name="SidePanel" type="ColorRect" parent="MainPanel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.8
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainPanel/SidePanel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -32.0
+offset_top = 20.0
+offset_right = 32.0
+offset_bottom = 200.0
+grow_horizontal = 2
+theme_override_constants/separation = 20
+
+[node name="SettingButton" type="TextureButton" parent="MainPanel/SidePanel/VBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture_normal = ExtResource("6_setting_clicked")
+
+[node name="ThanksButton" type="TextureButton" parent="MainPanel/SidePanel/VBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture_normal = ExtResource("7_thanks_idle")
+
+[node name="BackButton" type="TextureButton" parent="."]
+z_index = 1
+layout_mode = 0
+offset_left = 60.0
+offset_top = 20.0
+offset_right = 124.0
+offset_bottom = 84.0
+texture_normal = ExtResource("3_back_idle")
+texture_pressed = ExtResource("4_back_click")
+
+[connection signal="pressed" from="MainPanel/ContentArea/SettingsContent/HBoxContainer/DisplaySettings/ModeButtons/BorderlessBtn" to="." method="_on_borderless_btn_pressed"]
+[connection signal="pressed" from="MainPanel/ContentArea/SettingsContent/HBoxContainer/DisplaySettings/ModeButtons/WindowedBtn" to="." method="_on_windowed_btn_pressed"]
+[connection signal="item_selected" from="MainPanel/ContentArea/SettingsContent/HBoxContainer/DisplaySettings/ScreenList" to="." method="_on_screen_selected"]
+[connection signal="item_selected" from="MainPanel/ContentArea/SettingsContent/HBoxContainer/DisplaySettings/ResolutionList" to="." method="_on_resolution_selected"]
+[connection signal="value_changed" from="MainPanel/ContentArea/SettingsContent/HBoxContainer/AudioSettings/MasterVolumeSlider" to="." method="_on_master_volume_changed"]
+[connection signal="value_changed" from="MainPanel/ContentArea/SettingsContent/HBoxContainer/AudioSettings/MusicVolumeSlider" to="." method="_on_music_volume_changed"]
+[connection signal="value_changed" from="MainPanel/ContentArea/SettingsContent/HBoxContainer/AudioSettings/SFXVolumeSlider" to="." method="_on_sfx_volume_changed"]
+[connection signal="mouse_entered" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor1/AvatarContainer/AvatarButton" to="." method="_on_avatar_fusu_entered"]
+[connection signal="mouse_exited" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor1/AvatarContainer/AvatarButton" to="." method="_on_avatar_fusu_exited"]
+[connection signal="pressed" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor1/AvatarContainer/AvatarButton" to="." method="_on_contributor_fusu_pressed"]
+[connection signal="mouse_entered" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor2/AvatarContainer/AvatarButton" to="." method="_on_avatar_yang_entered"]
+[connection signal="mouse_exited" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor2/AvatarContainer/AvatarButton" to="." method="_on_avatar_yang_exited"]
+[connection signal="pressed" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ContributorsGrid/Contributor2/AvatarContainer/AvatarButton" to="." method="_on_contributor_yang_pressed"]
+[connection signal="mouse_entered" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks1/AvatarContainer/AvatarButton" to="." method="_on_avatar_sakura_entered"]
+[connection signal="mouse_exited" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks1/AvatarContainer/AvatarButton" to="." method="_on_avatar_sakura_exited"]
+[connection signal="pressed" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks1/AvatarContainer/AvatarButton" to="." method="_on_thanks_sakura_pressed"]
+[connection signal="mouse_entered" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks2/AvatarContainer/AvatarButton" to="." method="_on_avatar_snow_entered"]
+[connection signal="mouse_exited" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks2/AvatarContainer/AvatarButton" to="." method="_on_avatar_snow_exited"]
+[connection signal="pressed" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks2/AvatarContainer/AvatarButton" to="." method="_on_thanks_snow_pressed"]
+[connection signal="mouse_entered" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks3/AvatarContainer/AvatarButton" to="." method="_on_avatar_age_entered"]
+[connection signal="mouse_exited" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks3/AvatarContainer/AvatarButton" to="." method="_on_avatar_age_exited"]
+[connection signal="pressed" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks3/AvatarContainer/AvatarButton" to="." method="_on_thanks_age_pressed"]
+[connection signal="mouse_entered" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks4/AvatarContainer/AvatarButton" to="." method="_on_avatar_lazy_entered"]
+[connection signal="mouse_exited" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks4/AvatarContainer/AvatarButton" to="." method="_on_avatar_lazy_exited"]
+[connection signal="pressed" from="MainPanel/ContentArea/ThanksContent/VBoxContainer/ThanksGrid/Thanks4/AvatarContainer/AvatarButton" to="." method="_on_thanks_lazy_pressed"]
+[connection signal="pressed" from="MainPanel/SidePanel/VBoxContainer/SettingButton" to="." method="_on_setting_button_pressed"]
+[connection signal="pressed" from="MainPanel/SidePanel/VBoxContainer/ThanksButton" to="." method="_on_thanks_button_pressed"]
+[connection signal="pressed" from="BackButton" to="." method="_on_back_button_pressed"]

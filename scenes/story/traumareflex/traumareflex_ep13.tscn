@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://g8pfb4yx1yfc"]
+
+[ext_resource type="Script" uid="uid://flv7ihcgc6u7" path="res://scripts/story/traumareflex/traumareflex_ep13.gd" id="1_5hre13"]
+[ext_resource type="PackedScene" uid="uid://tfmmwjuxwu4x" path="res://scenes/dialog/NovelInterface.tscn" id="2_577b13"]
+
+[node name="TraumareflexEp13" type="Node2D"]
+script = ExtResource("1_5hre13")
+
+[node name="NovelInterface" parent="." instance=ExtResource("2_577b13")]

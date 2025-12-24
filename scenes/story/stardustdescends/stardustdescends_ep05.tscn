@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://bc2xdty6fajvc"]
+
+[ext_resource type="PackedScene" uid="uid://tfmmwjuxwu4x" path="res://scenes/dialog/NovelInterface.tscn" id="1_2s3tn"]
+[ext_resource type="Script" uid="uid://xj6m4c17su21" path="res://scripts/story/stardustdescends/stardustdescends_ep05.gd" id="2_script"]
+
+[node name="StardustDescendsEp05" type="Node2D"]
+script = ExtResource("2_script")
+
+[node name="NovelInterface" parent="." instance=ExtResource("1_2s3tn")]

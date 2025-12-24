@@ -1,0 +1,39 @@
+[gd_scene load_steps=5 format=3 uid="uid://4jspf5rp5ghc"]
+
+[ext_resource type="Texture2D" uid="uid://deedb147qrjcf" path="res://assets/gui/textui/name.png" id="2_t1koe"]
+[ext_resource type="FontFile" uid="uid://kfj8mkiu5cf0" path="res://assets/gui/font/HYQiHei-50S.otf" id="3_dr3cb"]
+
+[sub_resource type="FontVariation" id="FontVariation_4o72s"]
+base_font = ExtResource("3_dr3cb")
+variation_embolden = -0.5
+
+[sub_resource type="LabelSettings" id="LabelSettings_qjhvn"]
+font = SubResource("FontVariation_4o72s")
+font_size = 32
+outline_size = 1
+shadow_color = Color(0.215686, 0.196078, 0.164706, 1)
+
+[node name="NameBox" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NameBoxBackground" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 254.0
+offset_top = 512.0
+offset_right = 616.0
+offset_bottom = 580.0
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_t1koe")
+
+[node name="Name" type="Label" parent="NameBoxBackground"]
+layout_mode = 0
+offset_left = 45.0
+offset_top = 11.0
+offset_right = 114.0
+offset_bottom = 51.0
+label_settings = SubResource("LabelSettings_qjhvn")

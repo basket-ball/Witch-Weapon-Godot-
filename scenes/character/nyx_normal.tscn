@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://dkd2ococjvvyn"]
+
+[ext_resource type="Script" uid="uid://dlg2nt6bfx5mj" path="res://scripts/character/nyx_normal.gd" id="1_uxfjr"]
+[ext_resource type="Texture2D" uid="uid://dvalxtc44p8w4" path="res://assets/images/role/nyx/normal/base.png" id="2_hkb2l"]
+[ext_resource type="Texture2D" uid="uid://bmfwwhuu5taiy" path="res://assets/images/role/nyx/normal/normal1.png" id="3_p1blo"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_uxfjr")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(669.00006, 395.00003)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_hkb2l")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(-30, -201)
+texture = ExtResource("3_p1blo")

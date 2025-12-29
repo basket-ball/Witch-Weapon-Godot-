@@ -5,5 +5,5 @@ extends CharacterNode
 func _init():
 	character_name = "inara"
 	display_name = "伊娜拉"
-	expression_list = []
-	current_expression = ""
+	expression_list = ["afraid","angry","close_eye","hurt","jeer","mock","normal","Proud","shy","smile","Speechless","surprise","tease"]
+	current_expression = "normal"

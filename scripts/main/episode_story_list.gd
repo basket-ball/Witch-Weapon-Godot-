@@ -458,6 +458,7 @@ func _create_list_item(episode_name: String, scene_path: String) -> MarginContai
 	button.texture_hover = button_textures["hover"]
 	button.texture_disabled = button_textures["disabled"]
 	button.mouse_filter = Control.MOUSE_FILTER_PASS
+	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(_on_episode_selected.bind(scene_path, episode_name))
 
 	# 标签容器

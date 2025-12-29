@@ -53,8 +53,8 @@
 
 1. **克隆本仓库**
 ```bash
-git clone https://github.com/你的用户名/witch-weapon.git
-cd witch-weapon
+git clone https://github.com/YANG301/Witch-Weapon-Godot-.git
+cd Witch-Weapon-Godot-
 ```
 
 2. **下载并安装 Godot 引擎**

@@ -252,7 +252,7 @@ func _input(event: InputEvent):
 				is_mouse_pressed = false
 		return  # 在视频模式下，不处理其他输入
 
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if event.is_action_pressed("dialog_next") and event.pressed:
 		# 如果处于中心文字演出模式，处理点击事件
 		if is_center_performance_mode:
 			_on_center_performance_clicked()
@@ -267,7 +267,7 @@ func _input(event: InputEvent):
 			return
 
 		# 只要在等待输入状态，就允许点击背景跳过对话，不依赖背景可见性
-		if waiting_for_input:
+		if waiting_for_input and event is InputEventMouseButton :
 			var dialog_rect = Rect2(Vector2(13, 559), Vector2(1298, 157))
 			var name_rect = Rect2(Vector2(254, 512), Vector2(362, 68))
 			var skip_rect = Rect2(Vector2(1134, 11), Vector2(126, 60))
@@ -282,12 +282,17 @@ func _input(event: InputEvent):
 			   not next_button_rect.has_point(event.position):
 				_on_continue_pressed()
 
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_WHEEL_UP:
+		if log_interface and not log_interface.visible:
+			print("显示Log界面")
+			toggle_log_interface()
+
 func _on_dialog_bg_input(event: InputEvent):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if event.is_action_pressed("dialog_next") and event.pressed:
 		_on_continue_pressed()
 
 func _on_name_box_input(event: InputEvent):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if event.is_action_pressed("dialog_next") and event.pressed:
 		_on_continue_pressed()
 
 # ==================== 万能函数接口 ====================

@@ -403,16 +403,34 @@ func set_story(story_id: String) -> void:
 	if not story_config.has(story_id):
 		push_error("未找到故事ID: " + story_id)
 		return
-	
+
 	current_story_id = story_id
 	var story_data: Dictionary = story_config[story_id]
-	
+
 	# 更新标题
 	if episode_name_label:
 		episode_name_label.text = story_data["title"]
-	
+
 	# 更新剧集列表
 	_update_episode_list(story_data["episodes"])
+
+## 设置mod故事（用于同人mod）
+func set_mod_story(mod_title: String, episodes: Dictionary, mod_path: String) -> void:
+	current_story_id = "mod_" + mod_path.get_file()
+
+	# 更新标题
+	if episode_name_label:
+		episode_name_label.text = mod_title
+
+	# 更新剧集列表（需要处理mod路径）
+	var full_path_episodes := {}
+	for episode_name in episodes:
+		var relative_path: String = episodes[episode_name]
+		# 将相对路径转换为绝对路径
+		var full_path := mod_path + "/" + relative_path
+		full_path_episodes[episode_name] = full_path
+
+	_update_episode_list(full_path_episodes)
 
 ## 更新剧集列表
 func _update_episode_list(episodes: Dictionary) -> void:

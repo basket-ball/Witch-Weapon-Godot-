@@ -1,0 +1,34 @@
+{
+  "mod_id": "example_mod_001",
+  "title": "示例同人剧本",
+  "author": "作者名",
+  "version": "1.0.0",
+  "description": "这是一个示例同人剧本，展示了如何创建自己的mod",
+  "episodes": {
+	"第1节": "story/ep01.tscn",
+	"第2节": "story/ep02.tscn",
+	"第3节": "story/ep03.tscn",
+	"第4节": "story/ep04.tscn",
+	"第5节": "story/ep05.tscn"
+  },
+  "custom_characters": [
+	"characters/custom_character_01.tscn",
+    "characters/custom_character_02.tscn"
+  ],
+  "custom_music": {
+	"bgm_01": "music/custom_bgm_01.mp3",
+	"bgm_02": "music/custom_bgm_02.mp3"
+  },
+  "custom_images": {
+	"backgrounds": [
+	  "images/bg/custom_bg_01.png",
+      "images/bg/custom_bg_02.png"
+	],
+	"roles": [
+	  "images/role/custom_role_01.png",
+      "images/role/custom_role_02.png"
+	]
+  },
+  "created_date": "2025-12-30",
+  "last_updated": "2025-12-30"
+}

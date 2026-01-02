@@ -1,0 +1,47 @@
+[gd_scene load_steps=9 format=3 uid="uid://dt3vr5ekyg8pe"]
+
+[ext_resource type="Script" uid="uid://crl6y1g8yyh0g" path="res://scripts/main/dojin_story_list.gd" id="1_dojin"]
+[ext_resource type="Texture2D" uid="uid://sbx2bsq06xs3" path="res://assets/gui/main_menu/storyui_connect.png" id="2_connect"]
+[ext_resource type="Texture2D" uid="uid://d0upq6jsxo1jg" path="res://assets/gui/main_menu/line_contect.png" id="3_line"]
+[ext_resource type="FontFile" uid="uid://bajyd14et5o6v" path="res://assets/gui/font/方正兰亭准黑_GBK.ttf" id="4_font"]
+[ext_resource type="Texture2D" uid="uid://cclthvpetg4xi" path="res://assets/gui/main_menu/storyui_back.png" id="5_back"]
+[ext_resource type="Texture2D" uid="uid://705v0cjlcfdu" path="res://assets/gui/main_menu/juqing_bottm_xian.png" id="6_bg"]
+
+[sub_resource type="FontVariation" id="FontVariation_dojin"]
+base_font = ExtResource("4_font")
+variation_embolden = 0.8
+
+[sub_resource type="LabelSettings" id="LabelSettings_dojin"]
+font = SubResource("FontVariation_dojin")
+font_size = 29
+
+[node name="DojinStoryList" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_dojin")
+
+[node name="BackgroundColor" type="ColorRect" parent="."]
+visible = false
+z_index = 1
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0, 0, 0, 0.9)
+
+[node name="BackArea" type="TextureButton" parent="BackgroundColor"]
+layout_mode = 0
+offset_right = 780.0
+offset_bottom = 720.0
+
+[node name="EditorButton" type="Button" parent="."]
+z_index = 0
+layout_mode = 0
+offset_left = 40.0
+offset_top = 640.0
+offset_right = 200.0
+offset_bottom = 690.0
+text = "打开编辑器"

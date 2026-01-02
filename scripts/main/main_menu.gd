@@ -3,6 +3,7 @@ extends Control
 # 按钮组件引用
 @onready var main_story_button: TextureButton = $"MainStoryButton"  # 主线按钮
 @onready var side_story_button: TextureButton = $"SideStoryButton"  # 支线按钮
+@onready var dojin_button: TextureButton = $"DojinButton"  # 同人按钮
 @onready var settings_button: TextureButton = $"SettingsButton"  # 设置按钮
 
 # 主线按钮UI元素
@@ -17,9 +18,20 @@ extends Control
 @onready var side_icon_gray: Sprite2D = $"SideStoryButton/IconGray"     # 支线灰色图标
 @onready var side_label_gray: Label = $"SideStoryButton/IconGray/LabelGray"  # 支线灰色文字
 
+# 同人按钮UI元素
+@onready var dojin_icon_light: Sprite2D = $"DojinButton/IconLight"    # 同人高亮图标
+@onready var dojin_label_light: Label = $"DojinButton/IconLight/LabelLight" # 同人高亮文字
+@onready var dojin_icon_gray: Sprite2D = $"DojinButton/IconGray"     # 同人灰色图标
+@onready var dojin_label_gray: Label = $"DojinButton/IconGray/LabelGray"  # 同人灰色文字
+
+# 同人按钮点击代理（用于覆盖 Sprite2D/Label 组合可能产生的“点不到缝隙”区域）
+var _dojin_hit_proxy: Control = null
+const DOJIN_HIT_PADDING := 6.0
+
 # 故事列表容器
 @onready var main_story_list: Control = $"MainStoryList"  # 主线故事列表
 @onready var side_story_list: Control = $"SideStoryList"  # 支线故事列表
+@onready var dojin_story_list: Control = $"DojinStoryList"  # 同人故事列表
 
 # 设置面板
 @onready var settings_panel: Control = $"SettingsPanel"  # 设置面板
@@ -67,6 +79,8 @@ func _ready() -> void:
 	_initialize_backgrounds()
 	_initialize_story_lists()
 	_initialize_black_overlay()
+	_ensure_dojin_hit_proxy()
+	_update_dojin_hit_proxy_rect()
 	_update_backgrounds_position()
 
 func _input(event: InputEvent) -> void:
@@ -88,6 +102,8 @@ func _initialize_story_lists():
 	main_story_list.modulate.a = 1.0  # 主线完全显示
 	side_story_list.modulate.a = 0.0  # 支线完全隐藏
 	side_story_list.visible = false   # 支线不可见
+	dojin_story_list.modulate.a = 0.0  # 同人完全隐藏
+	dojin_story_list.visible = false   # 同人不可见
 
 func _initialize_black_overlay():
 	"""初始化黑色遮罩"""
@@ -101,6 +117,7 @@ func _process(_delta):
 	"""每帧更新，仅在非切换状态时更新背景视差效果"""
 	if not _is_switching:
 		_update_backgrounds_position()
+	_update_dojin_hit_proxy_rect()
 
 func _update_backgrounds_position():
 	"""根据当前可见的故事列表更新背景视差位置"""
@@ -114,6 +131,8 @@ func _get_active_story_list() -> Control:
 		return main_story_list
 	elif side_story_list.visible and side_story_list.modulate.a > 0.5:
 		return side_story_list
+	elif dojin_story_list.visible and dojin_story_list.modulate.a > 0.5:
+		return dojin_story_list
 	return null
 
 func _update_backgrounds_for_list(list_node: Control):
@@ -212,9 +231,9 @@ func _on_main_story_button_pressed() -> void:
 	"""处理主线按钮点击事件"""
 	if _is_switching or _is_main_story_active():
 		return
-	
-	_update_button_states(true)  # true表示激活主线
-	_switch_to_list(main_story_list, side_story_list)
+
+	_update_button_states(0)  # 0表示激活主线
+	_switch_to_list(main_story_list, _get_current_active_list())
 
 func _is_main_story_active() -> bool:
 	"""检查主线是否已经激活"""
@@ -224,24 +243,43 @@ func _on_side_story_button_pressed() -> void:
 	"""处理支线按钮点击事件"""
 	if _is_switching or _is_side_story_active():
 		return
-	
-	_update_button_states(false)  # false表示激活支线
-	_switch_to_list(side_story_list, main_story_list)
+
+	_update_button_states(1)  # 1表示激活支线
+	_switch_to_list(side_story_list, _get_current_active_list())
+
+func _on_dojin_button_pressed() -> void:
+	"""处理同人按钮点击事件"""
+	if _is_switching or _is_dojin_story_active():
+		return
+
+	_update_button_states(2)  # 2表示激活同人
+	_switch_to_list(dojin_story_list, _get_current_active_list())
 
 func _is_side_story_active() -> bool:
 	"""检查支线是否已经激活"""
 	return side_story_list.visible and side_story_list.modulate.a > 0.5
 
-func _update_button_states(is_main_active: bool):
-	"""更新按钮的高亮/灰色状态"""
-	if is_main_active:
-		# 激活主线按钮
-		_set_button_active(main_icon_light, main_label_light, main_icon_gray, main_label_gray, true)
-		_set_button_active(side_icon_light, side_label_light, side_icon_gray, side_label_gray, false)
-	else:
-		# 激活支线按钮
-		_set_button_active(main_icon_light, main_label_light, main_icon_gray, main_label_gray, false)
-		_set_button_active(side_icon_light, side_label_light, side_icon_gray, side_label_gray, true)
+func _is_dojin_story_active() -> bool:
+	"""检查同人是否已经激活"""
+	return dojin_story_list.visible and dojin_story_list.modulate.a > 0.5
+
+func _get_current_active_list() -> Control:
+	"""获取当前激活的列表，用于切换"""
+	if main_story_list.visible and main_story_list.modulate.a > 0.5:
+		return main_story_list
+	elif side_story_list.visible and side_story_list.modulate.a > 0.5:
+		return side_story_list
+	elif dojin_story_list.visible and dojin_story_list.modulate.a > 0.5:
+		return dojin_story_list
+	return main_story_list  # 默认返回主线
+
+func _update_button_states(active_index: int):
+	"""更新按钮的高亮/灰色状态
+	active_index: 0=主线, 1=支线, 2=同人"""
+	_set_button_active(main_icon_light, main_label_light, main_icon_gray, main_label_gray, active_index == 0)
+	_set_button_active(side_icon_light, side_label_light, side_icon_gray, side_label_gray, active_index == 1)
+	_set_button_active(dojin_icon_light, dojin_label_light, dojin_icon_gray, dojin_label_gray, active_index == 2)
+	_update_dojin_hit_proxy_rect()
 
 func _set_button_active(icon_light: Sprite2D, label_light: Label, icon_gray: Sprite2D, label_gray: Label, active: bool):
 	"""设置单个按钮的激活状态"""
@@ -249,6 +287,60 @@ func _set_button_active(icon_light: Sprite2D, label_light: Label, icon_gray: Spr
 	label_light.visible = active
 	icon_gray.visible = not active
 	label_gray.visible = not active
+
+func _ensure_dojin_hit_proxy() -> void:
+	if is_instance_valid(_dojin_hit_proxy):
+		return
+
+	_dojin_hit_proxy = Control.new()
+	_dojin_hit_proxy.name = "DojinHitProxy"
+	_dojin_hit_proxy.mouse_filter = Control.MOUSE_FILTER_STOP
+	_dojin_hit_proxy.modulate = Color(1, 1, 1, 0)
+	_dojin_hit_proxy.z_index = 100
+	add_child(_dojin_hit_proxy)
+
+	_dojin_hit_proxy.gui_input.connect(_on_dojin_hit_proxy_gui_input)
+
+func _on_dojin_hit_proxy_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_on_dojin_button_pressed()
+		get_viewport().set_input_as_handled()
+
+func _get_sprite2d_global_rect(sprite: Sprite2D) -> Rect2:
+	if not is_instance_valid(sprite) or not sprite.texture:
+		return Rect2()
+
+	var texture_size: Vector2 = sprite.texture.get_size()
+	var sprite_scale: Vector2 = Vector2(abs(sprite.scale.x), abs(sprite.scale.y))
+	var rect_size: Vector2 = texture_size * sprite_scale
+
+	var top_left := sprite.global_position
+	if sprite.centered:
+		top_left -= rect_size * 0.5
+
+	return Rect2(top_left, rect_size)
+
+func _update_dojin_hit_proxy_rect() -> void:
+	if not is_instance_valid(_dojin_hit_proxy):
+		return
+
+	var icon := dojin_icon_light if dojin_icon_light.visible else dojin_icon_gray
+	var label := dojin_label_light if dojin_label_light.visible else dojin_label_gray
+
+	var rect := _get_sprite2d_global_rect(icon)
+	if rect.size == Vector2.ZERO:
+		_dojin_hit_proxy.visible = false
+		return
+
+	if is_instance_valid(label) and label.visible:
+		rect = rect.merge(label.get_global_rect())
+
+	rect.position -= Vector2(DOJIN_HIT_PADDING, DOJIN_HIT_PADDING)
+	rect.size += Vector2(DOJIN_HIT_PADDING * 2.0, DOJIN_HIT_PADDING * 2.0)
+
+	_dojin_hit_proxy.global_position = rect.position
+	_dojin_hit_proxy.size = rect.size
+	_dojin_hit_proxy.visible = true
 
 func load_story_scene(scene_path: String) -> bool:
 	"""加载剧情场景到CanvasLayer中，带有渐变动画"""
@@ -262,8 +354,15 @@ func load_story_scene(scene_path: String) -> bool:
 	# 清除现有的剧情场景（不重新播放音乐）
 	_clear_story_scene_without_music()
 
-	# 加载新场景
-	var story_scene = load(scene_path)
+	# 加载新场景（处理mod路径）
+	var story_scene = null
+	if scene_path.begins_with("user://mods/"):
+		# mod场景需要特殊处理路径
+		story_scene = _load_mod_scene(scene_path)
+	else:
+		# 普通场景直接加载
+		story_scene = load(scene_path)
+
 	if not story_scene:
 		push_error("无法加载剧情场景: " + scene_path)
 		return false
@@ -276,6 +375,40 @@ func load_story_scene(scene_path: String) -> bool:
 	_clear_black_overlay()
 
 	return true
+
+func _load_mod_scene(scene_path: String) -> PackedScene:
+	"""加载mod场景，处理路径引用问题
+	mod场景文件中的资源引用使用res://mods/路径，需要转换为user://mods/"""
+
+	# 读取原始场景文件
+	var file = FileAccess.open(scene_path, FileAccess.READ)
+	if not file:
+		push_error("无法打开mod场景文件: " + scene_path)
+		return null
+
+	var original_content = file.get_as_text()
+	file.close()
+
+	# 替换所有res://mods/为user://mods/
+	var modified_content = original_content.replace("res://mods/", "user://mods/")
+
+	# 创建临时文件
+	var temp_path = "user://temp_mod_scene.tscn"
+	var temp_file = FileAccess.open(temp_path, FileAccess.WRITE)
+	if not temp_file:
+		push_error("无法创建临时场景文件")
+		return null
+
+	temp_file.store_string(modified_content)
+	temp_file.close()
+
+	# 加载临时文件
+	var scene = load(temp_path)
+
+	# 删除临时文件
+	DirAccess.remove_absolute(temp_path)
+
+	return scene
 
 func clear_story_scene():
 	"""清除当前的剧情场景"""

@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://b6ldhc4dldn1j"]
+[gd_scene load_steps=22 format=3 uid="uid://b6ldhc4dldn1j"]
 
 [ext_resource type="Script" uid="uid://um4c4un4ltp6" path="res://scripts/main/main_menu.gd" id="1_sd5it"]
 [ext_resource type="Texture2D" uid="uid://cad1e353svt3l" path="res://assets/gui/main_menu/story_bg2.png" id="2_w6ykx"]
@@ -9,9 +9,12 @@
 [ext_resource type="Texture2D" uid="uid://dv76b0hsk42tv" path="res://assets/gui/main_menu/Side_normal.png" id="7_s2sug"]
 [ext_resource type="Texture2D" uid="uid://covbn6sp4yh5r" path="res://assets/gui/main_menu/Side_pressed.png" id="8_ygj4d"]
 [ext_resource type="PackedScene" uid="uid://b3uub0sowa8g7" path="res://scenes/main/main_story_list.tscn" id="9_75pso"]
+[ext_resource type="Texture2D" uid="uid://jew5web7087" path="res://assets/gui/main_menu/Dojin_normal.png" id="9_dojin_normal"]
 [ext_resource type="PackedScene" uid="uid://ckymphh2diif0" path="res://scenes/main/side_story_list.tscn" id="10_cnht7"]
+[ext_resource type="Texture2D" uid="uid://5q7gi31ioar5" path="res://assets/gui/main_menu/Dojin_pressed.png" id="10_dojin_pressed"]
 [ext_resource type="AudioStream" uid="uid://d1k84r4y7j36o" path="res://assets/audio/music/unkown/UI_Main_Funk.mp3" id="11_bgm"]
-[ext_resource type="Texture2D" path="res://assets/gui/settings/setting_in_btn.png" id="12_settings_btn"]
+[ext_resource type="PackedScene" uid="uid://dt3vr5ekyg8pe" path="res://scenes/main/dojin_story_list.tscn" id="11_dojin_list"]
+[ext_resource type="Texture2D" uid="uid://c3o7lmmubeea" path="res://assets/gui/settings/setting_in_btn.png" id="12_settings_btn"]
 [ext_resource type="PackedScene" uid="uid://cgko5uvkl13mb" path="res://scenes/setting/settings.tscn" id="13_settings_scene"]
 
 [sub_resource type="FontVariation" id="FontVariation_xfho0"]
@@ -45,7 +48,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_sd5it")
 metadata/_edit_vertical_guides_ = [640.0]
-metadata/_edit_horizontal_guides_ = [360.0]
+metadata/_edit_horizontal_guides_ = [360.0, 41.0, 25.0, 52.0]
 
 [node name="ColorRect" type="ColorRect" parent="."]
 z_index = -2
@@ -156,7 +159,53 @@ offset_right = 100.268
 offset_bottom = 25.088
 text = "番外"
 label_settings = SubResource("LabelSettings_31vgd")
+
+[node name="DojinButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 319.0
+offset_top = 22.0
+offset_right = 418.0
+offset_bottom = 60.0
+
+[node name="IconLight" type="Sprite2D" parent="DojinButton"]
+visible = false
+position = Vector2(17, 19)
+scale = Vector2(0.45, 0.45)
+texture = ExtResource("9_dojin_normal")
+
+[node name="LabelLight" type="Label" parent="DojinButton/IconLight"]
+anchors_preset = -1
+anchor_left = -0.33142
+anchor_top = -0.126218
+anchor_right = -0.33142
+anchor_bottom = -0.126218
+offset_left = 66.45842
+offset_top = -36.666702
+offset_right = 131.45842
+offset_bottom = 0.33329964
+scale = Vector2(2.4, 2.4)
+text = "同人"
+label_settings = SubResource("LabelSettings_kpcq7")
 metadata/_edit_use_anchors_ = true
+
+[node name="IconGray" type="Sprite2D" parent="DojinButton"]
+position = Vector2(17, 19)
+scale = Vector2(0.45, 0.45)
+texture = ExtResource("10_dojin_pressed")
+
+[node name="LabelGray" type="Label" parent="DojinButton/IconGray"]
+anchors_preset = -1
+anchor_left = -0.478478
+anchor_top = -0.186525
+anchor_right = -0.478478
+anchor_bottom = -0.186525
+offset_left = 78.278275
+offset_top = -32.578
+offset_right = 143.27827
+offset_bottom = 4.422
+scale = Vector2(2.4, 2.4)
+text = "同人"
+label_settings = SubResource("LabelSettings_31vgd")
 
 [node name="MainStoryList" parent="." instance=ExtResource("9_75pso")]
 z_index = 1
@@ -169,8 +218,15 @@ grow_horizontal = 1
 grow_vertical = 1
 
 [node name="SideStoryList" parent="." instance=ExtResource("10_cnht7")]
-z_index = 1
 visible = false
+z_index = 1
+layout_mode = 1
+offset_right = -1280.0
+offset_bottom = -659.0
+
+[node name="DojinStoryList" parent="." instance=ExtResource("11_dojin_list")]
+visible = false
+z_index = 1
 layout_mode = 1
 offset_right = -1280.0
 offset_bottom = -659.0
@@ -201,15 +257,15 @@ offset_top = 20.0
 offset_right = 1264.0
 offset_bottom = 84.0
 pivot_offset = Vector2(32, 32)
-modulate = Color(1, 1, 1, 1)
-self_modulate = Color(1, 1, 1, 1)
 texture_normal = ExtResource("12_settings_btn")
 
 [node name="SettingsPanel" parent="." instance=ExtResource("13_settings_scene")]
 visible = false
 z_index = 1000
+layout_mode = 1
 
 [connection signal="pressed" from="MainStoryButton" to="." method="_on_main_story_button_pressed"]
 [connection signal="pressed" from="SideStoryButton" to="." method="_on_side_story_button_pressed"]
+[connection signal="pressed" from="DojinButton" to="." method="_on_dojin_button_pressed"]
 [connection signal="pressed" from="SettingsButton" to="." method="_on_settings_button_pressed"]
 [connection signal="back_pressed" from="SettingsPanel" to="." method="_on_settings_back_pressed"]

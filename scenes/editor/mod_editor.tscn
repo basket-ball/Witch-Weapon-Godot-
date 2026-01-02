@@ -1,0 +1,509 @@
+[gd_scene load_steps=16 format=3 uid="uid://dq8k7napxfj2t"]
+
+[ext_resource type="Script" path="res://scripts/editor/mod_editor.gd" id="1_editor"]
+
+[sub_resource type="StyleBoxFlat" id="TopBarStyle"]
+bg_color = Color(0.06, 0.06, 0.08, 1)
+border_width_bottom = 3
+border_color = Color(0.72, 0.75, 1.0, 0.9)
+shadow_size = 4
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="LeftPanelStyle"]
+bg_color = Color(0.16, 0.17, 0.25, 1)
+corner_radius_top_left = 0
+corner_radius_bottom_left = 0
+border_width_right = 3
+border_color = Color(0.72, 0.85, 1.0, 0.95)
+
+[sub_resource type="StyleBoxFlat" id="InspectorPanelStyle"]
+bg_color = Color(0.16, 0.17, 0.25, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.72, 0.85, 1.0, 0.9)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_size = 6
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="ResourcePanelStyle"]
+bg_color = Color(0.16, 0.17, 0.25, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.72, 0.85, 1.0, 0.9)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_size = 6
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="PreviewPanelStyle"]
+bg_color = Color(0.18, 0.16, 0.28, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.78, 0.72, 1.0, 0.9)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_size = 6
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="ToolboxPanelStyle"]
+bg_color = Color(0.18, 0.16, 0.28, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.78, 0.72, 1.0, 0.9)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_size = 6
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="RightPanelStyle"]
+bg_color = Color(0.16, 0.24, 0.24, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.55, 1.0, 1.0, 0.9)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_size = 6
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="RunButtonStyle"]
+bg_color = Color(0.298039, 0.686275, 0.313725, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 12
+content_margin_right = 12
+content_margin_top = 8
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="ExportButtonStyle"]
+bg_color = Color(0.423529, 0.388235, 1.0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 12
+content_margin_right = 12
+content_margin_top = 8
+content_margin_bottom = 8
+
+[sub_resource type="StyleBoxFlat" id="BackButtonStyle"]
+bg_color = Color(0.227451, 0.227451, 0.270588, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 12
+content_margin_right = 12
+content_margin_top = 8
+content_margin_bottom = 8
+
+[sub_resource type="LabelSettings" id="TopBarLabel"]
+font_size = 20
+
+[sub_resource type="LabelSettings" id="PanelTitleLabel"]
+font_size = 16
+
+[sub_resource type="LabelSettings" id="NormalLabel"]
+font_size = 14
+
+[sub_resource type="StyleBoxFlat" id="ScriptBlockStyle"]
+bg_color = Color(0.12, 0.12, 0.15, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.42, 0.39, 1.0, 0.6)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="ModEditor" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_editor")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.11, 0.11, 0.12, 1)
+
+[node name="TopBar" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 60.0
+grow_horizontal = 2
+theme_overrides/styles/panel = SubResource("TopBarStyle")
+
+[node name="BackButton" type="Button" parent="TopBar"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 10.0
+offset_right = 110.0
+offset_bottom = 50.0
+text = "← 返回"
+theme_overrides/styles/normal = SubResource("BackButtonStyle")
+theme_overrides/styles/hover = SubResource("BackButtonStyle")
+theme_overrides/styles/pressed = SubResource("BackButtonStyle")
+
+[node name="ProjectNameLabel" type="Label" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -15.0
+offset_right = 150.0
+offset_bottom = 15.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "工程名称"
+horizontal_alignment = 1
+vertical_alignment = 1
+label_settings = SubResource("TopBarLabel")
+
+[node name="RunButton" type="Button" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -20.0
+offset_right = -150.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+text = "▶ 运行"
+theme_overrides/styles/normal = SubResource("RunButtonStyle")
+theme_overrides/styles/hover = SubResource("RunButtonStyle")
+theme_overrides/styles/pressed = SubResource("RunButtonStyle")
+
+[node name="ExportButton" type="Button" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -130.0
+offset_top = -20.0
+offset_right = -16.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+text = "导出"
+theme_overrides/styles/normal = SubResource("ExportButtonStyle")
+theme_overrides/styles/hover = SubResource("ExportButtonStyle")
+theme_overrides/styles/pressed = SubResource("ExportButtonStyle")
+
+[node name="MainContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 70.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainContainer"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="InspectorPanel" type="Panel" parent="MainContainer/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_overrides/styles/panel = SubResource("InspectorPanelStyle")
+
+[node name="InspectorContainer" type="VBoxContainer" parent="MainContainer/LeftPanel/InspectorPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 5
+
+[node name="InspectorLabel" type="Label" parent="MainContainer/LeftPanel/InspectorPanel/InspectorContainer"]
+layout_mode = 2
+text = "Inspector"
+horizontal_alignment = 1
+label_settings = SubResource("PanelTitleLabel")
+
+[node name="Separator" type="HSeparator" parent="MainContainer/LeftPanel/InspectorPanel/InspectorContainer"]
+layout_mode = 2
+
+[node name="InspectorScroll" type="ScrollContainer" parent="MainContainer/LeftPanel/InspectorPanel/InspectorContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="InspectorContent" type="VBoxContainer" parent="MainContainer/LeftPanel/InspectorPanel/InspectorContainer/InspectorScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="EmptyHint" type="Label" parent="MainContainer/LeftPanel/InspectorPanel/InspectorContainer/InspectorScroll/InspectorContent"]
+layout_mode = 2
+text = "请在右侧选择一个脚本块"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ResourcePanel" type="Panel" parent="MainContainer/LeftPanel"]
+custom_minimum_size = Vector2(0, 380)
+layout_mode = 2
+size_flags_vertical = 3
+theme_overrides/styles/panel = SubResource("ResourcePanelStyle")
+
+[node name="ResourceContainer" type="VBoxContainer" parent="MainContainer/LeftPanel/ResourcePanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 3
+
+[node name="ResourceLabel" type="Label" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer"]
+layout_mode = 2
+text = "资源列表"
+horizontal_alignment = 1
+label_settings = SubResource("PanelTitleLabel")
+
+[node name="CharactersLabel" type="Label" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer"]
+layout_mode = 2
+text = "角色:"
+label_settings = SubResource("NormalLabel")
+
+[node name="CharactersList" type="ItemList" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BackgroundsLabel" type="Label" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer"]
+layout_mode = 2
+text = "背景:"
+label_settings = SubResource("NormalLabel")
+
+[node name="BackgroundsList" type="ItemList" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MusicLabel" type="Label" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer"]
+layout_mode = 2
+text = "音乐:"
+label_settings = SubResource("NormalLabel")
+
+[node name="MusicList" type="ItemList" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CenterPanel" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="PreviewPanel" type="Panel" parent="MainContainer/CenterPanel"]
+  layout_mode = 2
+  size_flags_vertical = 3
+ theme_overrides/styles/panel = SubResource("PreviewPanelStyle")
+
+[node name="PreviewContainer" type="VBoxContainer" parent="MainContainer/CenterPanel/PreviewPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 5
+
+[node name="PreviewLabel" type="Label" parent="MainContainer/CenterPanel/PreviewPanel/PreviewContainer"]
+layout_mode = 2
+text = "游戏预览区域"
+horizontal_alignment = 1
+label_settings = SubResource("PanelTitleLabel")
+
+[node name="PreviewAspect" type="AspectRatioContainer" parent="MainContainer/CenterPanel/PreviewPanel/PreviewContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+ratio = 1.7777778
+stretch_mode = 2
+
+[node name="PreviewArea" type="SubViewportContainer" parent="MainContainer/CenterPanel/PreviewPanel/PreviewContainer/PreviewAspect"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+stretch = true
+stretch_shrink = 1
+
+[node name="SubViewport" type="SubViewport" parent="MainContainer/CenterPanel/PreviewPanel/PreviewContainer/PreviewAspect/PreviewArea"]
+handle_input_independently = false
+transparent_bg = false
+render_target_update_mode = 4
+
+[node name="ToolboxPanel" type="Panel" parent="MainContainer/CenterPanel"]
+  custom_minimum_size = Vector2(0, 250)
+  layout_mode = 2
+ theme_overrides/styles/panel = SubResource("ToolboxPanelStyle")
+
+[node name="ToolboxContainer" type="VBoxContainer" parent="MainContainer/CenterPanel/ToolboxPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 5
+
+[node name="ToolboxLabel" type="Label" parent="MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer"]
+layout_mode = 2
+text = "脚本块工具箱"
+horizontal_alignment = 1
+label_settings = SubResource("PanelTitleLabel")
+
+[node name="ToolboxTabs" type="TabContainer" parent="MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="对话" type="ScrollContainer" parent="MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer/ToolboxTabs"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+metadata/_tab_index = 0
+
+[node name="DialogBlocksContainer" type="VBoxContainer" parent="MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer/ToolboxTabs/对话"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="角色" type="ScrollContainer" parent="MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer/ToolboxTabs"]
+visible = false
+layout_mode = 2
+horizontal_scroll_mode = 0
+metadata/_tab_index = 1
+
+[node name="CharacterBlocksContainer" type="VBoxContainer" parent="MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer/ToolboxTabs/角色"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="场景" type="ScrollContainer" parent="MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer/ToolboxTabs"]
+visible = false
+layout_mode = 2
+horizontal_scroll_mode = 0
+metadata/_tab_index = 2
+
+[node name="SceneBlocksContainer" type="VBoxContainer" parent="MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer/ToolboxTabs/场景"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="控制" type="ScrollContainer" parent="MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer/ToolboxTabs"]
+visible = false
+layout_mode = 2
+horizontal_scroll_mode = 0
+metadata/_tab_index = 3
+
+[node name="ControlBlocksContainer" type="VBoxContainer" parent="MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer/ToolboxTabs/控制"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="RightPanel" type="Panel" parent="MainContainer"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+theme_overrides/styles/panel = SubResource("RightPanelStyle")
+
+[node name="RightPanelContainer" type="VBoxContainer" parent="MainContainer/RightPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 5
+
+[node name="ScriptSequenceLabel" type="Label" parent="MainContainer/RightPanel/RightPanelContainer"]
+layout_mode = 2
+text = "脚本序列"
+horizontal_alignment = 1
+label_settings = SubResource("PanelTitleLabel")
+
+[node name="Separator" type="HSeparator" parent="MainContainer/RightPanel/RightPanelContainer"]
+layout_mode = 2
+
+[node name="ScriptSequenceScroll" type="ScrollContainer" parent="MainContainer/RightPanel/RightPanelContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScriptSequence" type="VBoxContainer" parent="MainContainer/RightPanel/RightPanelContainer/ScriptSequenceScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 3

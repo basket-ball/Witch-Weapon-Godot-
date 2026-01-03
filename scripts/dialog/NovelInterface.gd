@@ -57,6 +57,7 @@ signal center_performance_completed  # 中心演出模式完成信号
 signal briefing_performance_completed  # 简报演出模式完成信号
 signal video_performance_completed  # 视频演出模式完成信号
 signal name_input_completed(player_name: String)  # 姓名输入完成信号
+signal interface_initialized
 
 # 状态变量
 var waiting_for_input: bool = false
@@ -144,6 +145,13 @@ var name_error_label: Label = null  # 错误提示文字
 var name_shake_tween: Tween = null  # 晃动动画
 var current_player_name: String = ""  # 当前输入的玩家姓名
 
+var _interface_initialized: bool = false
+
+func wait_until_initialized() -> void:
+	if _interface_initialized:
+		return
+	await interface_initialized
+
 func _ready():
 	await get_tree().process_frame
 	_initialize_interface()
@@ -199,6 +207,9 @@ func _initialize_interface():
 		audio_player.autoplay = false
 	# 预留：初始化角色显示系统
 	# 预留：初始化背景系统
+	if not _interface_initialized:
+		_interface_initialized = true
+		interface_initialized.emit()
 
 func _setup_entrance_overlay():
 	"""设置入场遮罩"""
@@ -1010,6 +1021,10 @@ func hide_3rd_character() -> void:
 		current_3rd_character_node = null
 		current_3rd_character = ""
 		print("第三个角色已隐藏 (渐变0.1秒)")
+
+func hide_all_character() -> void:
+	"""兼容旧脚本：hide_all_character() -> hide_all_characters()"""
+	await hide_all_characters()
 
 func hide_all_characters() -> void:
 	"""同时隐藏所有角色 - 带有0.1秒的渐变效果"""

@@ -225,9 +225,11 @@ func _load_mod_config(config_path: String) -> Dictionary:
 
 func _load_mod_icon(icon_path: String) -> Texture2D:
 	"""加载mod图标"""
+	if not FileAccess.file_exists(icon_path):
+		return null
 	var image = Image.new()
-	var error = image.load(icon_path)
-	if error != OK:
+	var err: int = image.load(icon_path)
+	if err != OK:
 		print("无法加载mod图标: " + icon_path + "，使用默认图标")
 		return null
 

@@ -3,13 +3,13 @@
 [ext_resource type="Script" path="res://scripts/editor/project_manager.gd" id="1_manager"]
 [ext_resource type="FontFile" uid="uid://bajyd14et5o6v" path="res://assets/gui/font/方正兰亭准黑_GBK.ttf" id="2_font"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_list_panel"]
-bg_color = Color(0.18, 0.18, 0.18, 0.9)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_window"]
+bg_color = Color(0.16, 0.16, 0.16, 0.95)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(1, 1, 1, 0.08)
+border_color = Color(1, 1, 1, 0.1)
 corner_radius_top_left = 14
 corner_radius_top_right = 14
 corner_radius_bottom_right = 14
@@ -31,64 +31,232 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.12, 0.12, 0.12, 1)
+mouse_filter = 0
+color = Color(0, 0, 0, 0.55)
 
-[node name="TitleLabel" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -200.0
-offset_top = 40.0
-offset_right = 200.0
-offset_bottom = 80.0
-grow_horizontal = 2
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 34
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "Mod工程管理器"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="SearchInput" type="LineEdit" parent="."]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -260.0
-offset_top = 95.0
-offset_right = 260.0
-offset_bottom = 135.0
-grow_horizontal = 2
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 20
-placeholder_text = "搜索工程名..."
-clear_button_enabled = true
-
-[node name="ProjectListContainer" type="VBoxContainer" parent="."]
+[node name="WindowPanel" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -400.0
-offset_top = -200.0
-offset_right = 400.0
-offset_bottom = 200.0
+offset_left = -450.0
+offset_top = -270.0
+offset_right = 450.0
+offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
+clip_contents = true
+theme_override_styles/panel = SubResource("StyleBoxFlat_window")
+
+[node name="Margin" type="MarginContainer" parent="WindowPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Content" type="VBoxContainer" parent="WindowPanel/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="WindowPanel/Margin/Content"]
+layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="ProjectScrollContainer" type="ScrollContainer" parent="ProjectListContainer"]
+[node name="TitleLabel" type="Label" parent="WindowPanel/Margin/Content/Header"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Mod工程管理"
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="WindowPanel/Margin/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SearchInput" type="LineEdit" parent="WindowPanel/Margin/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "搜索工程名..."
+clear_button_enabled = true
+
+[node name="BackButton" type="Button" parent="WindowPanel/Margin/Content/Header"]
+layout_mode = 2
+custom_minimum_size = Vector2(96, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "返回"
+
+[node name="Body" type="HBoxContainer" parent="WindowPanel/Margin/Content"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/separation = 12
 
-[node name="ProjectList" type="VBoxContainer" parent="ProjectListContainer/ProjectScrollContainer"]
+[node name="LeftPanel" type="VBoxContainer" parent="WindowPanel/Margin/Content/Body"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="ProjectScrollContainer" type="ScrollContainer" parent="WindowPanel/Margin/Content/Body/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+clip_contents = true
+
+[node name="ProjectList" type="VBoxContainer" parent="WindowPanel/Margin/Content/Body/LeftPanel/ProjectScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 8
+
+[node name="RightPanel" type="VBoxContainer" parent="WindowPanel/Margin/Content/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DetailScroll" type="ScrollContainer" parent="WindowPanel/Margin/Content/Body/RightPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+clip_contents = true
+
+[node name="DetailForm" type="VBoxContainer" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="NameRow" type="HBoxContainer" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NameLabel" type="Label" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm/NameRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "项目名称:"
+vertical_alignment = 1
+
+[node name="ProjectTitleInput" type="LineEdit" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm/NameRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "未选择工程"
+
+[node name="ProjectPreview" type="TextureRect" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm/NameRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(110, 95)
+mouse_filter = 0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DescLabel" type="Label" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "项目描述:"
+
+[node name="ProjectDescInput" type="TextEdit" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 90)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="EpisodesHeader" type="HBoxContainer" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="EpisodesLabel" type="Label" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm/EpisodesHeader"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "剧情节:"
+vertical_alignment = 1
+
+[node name="AddEpisodeButton" type="Button" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm/EpisodesHeader"]
+layout_mode = 2
+custom_minimum_size = Vector2(44, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "＋"
+
+[node name="DeleteEpisodeButton" type="Button" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm/EpisodesHeader"]
+layout_mode = 2
+custom_minimum_size = Vector2(44, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "－"
+
+[node name="EpisodeList" type="ItemList" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 160)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 0
+
+[node name="ProjectActions" type="HBoxContainer" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ExportZipButton" type="Button" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm/ProjectActions"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 38)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "导出ZIP"
+
+[node name="InstallToModsButton" type="Button" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailForm/ProjectActions"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 38)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "导入到Mods"
+
+[node name="Footer" type="HBoxContainer" parent="WindowPanel/Margin/Content"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="NewProjectButton" type="Button" parent="WindowPanel/Margin/Content/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 44)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+text = "新建工程"
+
+[node name="OpenProjectButton" type="Button" parent="WindowPanel/Margin/Content/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 44)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+text = "编辑剧情节"
+
+[node name="DeleteProjectButton" type="Button" parent="WindowPanel/Margin/Content/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 44)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+text = "删除工程"
 
 [node name="EmptyLabel" type="Label" parent="."]
 visible = false
@@ -100,68 +268,17 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -320.0
+offset_left = -260.0
 offset_top = -40.0
-offset_right = 320.0
+offset_right = 260.0
 offset_bottom = 60.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(1, 1, 1, 0.7)
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="ButtonContainer" type="HBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -250.0
-offset_top = -80.0
-offset_right = 250.0
-offset_bottom = -40.0
-grow_horizontal = 2
-grow_vertical = 0
-alignment = 1
-theme_override_constants/separation = 14
-
-[node name="NewProjectButton" type="Button" parent="ButtonContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 54)
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 22
-text = "新建工程"
-
-[node name="OpenProjectButton" type="Button" parent="ButtonContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 54)
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 22
-text = "打开工程"
-
-[node name="DeleteProjectButton" type="Button" parent="ButtonContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 54)
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 22
-text = "删除工程"
-
-[node name="BackButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 40.0
-offset_top = 40.0
-offset_right = 140.0
-offset_bottom = 80.0
-custom_minimum_size = Vector2(120, 44)
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 20
-text = "返回"
 
 [node name="NewProjectDialog" type="Window" parent="."]
 title = "新建工程"
@@ -188,6 +305,14 @@ text = "工程名称："
 layout_mode = 2
 placeholder_text = "请输入工程名称"
 
+[node name="ErrorLabel" type="Label" parent="NewProjectDialog/DialogContent"]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 0.35, 0.35, 0.95)
+text = ""
+
 [node name="Spacer" type="Control" parent="NewProjectDialog/DialogContent"]
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
@@ -202,34 +327,32 @@ text = "确定"
 
 [node name="CancelButton" type="Button" parent="NewProjectDialog/DialogContent/ButtonRow"]
 layout_mode = 2
-
-[node name="ListPanel" type="Panel" parent="."]
-z_index = -1
-mouse_filter = 2
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -450.0
-offset_top = -255.0
-offset_right = 450.0
-offset_bottom = 275.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_list_panel")
+text = "取消"
 
 [node name="DeleteConfirmDialog" type="ConfirmationDialog" parent="."]
 title = "删除工程"
 size = Vector2i(460, 220)
 ok_button_text = "删除"
 cancel_button_text = "取消"
-text = "取消"
+text = "确定删除？"
 
-[connection signal="pressed" from="ButtonContainer/NewProjectButton" to="." method="_on_new_project_button_pressed"]
-[connection signal="pressed" from="ButtonContainer/OpenProjectButton" to="." method="_on_open_project_button_pressed"]
-[connection signal="pressed" from="ButtonContainer/DeleteProjectButton" to="." method="_on_delete_project_button_pressed"]
-[connection signal="pressed" from="BackButton" to="." method="_on_back_button_pressed"]
-[connection signal="pressed" from="NewProjectDialog/DialogContent/ButtonRow/ConfirmButton" to="." method="_on_confirm_new_project"]
-[connection signal="pressed" from="NewProjectDialog/DialogContent/ButtonRow/CancelButton" to="." method="_on_cancel_new_project"]
+[node name="PreviewFileDialog" type="FileDialog" parent="."]
+title = "选择项目预览图"
+visible = false
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.png ; PNG", "*.jpg, *.jpeg ; JPG", "*.webp ; WEBP")
+
+[node name="ExportZipDialog" type="FileDialog" parent="."]
+title = "导出为ZIP"
+visible = false
+file_mode = 4
+access = 2
+filters = PackedStringArray("*.zip ; ZIP")
+
+[node name="InstallModsConfirmDialog" type="ConfirmationDialog" parent="."]
+title = "覆盖Mods"
+size = Vector2i(520, 240)
+ok_button_text = "覆盖"
+cancel_button_text = "取消"
+text = "目标Mods已存在，是否覆盖？"

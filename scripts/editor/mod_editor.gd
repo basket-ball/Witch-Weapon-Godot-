@@ -10,6 +10,10 @@
 
 extends Control
 
+const CHARACTER_ICON_SIZE: Vector2i = Vector2i(96, 144)
+const BACKGROUND_ICON_SIZE: Vector2i = Vector2i(160, 90)
+const MOD_EDITOR_RESOURCE_INDEX_PATH: String = "res://assets/mod_editor_resource_index.json"
+
 # 脚本块类型枚举
 enum BlockType {
 	TEXT_ONLY,          # 纯文本（旁白）
@@ -27,6 +31,20 @@ enum BlockType {
 	SHOW_BACKGROUND,    # 显示背景（可渐变）
 	CHANGE_MUSIC,       # 切换音乐
 	STOP_MUSIC,         # 停止音乐
+	MOVE_CHARACTER_1_LEFT, # 角色1左移
+	MOVE_CHARACTER_2_LEFT, # 角色2左移
+	MOVE_CHARACTER_3_LEFT, # 角色3左移
+	CHANGE_EXPRESSION_1, # 更改表情(角色1)
+	CHANGE_EXPRESSION_2, # 更改表情(角色2)
+	CHANGE_EXPRESSION_3, # 更改表情(角色3)
+	HIDE_BACKGROUND, # 隐藏背景
+	HIDE_BACKGROUND_FADE, # 渐变隐藏背景
+	CHARACTER_LIGHT_1, # 角色1变亮
+	CHARACTER_LIGHT_2, # 角色2变亮
+	CHARACTER_LIGHT_3, # 角色3变亮
+	CHARACTER_DARK_1, # 角色1变暗
+	CHARACTER_DARK_2, # 角色2变暗
+	CHARACTER_DARK_3, # 角色3变暗
 }
 
 # 脚本块分类
@@ -35,8 +53,13 @@ const BLOCK_CATEGORIES = {
 	"角色": [BlockType.SHOW_CHARACTER_1, BlockType.HIDE_CHARACTER_1,
 			 BlockType.SHOW_CHARACTER_2, BlockType.HIDE_CHARACTER_2,
 			 BlockType.SHOW_CHARACTER_3, BlockType.HIDE_CHARACTER_3,
+			 BlockType.MOVE_CHARACTER_1_LEFT, BlockType.MOVE_CHARACTER_2_LEFT, BlockType.MOVE_CHARACTER_3_LEFT,
+			 BlockType.EXPRESSION, BlockType.CHANGE_EXPRESSION_1, BlockType.CHANGE_EXPRESSION_2, BlockType.CHANGE_EXPRESSION_3,
+			 BlockType.CHARACTER_LIGHT_1, BlockType.CHARACTER_LIGHT_2, BlockType.CHARACTER_LIGHT_3,
+			 BlockType.CHARACTER_DARK_1, BlockType.CHARACTER_DARK_2, BlockType.CHARACTER_DARK_3,
 			 BlockType.HIDE_ALL_CHARACTERS],
-	"场景": [BlockType.BACKGROUND, BlockType.SHOW_BACKGROUND, BlockType.MUSIC, BlockType.CHANGE_MUSIC, BlockType.STOP_MUSIC],
+	"场景": [BlockType.BACKGROUND, BlockType.SHOW_BACKGROUND, BlockType.HIDE_BACKGROUND, BlockType.HIDE_BACKGROUND_FADE],
+	"音乐": [BlockType.MUSIC, BlockType.CHANGE_MUSIC, BlockType.STOP_MUSIC],
 }
 
 # 脚本块数据类
@@ -65,14 +88,37 @@ class ScriptBlock:
 					return false
 
 				# 验证X位置 (0-1范围)
-				var x_pos = params.get("x_position", 0.5)
+				var x_pos = params.get("x_position", 0.0)
 				if typeof(x_pos) == TYPE_STRING:
 					x_pos = x_pos.to_float()
 				if x_pos < 0.0 or x_pos > 1.0:
 					has_error = true
 					error_message = "X位置必须在0-1之间"
 					return false
+			BlockType.MOVE_CHARACTER_1_LEFT, BlockType.MOVE_CHARACTER_2_LEFT, BlockType.MOVE_CHARACTER_3_LEFT:
+				var to_xalign = params.get("to_xalign", -0.25)
+				if typeof(to_xalign) == TYPE_STRING:
+					to_xalign = to_xalign.to_float()
+				if is_nan(to_xalign) or is_inf(to_xalign):
+					has_error = true
+					error_message = "目标X位置必须是有效数字"
+					return false
 
+				var duration = params.get("duration", 0.3)
+				if typeof(duration) == TYPE_STRING:
+					duration = duration.to_float()
+				if is_nan(duration) or is_inf(duration) or duration < 0.0:
+					has_error = true
+					error_message = "时长必须是>=0的有效数字"
+					return false
+			BlockType.CHARACTER_LIGHT_1, BlockType.CHARACTER_LIGHT_2, BlockType.CHARACTER_LIGHT_3:
+				var duration = params.get("duration", 0.35)
+				if typeof(duration) == TYPE_STRING:
+					duration = duration.to_float()
+				if is_nan(duration) or is_inf(duration) or duration < 0.0:
+					has_error = true
+					error_message = "时长必须是>=0的有效数字"
+					return false
 			BlockType.TEXT_ONLY:
 				var text = params.get("text", "")
 				if text.is_empty():
@@ -142,6 +188,39 @@ class ScriptBlock:
 			BlockType.SHOW_CHARACTER_1, BlockType.SHOW_CHARACTER_2, BlockType.SHOW_CHARACTER_3:
 				var char_name = params.get("character_name", "未设置")
 				return "显示角色: " + char_name
+			BlockType.MOVE_CHARACTER_1_LEFT:
+				var to_xalign = params.get("to_xalign", -0.25)
+				return "角色1左移到: " + str(to_xalign)
+			BlockType.MOVE_CHARACTER_2_LEFT:
+				var to_xalign = params.get("to_xalign", -0.25)
+				return "角色2左移到: " + str(to_xalign)
+			BlockType.MOVE_CHARACTER_3_LEFT:
+				var to_xalign = params.get("to_xalign", -0.25)
+				return "角色3左移到: " + str(to_xalign)
+			BlockType.EXPRESSION, BlockType.CHANGE_EXPRESSION_1:
+				var expression = params.get("expression", "未设置")
+				return "角色1表情: " + expression
+			BlockType.CHANGE_EXPRESSION_2:
+				var expression = params.get("expression", "未设置")
+				return "角色2表情: " + expression
+			BlockType.CHANGE_EXPRESSION_3:
+				var expression = params.get("expression", "未设置")
+				return "角色3表情: " + expression
+			BlockType.CHARACTER_LIGHT_1:
+				var expression = str(params.get("expression", ""))
+				return "角色1变亮" + (" +表情" if not expression.is_empty() else "")
+			BlockType.CHARACTER_LIGHT_2:
+				var expression = str(params.get("expression", ""))
+				return "角色2变亮" + (" +表情" if not expression.is_empty() else "")
+			BlockType.CHARACTER_LIGHT_3:
+				var expression = str(params.get("expression", ""))
+				return "角色3变亮" + (" +表情" if not expression.is_empty() else "")
+			BlockType.CHARACTER_DARK_1:
+				return "角色1变暗"
+			BlockType.CHARACTER_DARK_2:
+				return "角色2变暗"
+			BlockType.CHARACTER_DARK_3:
+				return "角色3变暗"
 			BlockType.HIDE_CHARACTER_1:
 				return "隐藏角色1"
 			BlockType.HIDE_CHARACTER_2:
@@ -157,14 +236,15 @@ class ScriptBlock:
 			BlockType.SHOW_BACKGROUND:
 				var bg_path = params.get("background_path", "")
 				return "显示背景: " + bg_path.get_file()
+			BlockType.HIDE_BACKGROUND:
+				return "隐藏背景"
+			BlockType.HIDE_BACKGROUND_FADE:
+				return "渐变隐藏背景"
 			BlockType.CHANGE_MUSIC:
 				var music_path = params.get("music_path", "")
 				return "切换音乐: " + music_path.get_file()
 			BlockType.STOP_MUSIC:
 				return "停止音乐"
-			BlockType.EXPRESSION:
-				var expression = params.get("expression", "未设置")
-				return "表情: " + expression
 			_:
 				return "未知类型"
 
@@ -179,6 +259,9 @@ class ScriptBlock:
 @onready var inspector_content: VBoxContainer = $MainContainer/LeftPanel/InspectorPanel/InspectorContainer/InspectorScroll/InspectorContent
 @onready var characters_list: ItemList = $MainContainer/LeftPanel/ResourcePanel/ResourceContainer/CharactersList
 @onready var backgrounds_list: ItemList = $MainContainer/LeftPanel/ResourcePanel/ResourceContainer/BackgroundsList
+@onready var background_tabs: TabContainer = $MainContainer/LeftPanel/ResourcePanel/ResourceContainer/BackgroundTabs
+@onready var music_rows_scroll: ScrollContainer = $MainContainer/LeftPanel/ResourcePanel/ResourceContainer/MusicRowsScroll
+@onready var music_rows: VBoxContainer = $MainContainer/LeftPanel/ResourcePanel/ResourceContainer/MusicRowsScroll/MusicRows
 @onready var music_list: ItemList = $MainContainer/LeftPanel/ResourcePanel/ResourceContainer/MusicList
 
 # 中间面板
@@ -186,6 +269,7 @@ class ScriptBlock:
 @onready var dialog_blocks_container: VBoxContainer = $MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer/ToolboxTabs/对话/DialogBlocksContainer
 @onready var character_blocks_container: VBoxContainer = $MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer/ToolboxTabs/角色/CharacterBlocksContainer
 @onready var scene_blocks_container: VBoxContainer = $MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer/ToolboxTabs/场景/SceneBlocksContainer
+@onready var music_blocks_container: VBoxContainer = $MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer/ToolboxTabs/音乐/MusicBlocksContainer
 @onready var control_blocks_container: VBoxContainer = $MainContainer/CenterPanel/ToolboxPanel/ToolboxContainer/ToolboxTabs/控制/ControlBlocksContainer
 
 # 右侧面板
@@ -212,6 +296,27 @@ var _character_scene_cache: Dictionary = {} # character_name -> PackedScene
 var _character_base_dir_cache: Dictionary = {} # character_name -> String
 var _character_thumbnail_cache: Dictionary = {} # character_name -> Texture2D
 var _expression_thumbnail_cache: Dictionary = {} # "character|expression" -> Texture2D
+var _character_expressions_cache: Dictionary = {} # character_name -> Array[String]
+var _background_thumbnail_cache: Dictionary = {} # full_path -> Texture2D
+
+var _background_base_dir: String = ""
+var _background_tab_loaded: Array[bool] = []
+var _background_tab_dirs: Array[String] = []
+
+var _resource_index_loaded: bool = false
+var _resource_index: Dictionary = {}
+
+var _music_preview_player: AudioStreamPlayer = null
+var _music_preview_current_path: String = ""
+var _music_preview_buttons_by_path: Dictionary = {}
+
+var _main_bgm_player: AudioStreamPlayer = null
+var _main_bgm_suspended: bool = false
+var _main_bgm_was_playing: bool = false
+var _main_bgm_was_paused: bool = false
+var _main_bgm_volume_db: float = 0.0
+var _main_bgm_playback_pos: float = 0.0
+var _main_bgm_stream: AudioStream = null
 
 # 错误追踪
 var has_validation_errors: bool = false
@@ -225,6 +330,8 @@ func _ready():
 	_setup_preview()
 
 	_setup_resource_panel()
+	_suspend_main_menu_bgm()
+	_ensure_music_preview_player()
 
 	# 连接资源列表的点击事件
 	characters_list.item_selected.connect(_on_character_selected)
@@ -247,12 +354,13 @@ func _ready():
 		Callable(self, "_can_drop_data_for_sequence").bind(script_sequence_scroll),
 		Callable(self, "_drop_data_for_sequence").bind(script_sequence_scroll)
 	)
+	_validate_all_blocks()
 
 func _setup_resource_panel() -> void:
 	_set_resource_panel_mode("none")
 
 	# 更适合显示缩略图
-	characters_list.fixed_icon_size = Vector2i(64, 64)
+	characters_list.fixed_icon_size = CHARACTER_ICON_SIZE
 	characters_list.max_columns = 1
 
 func _input(event: InputEvent) -> void:
@@ -261,6 +369,61 @@ func _input(event: InputEvent) -> void:
 		_hide_drop_placeholder()
 	elif event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		_hide_drop_placeholder()
+
+func _exit_tree() -> void:
+	_stop_music_preview()
+	_resume_main_menu_bgm()
+
+func _suspend_main_menu_bgm() -> void:
+	if _main_bgm_suspended:
+		return
+
+	var player := _find_main_menu_bgm_player()
+	if player == null:
+		return
+
+	_main_bgm_player = player
+	_main_bgm_stream = player.stream
+	_main_bgm_volume_db = player.volume_db
+	_main_bgm_was_playing = player.playing
+	_main_bgm_was_paused = player.stream_paused
+	_main_bgm_playback_pos = player.get_playback_position()
+
+	if player.playing or player.stream_paused:
+		player.stream_paused = false
+		player.stop()
+
+	_main_bgm_suspended = true
+
+func _resume_main_menu_bgm() -> void:
+	if not _main_bgm_suspended:
+		return
+
+	_main_bgm_suspended = false
+
+	if _main_bgm_player == null or not is_instance_valid(_main_bgm_player):
+		return
+
+	if not _main_bgm_was_playing:
+		return
+
+	if _main_bgm_stream != null:
+		_main_bgm_player.stream = _main_bgm_stream
+	_main_bgm_player.volume_db = _main_bgm_volume_db
+	_main_bgm_player.play(_main_bgm_playback_pos)
+	_main_bgm_player.stream_paused = _main_bgm_was_paused
+
+func _find_main_menu_bgm_player() -> AudioStreamPlayer:
+	var scene := get_tree().current_scene
+	if scene == null:
+		return null
+
+	var direct := scene.get_node_or_null("BGMPlayer")
+	if direct is AudioStreamPlayer:
+		return direct as AudioStreamPlayer
+
+	var found := scene.find_child("BGMPlayer", true, false)
+	return found as AudioStreamPlayer
 
 func _setup_preview():
 	"""初始化预览区域的NovelInterface"""
@@ -279,6 +442,7 @@ func _setup_preview():
 # ==================== 资源列表管理 ====================
 
 func _set_resource_panel_mode(mode: String) -> void:
+	var previous_mode: String = _resource_mode
 	_resource_mode = mode
 
 	var resource_panel := get_node_or_null("MainContainer/LeftPanel/ResourcePanel") as Control
@@ -300,12 +464,16 @@ func _set_resource_panel_mode(mode: String) -> void:
 	if backgrounds_label:
 		backgrounds_label.visible = mode == "background"
 	if backgrounds_list:
-		backgrounds_list.visible = mode == "background"
+		backgrounds_list.visible = false
+	if background_tabs:
+		background_tabs.visible = mode == "background"
 
 	if music_label:
 		music_label.visible = mode == "music"
 	if music_list:
-		music_list.visible = mode == "music"
+		music_list.visible = false
+	if music_rows_scroll:
+		music_rows_scroll.visible = mode == "music"
 
 	# 当模式为"none"时，清空所有列表（但不隐藏面板）
 	if mode == "none":
@@ -313,8 +481,14 @@ func _set_resource_panel_mode(mode: String) -> void:
 			characters_list.clear()
 		if backgrounds_list:
 			backgrounds_list.clear()
+		if background_tabs:
+			for child in background_tabs.get_children():
+				child.queue_free()
 		if music_list:
 			music_list.clear()
+		if music_rows:
+			for child in music_rows.get_children():
+				child.queue_free()
 		# 隐藏所有标签
 		if characters_label:
 			characters_label.visible = false
@@ -323,7 +497,29 @@ func _set_resource_panel_mode(mode: String) -> void:
 		if music_label:
 			music_label.visible = false
 
+	if previous_mode == "music" and mode != "music":
+		_stop_music_preview()
+
 func _load_characters_list():
+	# Exported builds may store resources as `<name>.tscn.remap`, so avoid relying on raw `.tscn` listing.
+	var dir_path := "res://scenes/character"
+	var character_names: Array[String] = []
+	var unique: Dictionary = {}
+	for entry_name: String in DirAccess.get_files_at(dir_path):
+		var normalized := _normalize_listed_file_name(entry_name)
+		if normalized.to_lower().ends_with(".tscn"):
+			var character_name := normalized.trim_suffix(".tscn")
+			if not unique.has(character_name):
+				unique[character_name] = true
+				character_names.append(character_name)
+	character_names.sort()
+	_set_resource_panel_mode("character")
+	characters_list.clear()
+	for character_name in character_names:
+		var icon := _get_character_thumbnail(character_name)
+		characters_list.add_item(character_name, icon)
+	print("Loaded %d characters" % characters_list.item_count)
+	return
 	"""扫描并加载角色列表"""
 	_set_resource_panel_mode("character")
 	characters_list.clear()
@@ -353,43 +549,367 @@ func _load_backgrounds_list():
 	_set_resource_panel_mode("background")
 	backgrounds_list.clear()
 
-	# 尝试从 res://assets/images/bg/ 加载
-	var bg_dir = DirAccess.open("res://assets/images/bg/")
-	if not bg_dir:
-		# 如果不存在，尝试 res://assets/background/
-		bg_dir = DirAccess.open("res://assets/background/")
+	_background_base_dir = ""
+	var bg_dir_new := "res://assets/images/bg"
+	var bg_dir_old := "res://assets/background"
+	if _dir_has_any_entry(bg_dir_new):
+		_background_base_dir = bg_dir_new + "/"
+	elif _dir_has_any_entry(bg_dir_old):
+		_background_base_dir = bg_dir_old + "/"
 
-	if bg_dir:
-		bg_dir.list_dir_begin()
-		var file_name = bg_dir.get_next()
-
-		while file_name != "":
-			if not bg_dir.current_is_dir() and (file_name.ends_with(".png") or file_name.ends_with(".jpg")):
-				backgrounds_list.add_item(file_name)
-			file_name = bg_dir.get_next()
-
-		bg_dir.list_dir_end()
-		print("已加载 %d 个背景" % backgrounds_list.item_count)
-	else:
+	if _background_base_dir.is_empty():
 		push_warning("无法找到背景文件夹: res://assets/images/bg/ 或 res://assets/background/")
+		return
+
+	_refresh_background_tabs()
+
+func _refresh_background_tabs() -> void:
+	if not background_tabs:
+		push_warning("BackgroundTabs 节点不存在，无法按文件夹显示背景资源")
+		return
+
+	for child in background_tabs.get_children():
+		child.queue_free()
+
+	_background_tab_dirs.clear()
+	_background_tab_loaded.clear()
+
+	var allowed_exts: Array[String] = [".png", ".jpg", ".jpeg", ".webp"]
+
+	var root_files: Array[String] = _collect_files_flat(_background_base_dir, allowed_exts)
+	if root_files.is_empty():
+		root_files = _get_index_background_root_files()
+	if not root_files.is_empty():
+		_add_background_tab("根目录", "")
+
+	var folder_names: Array[String] = []
+	for dir_name: String in DirAccess.get_directories_at(_background_base_dir.trim_suffix("/")):
+		if not dir_name.begins_with("."):
+			folder_names.append(dir_name)
+
+	if folder_names.is_empty():
+		var index := _get_resource_index()
+		var bg: Variant = index.get("backgrounds", {})
+		if typeof(bg) == TYPE_DICTIONARY:
+			var folders: Variant = (bg as Dictionary).get("folders", {})
+			if typeof(folders) == TYPE_DICTIONARY:
+				for key in (folders as Dictionary).keys():
+					if typeof(key) == TYPE_STRING and not (key as String).begins_with("."):
+						folder_names.append(key as String)
+
+	folder_names.sort()
+	for folder_name: String in folder_names:
+		_add_background_tab(folder_name, folder_name + "/")
+
+	if background_tabs.tab_changed.is_connected(_on_background_tab_changed):
+		background_tabs.tab_changed.disconnect(_on_background_tab_changed)
+	background_tabs.tab_changed.connect(_on_background_tab_changed)
+
+	if background_tabs.get_child_count() > 0:
+		background_tabs.current_tab = 0
+		_on_background_tab_changed(0)
+
+func _add_background_tab(title: String, rel_dir: String) -> void:
+	var list: ItemList = ItemList.new()
+	list.name = title
+	list.fixed_icon_size = BACKGROUND_ICON_SIZE
+	list.max_columns = 1
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	list.item_selected.connect(_on_background_selected.bind(list))
+	background_tabs.add_child(list)
+	_background_tab_dirs.append(rel_dir)
+	_background_tab_loaded.append(false)
+
+func _on_background_tab_changed(tab_index: int) -> void:
+	if tab_index < 0 or tab_index >= background_tabs.get_child_count():
+		return
+	if tab_index < 0 or tab_index >= _background_tab_loaded.size():
+		return
+	if _background_tab_loaded[tab_index]:
+		return
+
+	var list: ItemList = background_tabs.get_child(tab_index) as ItemList
+	if list == null:
+		return
+
+	var allowed_exts: Array[String] = [".png", ".jpg", ".jpeg", ".webp"]
+	var rel_dir: String = _background_tab_dirs[tab_index]
+	var rel_files: Array[String] = []
+	if rel_dir.is_empty():
+		rel_files = _collect_files_flat(_background_base_dir, allowed_exts)
+	else:
+		rel_files = _collect_files_recursive(_background_base_dir + rel_dir, allowed_exts)
+
+	if rel_files.is_empty():
+		if rel_dir.is_empty():
+			rel_files = _get_index_background_root_files()
+		else:
+			rel_files = _get_index_background_folder_files(rel_dir.trim_suffix("/"))
+
+	rel_files.sort()
+	for rel_path: String in rel_files:
+		var full_path: String = (_background_base_dir + rel_dir + rel_path) if not rel_dir.is_empty() else (_background_base_dir + rel_path)
+		var icon := _get_background_thumbnail(full_path)
+		var idx := list.add_item(rel_path, icon)
+		list.set_item_metadata(idx, full_path)
+
+	_background_tab_loaded[tab_index] = true
+	print("已加载背景分类[%s] %d 个" % [list.name, rel_files.size()])
+
+func _dir_has_any_entry(dir_path: String) -> bool:
+	var normalized := dir_path.trim_suffix("/")
+	return DirAccess.get_files_at(normalized).size() > 0 or DirAccess.get_directories_at(normalized).size() > 0
+
+func _normalize_listed_file_name(entry_name: String) -> String:
+	# 导出后常见：`xxx.ext.remap`；少数情况下也可能出现 `xxx.ext.import.remap`。
+	var normalized := entry_name
+	var had_remap := normalized.ends_with(".remap")
+	normalized = normalized.trim_suffix(".remap")
+	if had_remap and normalized.ends_with(".import"):
+		normalized = normalized.trim_suffix(".import")
+	return normalized
+
+func _get_resource_index() -> Dictionary:
+	if _resource_index_loaded:
+		return _resource_index
+	_resource_index_loaded = true
+
+	var file := FileAccess.open(MOD_EDITOR_RESOURCE_INDEX_PATH, FileAccess.READ)
+	if file == null:
+		push_warning("Mod editor resource index not found: " + MOD_EDITOR_RESOURCE_INDEX_PATH)
+		return {}
+
+	var json := JSON.new()
+	var err := json.parse(file.get_as_text())
+	if err != OK:
+		push_warning("Failed to parse mod editor resource index: " + MOD_EDITOR_RESOURCE_INDEX_PATH)
+		return {}
+	if typeof(json.data) == TYPE_DICTIONARY:
+		_resource_index = json.data as Dictionary
+	return _resource_index
+
+func _get_index_background_root_files() -> Array[String]:
+	var index := _get_resource_index()
+	var bg: Variant = index.get("backgrounds", {})
+	if typeof(bg) != TYPE_DICTIONARY:
+		var empty: Array[String] = []
+		return empty
+	var root: Variant = (bg as Dictionary).get("root", [])
+	if typeof(root) != TYPE_ARRAY:
+		var empty: Array[String] = []
+		return empty
+	var results: Array[String] = []
+	for entry in (root as Array):
+		results.append(str(entry))
+	return results
+
+func _get_index_background_folder_files(folder_name: String) -> Array[String]:
+	var index := _get_resource_index()
+	var bg: Variant = index.get("backgrounds", {})
+	if typeof(bg) != TYPE_DICTIONARY:
+		var empty: Array[String] = []
+		return empty
+	var folders: Variant = (bg as Dictionary).get("folders", {})
+	if typeof(folders) != TYPE_DICTIONARY:
+		var empty: Array[String] = []
+		return empty
+	var list: Variant = (folders as Dictionary).get(folder_name, [])
+	if typeof(list) != TYPE_ARRAY:
+		var empty: Array[String] = []
+		return empty
+	var results: Array[String] = []
+	for entry in (list as Array):
+		results.append(str(entry))
+	return results
+
+func _get_index_music_files() -> Array[String]:
+	var index := _get_resource_index()
+	var music: Variant = index.get("music", {})
+	if typeof(music) != TYPE_DICTIONARY:
+		var empty: Array[String] = []
+		return empty
+	var files: Variant = (music as Dictionary).get("files", [])
+	if typeof(files) != TYPE_ARRAY:
+		var empty: Array[String] = []
+		return empty
+	var results: Array[String] = []
+	for entry in (files as Array):
+		results.append(str(entry))
+	return results
+
+func _collect_files_flat(dir_path: String, allowed_exts: Array[String]) -> Array[String]:
+	# In exported builds, files can appear as `<name>.<ext>.remap`, so we enumerate with `get_files_at` and strip the suffix.
+	var results: Array[String] = []
+	var unique: Dictionary = {}
+	for entry_name: String in DirAccess.get_files_at(dir_path.trim_suffix("/")):
+		if entry_name.begins_with("."):
+			continue
+		var normalized := _normalize_listed_file_name(entry_name)
+		var lower := normalized.to_lower()
+		for ext in allowed_exts:
+			if lower.ends_with(ext):
+				if not unique.has(normalized):
+					unique[normalized] = true
+					results.append(normalized)
+				break
+	return results
+
+func _collect_files_recursive(base_dir: String, allowed_exts: Array[String]) -> Array[String]:
+	var results: Array[String] = []
+	_collect_files_recursive_impl(base_dir, "", allowed_exts, results)
+	return results
+
+func _collect_files_recursive_impl(base_dir: String, sub_dir: String, allowed_exts: Array[String], results: Array[String]) -> void:
+	var dir_path := (base_dir + sub_dir).trim_suffix("/")
+	for dir_name: String in DirAccess.get_directories_at(dir_path):
+		if dir_name.begins_with("."):
+			continue
+		_collect_files_recursive_impl(base_dir, sub_dir + dir_name + "/", allowed_exts, results)
+
+	for entry_name: String in DirAccess.get_files_at(dir_path):
+		if entry_name.begins_with("."):
+			continue
+		var normalized := _normalize_listed_file_name(entry_name)
+		var lower := normalized.to_lower()
+		for ext in allowed_exts:
+			if lower.ends_with(ext):
+				results.append(sub_dir + normalized)
+				break
+	return
 
 func _load_music_list():
 	"""扫描并加载音乐列表"""
 	_set_resource_panel_mode("music")
-	music_list.clear()
+	if music_rows:
+		for child in music_rows.get_children():
+			child.queue_free()
+	_music_preview_buttons_by_path.clear()
 
-	var music_dir = DirAccess.open("res://assets/audio/music/")
-	if music_dir:
-		music_dir.list_dir_begin()
-		var file_name = music_dir.get_next()
+	var base_dir: String = "res://assets/audio/music/"
+	var allowed_exts: Array[String] = [".ogg", ".mp3", ".wav"]
 
-		while file_name != "":
-			if not music_dir.current_is_dir() and (file_name.ends_with(".ogg") or file_name.ends_with(".mp3") or file_name.ends_with(".wav")):
-				music_list.add_item(file_name)
-			file_name = music_dir.get_next()
+	var rel_files: Array[String] = _collect_files_recursive(base_dir, allowed_exts)
+	if rel_files.is_empty():
+		rel_files = _get_index_music_files()
+	rel_files.sort()
 
-		music_dir.list_dir_end()
-		print("已加载 %d 首音乐" % music_list.item_count)
+	for rel_path: String in rel_files:
+		var full_path: String = base_dir + rel_path
+		_add_music_row(rel_path, full_path)
+
+	print("已加载 %d 首音乐" % rel_files.size())
+
+func _add_music_row(display_name: String, full_path: String) -> void:
+	if music_rows == null:
+		return
+
+	_ensure_music_preview_player()
+
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var name_label: Label = Label.new()
+	name_label.text = display_name.get_file()
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.clip_text = true
+	name_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	name_label.gui_input.connect(Callable(self, "_on_music_name_gui_input").bind(full_path))
+
+	var preview_button: Button = Button.new()
+	preview_button.text = "▶"
+	preview_button.tooltip_text = "播放/暂停"
+	preview_button.custom_minimum_size = Vector2(36, 0)
+	preview_button.focus_mode = Control.FOCUS_NONE
+	preview_button.pressed.connect(Callable(self, "_toggle_music_preview").bind(full_path))
+
+	row.add_child(name_label)
+	row.add_child(preview_button)
+	music_rows.add_child(row)
+
+	_music_preview_buttons_by_path[full_path] = preview_button
+	_update_music_preview_buttons()
+
+func _on_music_name_gui_input(event: InputEvent, full_path: String) -> void:
+	if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
+		_select_music_path(full_path)
+
+func _select_music_path(full_path: String) -> void:
+	if current_editing_field == null or current_editing_param != "music_path":
+		return
+
+	current_editing_field.text = full_path
+	current_editing_field.text_changed.emit(full_path)
+
+func _ensure_music_preview_player() -> void:
+	if _music_preview_player != null:
+		return
+
+	var player: AudioStreamPlayer = AudioStreamPlayer.new()
+	player.name = "MusicPreviewPlayer"
+	add_child(player)
+	player.finished.connect(_on_music_preview_finished)
+	_music_preview_player = player
+
+func _on_music_preview_finished() -> void:
+	_music_preview_current_path = ""
+	if _music_preview_player:
+		_music_preview_player.stream_paused = false
+	_update_music_preview_buttons()
+
+func _stop_music_preview() -> void:
+	if _music_preview_player == null:
+		_music_preview_current_path = ""
+		return
+
+	_music_preview_player.stop()
+	_music_preview_player.stream_paused = false
+	_music_preview_current_path = ""
+	_update_music_preview_buttons()
+
+func _toggle_music_preview(full_path: String) -> void:
+	_ensure_music_preview_player()
+	if _music_preview_player == null:
+		return
+	_select_music_path(full_path)
+
+	if _music_preview_current_path != full_path:
+		_music_preview_player.stop()
+		_music_preview_player.stream_paused = false
+		var stream: AudioStream = load(full_path) as AudioStream
+		if stream == null and not full_path.ends_with(".remap"):
+			stream = load(full_path + ".remap") as AudioStream
+		if stream == null:
+			push_warning("无法加载音乐资源: " + full_path)
+			return
+		_music_preview_player.stream = stream
+		_music_preview_player.play()
+		_music_preview_current_path = full_path
+	else:
+		if _music_preview_player.playing:
+			_music_preview_player.stream_paused = not _music_preview_player.stream_paused
+		else:
+			_music_preview_player.stream_paused = false
+			_music_preview_player.play()
+
+	_update_music_preview_buttons()
+
+func _update_music_preview_buttons() -> void:
+	for key in _music_preview_buttons_by_path.keys():
+		var path: String = str(key)
+		var button: Button = _music_preview_buttons_by_path.get(path) as Button
+		if button == null:
+			continue
+
+		var is_current: bool = path == _music_preview_current_path
+		var is_playing: bool = false
+		var is_paused: bool = false
+		if _music_preview_player != null and is_current:
+			is_playing = _music_preview_player.playing
+			is_paused = _music_preview_player.stream_paused
+
+		button.text = "⏸" if (is_current and is_playing and not is_paused) else "▶"
 
 func _get_character_base_dir(character_name: String) -> String:
 	if _character_base_dir_cache.has(character_name):
@@ -409,13 +929,41 @@ func _get_character_base_dir(character_name: String) -> String:
 	return base_dir
 
 func _get_texture_thumbnail(texture: Texture2D) -> Texture2D:
+	return _get_texture_thumbnail_fit(texture, CHARACTER_ICON_SIZE)
+
+func _get_texture_thumbnail_fit(texture: Texture2D, target_size: Vector2i) -> Texture2D:
 	if not texture:
 		return null
-	var image := texture.get_image()
-	if not image:
+	var source_image: Image = texture.get_image()
+	if source_image == null:
 		return texture
-	image.resize(64, 64, Image.INTERPOLATE_BILINEAR)
-	return ImageTexture.create_from_image(image)
+
+	var src_w: int = source_image.get_width()
+	var src_h: int = source_image.get_height()
+	if src_w <= 0 or src_h <= 0:
+		return texture
+
+	var target_w: int = maxi(1, target_size.x)
+	var target_h: int = maxi(1, target_size.y)
+
+	var scale_w: float = float(target_w) / float(src_w)
+	var scale_h: float = float(target_h) / float(src_h)
+	var scale_factor: float = min(scale_w, scale_h)
+
+	var new_w: int = maxi(1, int(round(float(src_w) * scale_factor)))
+	var new_h: int = maxi(1, int(round(float(src_h) * scale_factor)))
+
+	var scaled: Image = source_image.duplicate()
+	if scaled.get_format() != Image.FORMAT_RGBA8:
+		scaled.convert(Image.FORMAT_RGBA8)
+	scaled.resize(new_w, new_h, Image.INTERPOLATE_BILINEAR)
+
+	var canvas: Image = Image.create(target_w, target_h, false, Image.FORMAT_RGBA8)
+	canvas.fill(Color(0, 0, 0, 0))
+	var offset_x: int = int((target_w - new_w) / 2.0)
+	var offset_y: int = int((target_h - new_h) / 2.0)
+	canvas.blit_rect(scaled, Rect2i(0, 0, new_w, new_h), Vector2i(offset_x, offset_y))
+	return ImageTexture.create_from_image(canvas)
 
 func _get_character_thumbnail(character_name: String) -> Texture2D:
 	if _character_thumbnail_cache.has(character_name):
@@ -430,7 +978,7 @@ func _get_character_thumbnail(character_name: String) -> Texture2D:
 		return null
 
 	var texture := load(base_path) as Texture2D
-	var thumbnail := _get_texture_thumbnail(texture)
+	var thumbnail := _get_texture_thumbnail_fit(texture, CHARACTER_ICON_SIZE)
 	_character_thumbnail_cache[character_name] = thumbnail
 	return thumbnail
 
@@ -448,8 +996,21 @@ func _get_expression_thumbnail(character_name: String, expression_name: String) 
 		return null
 
 	var texture := load(texture_path) as Texture2D
-	var thumbnail := _get_texture_thumbnail(texture)
+	var thumbnail := _get_texture_thumbnail_fit(texture, CHARACTER_ICON_SIZE)
 	_expression_thumbnail_cache[key] = thumbnail
+	return thumbnail
+
+func _get_background_thumbnail(full_path: String) -> Texture2D:
+	if _background_thumbnail_cache.has(full_path):
+		return _background_thumbnail_cache[full_path] as Texture2D
+
+	var texture := load(full_path) as Texture2D
+	if texture == null and not full_path.ends_with(".remap"):
+		texture = load(full_path + ".remap") as Texture2D
+	if texture == null:
+		return null
+	var thumbnail := _get_texture_thumbnail_fit(texture, BACKGROUND_ICON_SIZE)
+	_background_thumbnail_cache[full_path] = thumbnail
 	return thumbnail
 
 func _get_character_scene(character_name: String) -> PackedScene:
@@ -466,17 +1027,25 @@ func _get_character_scene(character_name: String) -> PackedScene:
 	return scene
 
 func _get_character_expressions(character_name: String) -> Array[String]:
+	if _character_expressions_cache.has(character_name):
+		var cached: Variant = _character_expressions_cache[character_name]
+		if typeof(cached) == TYPE_ARRAY:
+			return cached as Array[String]
+		return []
+
 	var scene := _get_character_scene(character_name)
 	if not scene:
+		_character_expressions_cache[character_name] = []
 		return []
 
 	var instance := scene.instantiate()
 	if not instance:
+		_character_expressions_cache[character_name] = []
 		return []
 
 	var unique: Dictionary = {}
 	var expressions: Array[String] = []
-	var raw = instance.get("expression_list")
+	var raw: Variant = instance.get("expression_list")
 	if typeof(raw) == TYPE_ARRAY:
 		for entry in raw:
 			if typeof(entry) == TYPE_STRING:
@@ -486,6 +1055,7 @@ func _get_character_expressions(character_name: String) -> Array[String]:
 					expressions.append(expression_name)
 
 	instance.free()
+	_character_expressions_cache[character_name] = expressions
 	return expressions
 
 func _load_expressions_list(character_name: String) -> void:
@@ -517,16 +1087,22 @@ func _on_character_selected(index: int):
 		current_editing_field.text = expression_name
 		current_editing_field.text_changed.emit(expression_name)
 
-func _on_background_selected(index: int):
+func _on_background_selected(index: int, source_list: ItemList = null):
 	"""背景列表项被选中"""
 	if current_editing_field and current_editing_param == "background_path":
-		var bg_name = backgrounds_list.get_item_text(index)
+		var full_path: String = ""
+		var list: ItemList = source_list if source_list != null else backgrounds_list
+		var metadata: Variant = list.get_item_metadata(index)
+		if typeof(metadata) == TYPE_STRING:
+			full_path = metadata as String
 
-		# 优先尝试 res://assets/images/bg/ 路径
-		var full_path = "res://assets/images/bg/" + bg_name
-		if not ResourceLoader.exists(full_path):
-			# 如果不存在，尝试 res://assets/background/ 路径
-			full_path = "res://assets/background/" + bg_name
+		if full_path.is_empty():
+			var bg_name = list.get_item_text(index)
+			# 兼容旧数据：优先尝试 res://assets/images/bg/ 路径
+			full_path = "res://assets/images/bg/" + bg_name
+			if not ResourceLoader.exists(full_path):
+				# 如果不存在，尝试 res://assets/background/ 路径
+				full_path = "res://assets/background/" + bg_name
 
 		current_editing_field.text = full_path
 		# 触发text_changed信号以保存数据
@@ -550,10 +1126,69 @@ func _validate_all_blocks() -> bool:
 	for block in script_blocks:
 		if not block.validate():
 			has_validation_errors = true
+		elif not _validate_block_context(block):
+			has_validation_errors = true
 
 	_update_buttons_state()
 	_update_all_block_ui()
 	return not has_validation_errors
+
+func _validate_block_context(block: ScriptBlock) -> bool:
+	if block.block_type in [BlockType.EXPRESSION, BlockType.CHANGE_EXPRESSION_1, BlockType.CHANGE_EXPRESSION_2, BlockType.CHANGE_EXPRESSION_3]:
+		var slot := 1
+		match block.block_type:
+			BlockType.CHANGE_EXPRESSION_2:
+				slot = 2
+			BlockType.CHANGE_EXPRESSION_3:
+				slot = 3
+			_:
+				slot = 1
+
+		var state: Dictionary = _infer_character_state_for_slot(block, slot)
+		var slot_is_visible: bool = bool(state.get("visible", false))
+		var character_name: String = str(state.get("character_name", ""))
+		if not slot_is_visible or character_name.is_empty():
+			block.has_error = true
+			block.error_message = "必须先显示%s（且未隐藏）才能切换表情" % ("角色%d" % slot)
+			return false
+		var expression_text: String = str(block.params.get("expression", "")).strip_edges()
+		if expression_text.is_empty():
+			block.has_error = true
+			block.error_message = "表情不能为空"
+			return false
+		var expressions: Array[String] = _get_character_expressions(character_name)
+		if not expressions.has(expression_text):
+			block.has_error = true
+			block.error_message = "表情不存在: " + expression_text
+			return false
+	elif block.block_type in [BlockType.CHARACTER_LIGHT_1, BlockType.CHARACTER_LIGHT_2, BlockType.CHARACTER_LIGHT_3,
+		BlockType.CHARACTER_DARK_1, BlockType.CHARACTER_DARK_2, BlockType.CHARACTER_DARK_3]:
+		var slot := 1
+		match block.block_type:
+			BlockType.CHARACTER_LIGHT_2, BlockType.CHARACTER_DARK_2:
+				slot = 2
+			BlockType.CHARACTER_LIGHT_3, BlockType.CHARACTER_DARK_3:
+				slot = 3
+			_:
+				slot = 1
+
+		var state: Dictionary = _infer_character_state_for_slot(block, slot)
+		var slot_is_visible: bool = bool(state.get("visible", false))
+		var character_name: String = str(state.get("character_name", ""))
+		if not slot_is_visible or character_name.is_empty():
+			block.has_error = true
+			block.error_message = "必须先显示%s（且未隐藏）才能变更明暗" % ("角色%d" % slot)
+			return false
+
+		if block.block_type in [BlockType.CHARACTER_LIGHT_1, BlockType.CHARACTER_LIGHT_2, BlockType.CHARACTER_LIGHT_3]:
+			var expression_text: String = str(block.params.get("expression", "")).strip_edges()
+			if not expression_text.is_empty():
+				var expressions: Array[String] = _get_character_expressions(character_name)
+				if not expressions.has(expression_text):
+					block.has_error = true
+					block.error_message = "表情不存在: " + expression_text
+					return false
+	return true
 
 func _update_buttons_state():
 	"""根据验证状态更新按钮"""
@@ -603,30 +1238,61 @@ func load_project(path: String):
 				for script_data in project_config["scripts"]:
 					_add_script_block_from_data(script_data)
 		config_file.close()
+	_validate_all_blocks()
 
 func _create_block_palette():
 	"""创建分类的脚本块工具箱"""
 	var block_templates = {
-		"对话": [
+		"对话": [[
 			{"type": BlockType.TEXT_ONLY, "name": "纯文本", "color": Color(0.4, 0.7, 1.0)},
 			{"type": BlockType.DIALOG, "name": "对话", "color": Color(0.3, 0.6, 1.0)},
-		],
+		]],
 		"角色": [
-			{"type": BlockType.SHOW_CHARACTER_1, "name": "显示角色1", "color": Color(1.0, 0.6, 0.3)},
-			{"type": BlockType.HIDE_CHARACTER_1, "name": "隐藏角色1", "color": Color(0.8, 0.4, 0.2)},
-			{"type": BlockType.SHOW_CHARACTER_2, "name": "显示角色2", "color": Color(1.0, 0.7, 0.4)},
-			{"type": BlockType.HIDE_CHARACTER_2, "name": "隐藏角色2", "color": Color(0.8, 0.5, 0.3)},
-			{"type": BlockType.SHOW_CHARACTER_3, "name": "显示角色3", "color": Color(1.0, 0.8, 0.5)},
-			{"type": BlockType.HIDE_CHARACTER_3, "name": "隐藏角色3", "color": Color(0.8, 0.6, 0.4)},
-			{"type": BlockType.HIDE_ALL_CHARACTERS, "name": "隐藏所有", "color": Color(0.5, 0.5, 0.5)},
+			[
+				{"type": BlockType.SHOW_CHARACTER_1, "name": "显示角色1", "color": Color(1.0, 0.6, 0.3)},
+				{"type": BlockType.HIDE_CHARACTER_1, "name": "隐藏角色1", "color": Color(0.8, 0.4, 0.2)},
+				{"type": BlockType.MOVE_CHARACTER_1_LEFT, "name": "角色1左移", "color": Color(0.95, 0.55, 0.25)},
+			],
+			[
+				{"type": BlockType.CHARACTER_LIGHT_1, "name": "变亮1", "color": Color(0.75, 0.9, 1.0)},
+				{"type": BlockType.CHARACTER_DARK_1, "name": "变暗1", "color": Color(0.55, 0.7, 0.85)},
+				{"type": BlockType.CHANGE_EXPRESSION_1, "name": "表情1", "color": Color(0.8, 0.8, 0.3)},
+			],
+			[
+				{"type": BlockType.SHOW_CHARACTER_2, "name": "显示角色2", "color": Color(1.0, 0.7, 0.4)},
+				{"type": BlockType.HIDE_CHARACTER_2, "name": "隐藏角色2", "color": Color(0.8, 0.5, 0.3)},
+				{"type": BlockType.MOVE_CHARACTER_2_LEFT, "name": "角色2左移", "color": Color(0.95, 0.65, 0.35)},
+			],
+			[
+				{"type": BlockType.CHARACTER_LIGHT_2, "name": "变亮2", "color": Color(0.75, 0.9, 1.0)},
+				{"type": BlockType.CHARACTER_DARK_2, "name": "变暗2", "color": Color(0.55, 0.7, 0.85)},
+				{"type": BlockType.CHANGE_EXPRESSION_2, "name": "表情2", "color": Color(0.8, 0.8, 0.3)},
+			],
+			[
+				{"type": BlockType.SHOW_CHARACTER_3, "name": "显示角色3", "color": Color(1.0, 0.8, 0.5)},
+				{"type": BlockType.HIDE_CHARACTER_3, "name": "隐藏角色3", "color": Color(0.8, 0.6, 0.4)},
+				{"type": BlockType.MOVE_CHARACTER_3_LEFT, "name": "角色3左移", "color": Color(0.95, 0.75, 0.45)},
+			],
+			[
+				{"type": BlockType.CHARACTER_LIGHT_3, "name": "变亮3", "color": Color(0.75, 0.9, 1.0)},
+				{"type": BlockType.CHARACTER_DARK_3, "name": "变暗3", "color": Color(0.55, 0.7, 0.85)},
+				{"type": BlockType.CHANGE_EXPRESSION_3, "name": "表情3", "color": Color(0.8, 0.8, 0.3)},
+			],
+			[
+				{"type": BlockType.HIDE_ALL_CHARACTERS, "name": "隐藏所有", "color": Color(0.5, 0.5, 0.5)},
+			],
 		],
-		"场景": [
+		"场景": [[
 			{"type": BlockType.BACKGROUND, "name": "切换背景(渐变)", "color": Color(0.6, 1.0, 0.3)},
 			{"type": BlockType.SHOW_BACKGROUND, "name": "显示背景", "color": Color(0.5, 0.95, 0.35)},
+			{"type": BlockType.HIDE_BACKGROUND, "name": "隐藏背景", "color": Color(0.45, 0.8, 0.25)},
+			{"type": BlockType.HIDE_BACKGROUND_FADE, "name": "渐隐背景", "color": Color(0.35, 0.7, 0.2)},
+		]],
+		"音乐": [[
 			{"type": BlockType.MUSIC, "name": "播放音乐", "color": Color(1.0, 0.3, 0.6)},
 			{"type": BlockType.CHANGE_MUSIC, "name": "切换音乐", "color": Color(1.0, 0.4, 0.7)},
 			{"type": BlockType.STOP_MUSIC, "name": "停止音乐", "color": Color(0.9, 0.25, 0.45)},
-		],
+		]],
 	}
 
 	# 为每个分类添加按钮
@@ -636,20 +1302,21 @@ func _create_block_palette():
 			"对话": container = dialog_blocks_container
 			"角色": container = character_blocks_container
 			"场景": container = scene_blocks_container
+			"音乐": container = music_blocks_container
 
 		if container:
-			# 使用HBoxContainer让按钮横向排列
-			var hbox = HBoxContainer.new()
-			hbox.add_theme_constant_override("separation", 5)
-			container.add_child(hbox)
+			for row in block_templates[category]:
+				var hbox = HBoxContainer.new()
+				hbox.add_theme_constant_override("separation", 5)
+				container.add_child(hbox)
 
-			for template in block_templates[category]:
-				var block_button = Button.new()
-				block_button.text = template["name"]
-				block_button.custom_minimum_size = Vector2(80, 30)
-				block_button.modulate = template["color"]
-				block_button.pressed.connect(_on_palette_block_pressed.bind(template["type"]))
-				hbox.add_child(block_button)
+				for template in row:
+					var block_button = Button.new()
+					block_button.text = template["name"]
+					block_button.custom_minimum_size = Vector2(80, 30)
+					block_button.modulate = template["color"]
+					block_button.pressed.connect(_on_palette_block_pressed.bind(template["type"]))
+					hbox.add_child(block_button)
 
 func _on_palette_block_pressed(block_type: BlockType):
 	"""点击工具箱中的脚本块"""
@@ -657,6 +1324,7 @@ func _on_palette_block_pressed(block_type: BlockType):
 	script_blocks.append(block)
 	_create_simplified_block_ui(block)
 	_save_project()
+	_validate_all_blocks()
 
 func _create_simplified_block_ui(block: ScriptBlock, auto_select: bool = true):
 	"""创建简化的脚本块UI（显示在右侧序列中）"""
@@ -776,17 +1444,6 @@ func _show_inspector_for_block(block: ScriptBlock):
 	for child in inspector_content.get_children():
 		child.queue_free()
 
-	# 添加标题
-	var title_label = Label.new()
-	title_label.text = _get_block_type_name(block.block_type)
-	title_label.add_theme_font_size_override("font_size", 18)
-	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	inspector_content.add_child(title_label)
-
-	# 添加分隔线
-	var separator = HSeparator.new()
-	inspector_content.add_child(separator)
-
 	# 根据类型添加参数控件
 	match block.block_type:
 		BlockType.TEXT_ONLY:
@@ -795,6 +1452,28 @@ func _show_inspector_for_block(block: ScriptBlock):
 			_add_dialog_block_inspector(block)
 		BlockType.SHOW_CHARACTER_1, BlockType.SHOW_CHARACTER_2, BlockType.SHOW_CHARACTER_3:
 			_add_show_character_inspector(block)
+		BlockType.MOVE_CHARACTER_1_LEFT:
+			_add_character_move_left_inspector(block, 1)
+		BlockType.MOVE_CHARACTER_2_LEFT:
+			_add_character_move_left_inspector(block, 2)
+		BlockType.MOVE_CHARACTER_3_LEFT:
+			_add_character_move_left_inspector(block, 3)
+		BlockType.EXPRESSION, BlockType.CHANGE_EXPRESSION_1:
+			_add_character_expression_inspector(block, 1)
+		BlockType.CHANGE_EXPRESSION_2:
+			_add_character_expression_inspector(block, 2)
+		BlockType.CHANGE_EXPRESSION_3:
+			_add_character_expression_inspector(block, 3)
+		BlockType.CHARACTER_LIGHT_1:
+			_add_character_light_inspector(block, 1)
+		BlockType.CHARACTER_LIGHT_2:
+			_add_character_light_inspector(block, 2)
+		BlockType.CHARACTER_LIGHT_3:
+			_add_character_light_inspector(block, 3)
+		BlockType.CHARACTER_DARK_1, BlockType.CHARACTER_DARK_2, BlockType.CHARACTER_DARK_3:
+			var hint = Label.new()
+			hint.text = "此脚本块无需参数"
+			inspector_content.add_child(hint)
 		BlockType.HIDE_CHARACTER_1, BlockType.HIDE_CHARACTER_2, BlockType.HIDE_CHARACTER_3, BlockType.HIDE_ALL_CHARACTERS:
 			var hint = Label.new()
 			hint.text = "此脚本块无需参数"
@@ -803,14 +1482,16 @@ func _show_inspector_for_block(block: ScriptBlock):
 			_add_background_block_inspector(block)
 		BlockType.SHOW_BACKGROUND:
 			_add_show_background_block_inspector(block)
+		BlockType.HIDE_BACKGROUND, BlockType.HIDE_BACKGROUND_FADE:
+			var hint = Label.new()
+			hint.text = "此脚本块无需参数"
+			inspector_content.add_child(hint)
 		BlockType.MUSIC, BlockType.CHANGE_MUSIC:
 			_add_music_block_inspector(block)
 		BlockType.STOP_MUSIC:
 			var hint = Label.new()
 			hint.text = "此脚本块无需参数"
 			inspector_content.add_child(hint)
-		BlockType.EXPRESSION:
-			_add_expression_block_inspector(block)
 
 func _add_text_only_block_inspector(block: ScriptBlock):
 	"""添加纯文本块参数到Inspector"""
@@ -914,8 +1595,8 @@ func _add_show_character_inspector(block: ScriptBlock):
 	inspector_content.add_child(xpos_label)
 
 	var xpos_input = LineEdit.new()
-	xpos_input.placeholder_text = "0.5"
-	xpos_input.text = str(block.params.get("x_position", 0.5))
+	xpos_input.placeholder_text = "0"
+	xpos_input.text = str(block.params.get("x_position", 0.0))
 	xpos_input.text_changed.connect(func(text):
 		var value = text.to_float()
 		block.params["x_position"] = value
@@ -923,6 +1604,232 @@ func _add_show_character_inspector(block: ScriptBlock):
 		_validate_all_blocks()  # 验证所有块
 	)
 	inspector_content.add_child(xpos_input)
+
+func _infer_character_name_for_slot(block: ScriptBlock, slot: int) -> String:
+	var index := script_blocks.find(block)
+	if index == -1:
+		return ""
+
+	var show_type := BlockType.SHOW_CHARACTER_1
+	match slot:
+		1: show_type = BlockType.SHOW_CHARACTER_1
+		2: show_type = BlockType.SHOW_CHARACTER_2
+		3: show_type = BlockType.SHOW_CHARACTER_3
+
+	for i in range(index, -1, -1):
+		var prev: ScriptBlock = script_blocks[i]
+		if prev.block_type != show_type:
+			continue
+		var found_character_name := str(prev.params.get("character_name", "")).strip_edges()
+		if not found_character_name.is_empty():
+			return found_character_name
+
+	return ""
+
+func _infer_character_state_for_slot(block: ScriptBlock, slot: int) -> Dictionary:
+	var index := script_blocks.find(block)
+	if index == -1:
+		return {"visible": false, "character_name": ""}
+
+	var show_type := BlockType.SHOW_CHARACTER_1
+	var hide_type := BlockType.HIDE_CHARACTER_1
+	match slot:
+		1:
+			show_type = BlockType.SHOW_CHARACTER_1
+			hide_type = BlockType.HIDE_CHARACTER_1
+		2:
+			show_type = BlockType.SHOW_CHARACTER_2
+			hide_type = BlockType.HIDE_CHARACTER_2
+		3:
+			show_type = BlockType.SHOW_CHARACTER_3
+			hide_type = BlockType.HIDE_CHARACTER_3
+
+	for i in range(index, -1, -1):
+		var prev: ScriptBlock = script_blocks[i]
+		if prev.block_type == BlockType.HIDE_ALL_CHARACTERS:
+			return {"visible": false, "character_name": ""}
+		if prev.block_type == hide_type:
+			return {"visible": false, "character_name": ""}
+		if prev.block_type == show_type:
+			var found_character_name := str(prev.params.get("character_name", "")).strip_edges()
+			return {"visible": not found_character_name.is_empty(), "character_name": found_character_name}
+
+	return {"visible": false, "character_name": ""}
+
+func _add_character_expression_inspector(block: ScriptBlock, slot: int) -> void:
+	var slot_name := "角色%d" % slot
+	var state: Dictionary = _infer_character_state_for_slot(block, slot)
+	var slot_is_visible: bool = bool(state.get("visible", false))
+	var character_name: String = str(state.get("character_name", ""))
+
+	var info_label: Label = Label.new()
+	if slot_is_visible:
+		info_label.text = "%s（推断）: %s" % [slot_name, character_name]
+	else:
+		info_label.text = "%s（推断）: 未显示或已隐藏（必须先显示对应角色）" % slot_name
+	inspector_content.add_child(info_label)
+
+	var label: Label = Label.new()
+	label.text = "表情名称:"
+	inspector_content.add_child(label)
+
+	var input: LineEdit = LineEdit.new()
+	input.placeholder_text = "从资源列表选择"
+	input.text = block.params.get("expression", "")
+	input.text_changed.connect(func(text):
+		block.params["expression"] = text
+		_update_block_summary(block)
+		_save_project()
+		_validate_all_blocks()
+	)
+	input.focus_entered.connect(func():
+		var refreshed: Dictionary = _infer_character_state_for_slot(block, slot)
+		var visible_now: bool = bool(refreshed.get("visible", false))
+		var name_now: String = str(refreshed.get("character_name", ""))
+		if visible_now:
+			info_label.text = "%s（推断）: %s" % [slot_name, name_now]
+			current_editing_field = input
+			current_editing_param = "expression"
+			_load_expressions_list(name_now)
+		else:
+			info_label.text = "%s（推断）: 未显示或已隐藏（必须先显示对应角色）" % slot_name
+			current_editing_field = null
+			current_editing_param = ""
+			_set_resource_panel_mode("none")
+			_validate_all_blocks()
+	)
+	inspector_content.add_child(input)
+
+func _add_character_light_inspector(block: ScriptBlock, slot: int) -> void:
+	var slot_name := "角色%d" % slot
+	var state: Dictionary = _infer_character_state_for_slot(block, slot)
+	var slot_is_visible: bool = bool(state.get("visible", false))
+	var character_name: String = str(state.get("character_name", ""))
+
+	var info_label: Label = Label.new()
+	if slot_is_visible:
+		info_label.text = "%s（推断）: %s" % [slot_name, character_name]
+	else:
+		info_label.text = "%s（推断）: 未显示或已隐藏（必须先显示对应角色）" % slot_name
+	inspector_content.add_child(info_label)
+
+	var duration_label: Label = Label.new()
+	duration_label.text = "时长(秒):"
+	inspector_content.add_child(duration_label)
+
+	var duration_input: LineEdit = LineEdit.new()
+	duration_input.placeholder_text = "0.35"
+	duration_input.text = str(block.params.get("duration", 0.35))
+	duration_input.text_changed.connect(func(text):
+		block.params["duration"] = text.to_float()
+		_save_project()
+		_validate_all_blocks()
+	)
+	inspector_content.add_child(duration_input)
+
+	var expr_label: Label = Label.new()
+	expr_label.text = "表情(可选):"
+	inspector_content.add_child(expr_label)
+
+	var expr_input: LineEdit = LineEdit.new()
+	expr_input.placeholder_text = "留空"
+	expr_input.text = str(block.params.get("expression", ""))
+	expr_input.text_changed.connect(func(text):
+		block.params["expression"] = text
+		_update_block_summary(block)
+		_save_project()
+		_validate_all_blocks()
+	)
+	expr_input.focus_entered.connect(func():
+		var refreshed: Dictionary = _infer_character_state_for_slot(block, slot)
+		var visible_now: bool = bool(refreshed.get("visible", false))
+		var name_now: String = str(refreshed.get("character_name", ""))
+		if visible_now:
+			info_label.text = "%s（推断）: %s" % [slot_name, name_now]
+			current_editing_field = expr_input
+			current_editing_param = "expression"
+			_load_expressions_list(name_now)
+		else:
+			info_label.text = "%s（推断）: 未显示或已隐藏（必须先显示对应角色）" % slot_name
+			current_editing_field = null
+			current_editing_param = ""
+			_set_resource_panel_mode("none")
+			_validate_all_blocks()
+	)
+	inspector_content.add_child(expr_input)
+
+func _add_character_move_left_inspector(block: ScriptBlock, slot: int) -> void:
+	var slot_name := "角色%d" % slot
+
+	var info_label := Label.new()
+	var inferred := _infer_character_name_for_slot(block, slot)
+	info_label.text = "%s（推断）: %s" % [slot_name, inferred if not inferred.is_empty() else "未找到（请先添加对应的“显示角色”块）"]
+	inspector_content.add_child(info_label)
+
+	var xalign_label := Label.new()
+	xalign_label.text = "目标X位置:"
+	inspector_content.add_child(xalign_label)
+
+	var xalign_input := LineEdit.new()
+	xalign_input.placeholder_text = "-0.25"
+	xalign_input.text = str(block.params.get("to_xalign", -0.25))
+	xalign_input.text_changed.connect(func(text):
+		block.params["to_xalign"] = text.to_float()
+		_update_block_summary(block)
+		_save_project()
+		_validate_all_blocks()
+	)
+	inspector_content.add_child(xalign_input)
+
+	var duration_label := Label.new()
+	duration_label.text = "时长(秒):"
+	inspector_content.add_child(duration_label)
+
+	var duration_input := LineEdit.new()
+	duration_input.placeholder_text = "0.3"
+	duration_input.text = str(block.params.get("duration", 0.3))
+	duration_input.text_changed.connect(func(text):
+		block.params["duration"] = text.to_float()
+		_save_project()
+		_validate_all_blocks()
+	)
+	inspector_content.add_child(duration_input)
+
+	var brightness_label := Label.new()
+	brightness_label.text = "启用明暗变化:"
+	inspector_content.add_child(brightness_label)
+
+	var brightness_checkbox := CheckBox.new()
+	brightness_checkbox.text = "启用"
+	brightness_checkbox.button_pressed = bool(block.params.get("enable_brightness_change", true))
+	brightness_checkbox.toggled.connect(func(pressed: bool):
+		block.params["enable_brightness_change"] = pressed
+		_save_project()
+		_validate_all_blocks()
+	)
+	inspector_content.add_child(brightness_checkbox)
+
+	var expr_label := Label.new()
+	expr_label.text = "表情(可选):"
+	inspector_content.add_child(expr_label)
+
+	var expr_input := LineEdit.new()
+	expr_input.placeholder_text = "留空"
+	expr_input.text = block.params.get("expression", "")
+	expr_input.text_changed.connect(func(text):
+		block.params["expression"] = text
+		_update_block_summary(block)
+		_save_project()
+		_validate_all_blocks()
+	)
+	expr_input.focus_entered.connect(func():
+		current_editing_field = expr_input
+		current_editing_param = "expression"
+		var inferred_name := _infer_character_name_for_slot(block, slot)
+		info_label.text = "%s（推断）: %s" % [slot_name, inferred_name if not inferred_name.is_empty() else "未找到（请先添加对应的“显示角色”块）"]
+		_load_expressions_list(inferred_name)
+	)
+	inspector_content.add_child(expr_input)
 
 func _add_background_block_inspector(block: ScriptBlock):
 	"""添加背景块参数到Inspector"""
@@ -1033,17 +1940,30 @@ func _get_block_type_name(type: BlockType) -> String:
 		BlockType.DIALOG: return "对话"
 		BlockType.SHOW_CHARACTER_1: return "显示角色1"
 		BlockType.HIDE_CHARACTER_1: return "隐藏角色1"
+		BlockType.MOVE_CHARACTER_1_LEFT: return "角色1左移"
+		BlockType.EXPRESSION, BlockType.CHANGE_EXPRESSION_1: return "角色1表情"
+		BlockType.CHARACTER_LIGHT_1: return "角色1变亮"
+		BlockType.CHARACTER_DARK_1: return "角色1变暗"
 		BlockType.SHOW_CHARACTER_2: return "显示角色2"
 		BlockType.HIDE_CHARACTER_2: return "隐藏角色2"
+		BlockType.MOVE_CHARACTER_2_LEFT: return "角色2左移"
+		BlockType.CHANGE_EXPRESSION_2: return "角色2表情"
+		BlockType.CHARACTER_LIGHT_2: return "角色2变亮"
+		BlockType.CHARACTER_DARK_2: return "角色2变暗"
 		BlockType.SHOW_CHARACTER_3: return "显示角色3"
 		BlockType.HIDE_CHARACTER_3: return "隐藏角色3"
+		BlockType.MOVE_CHARACTER_3_LEFT: return "角色3左移"
+		BlockType.CHANGE_EXPRESSION_3: return "角色3表情"
+		BlockType.CHARACTER_LIGHT_3: return "角色3变亮"
+		BlockType.CHARACTER_DARK_3: return "角色3变暗"
 		BlockType.HIDE_ALL_CHARACTERS: return "隐藏所有角色"
 		BlockType.BACKGROUND: return "切换背景(渐变)"
 		BlockType.MUSIC: return "播放音乐"
 		BlockType.SHOW_BACKGROUND: return "显示背景"
+		BlockType.HIDE_BACKGROUND: return "隐藏背景"
+		BlockType.HIDE_BACKGROUND_FADE: return "渐隐背景"
 		BlockType.CHANGE_MUSIC: return "切换音乐"
 		BlockType.STOP_MUSIC: return "停止音乐"
-		BlockType.EXPRESSION: return "更改表情"
 		_: return "未知"
 
 func _get_block_color(type: BlockType) -> Color:
@@ -1053,17 +1973,30 @@ func _get_block_color(type: BlockType) -> Color:
 		BlockType.DIALOG: return Color(0.3, 0.6, 1.0)
 		BlockType.SHOW_CHARACTER_1: return Color(1.0, 0.6, 0.3)
 		BlockType.HIDE_CHARACTER_1: return Color(0.8, 0.4, 0.2)
+		BlockType.MOVE_CHARACTER_1_LEFT: return Color(0.95, 0.55, 0.25)
+		BlockType.EXPRESSION, BlockType.CHANGE_EXPRESSION_1: return Color(0.8, 0.8, 0.3)
+		BlockType.CHARACTER_LIGHT_1: return Color(0.75, 0.9, 1.0)
+		BlockType.CHARACTER_DARK_1: return Color(0.55, 0.7, 0.85)
 		BlockType.SHOW_CHARACTER_2: return Color(1.0, 0.7, 0.4)
 		BlockType.HIDE_CHARACTER_2: return Color(0.8, 0.5, 0.3)
+		BlockType.MOVE_CHARACTER_2_LEFT: return Color(0.95, 0.65, 0.35)
+		BlockType.CHANGE_EXPRESSION_2: return Color(0.8, 0.8, 0.3)
+		BlockType.CHARACTER_LIGHT_2: return Color(0.75, 0.9, 1.0)
+		BlockType.CHARACTER_DARK_2: return Color(0.55, 0.7, 0.85)
 		BlockType.SHOW_CHARACTER_3: return Color(1.0, 0.8, 0.5)
 		BlockType.HIDE_CHARACTER_3: return Color(0.8, 0.6, 0.4)
+		BlockType.MOVE_CHARACTER_3_LEFT: return Color(0.95, 0.75, 0.45)
+		BlockType.CHANGE_EXPRESSION_3: return Color(0.8, 0.8, 0.3)
+		BlockType.CHARACTER_LIGHT_3: return Color(0.75, 0.9, 1.0)
+		BlockType.CHARACTER_DARK_3: return Color(0.55, 0.7, 0.85)
 		BlockType.HIDE_ALL_CHARACTERS: return Color(0.5, 0.5, 0.5)
 		BlockType.BACKGROUND: return Color(0.6, 1.0, 0.3)
 		BlockType.MUSIC: return Color(1.0, 0.3, 0.6)
 		BlockType.SHOW_BACKGROUND: return Color(0.5, 0.95, 0.35)
+		BlockType.HIDE_BACKGROUND: return Color(0.45, 0.8, 0.25)
+		BlockType.HIDE_BACKGROUND_FADE: return Color(0.35, 0.7, 0.2)
 		BlockType.CHANGE_MUSIC: return Color(1.0, 0.4, 0.7)
 		BlockType.STOP_MUSIC: return Color(0.9, 0.25, 0.45)
-		BlockType.EXPRESSION: return Color(0.8, 0.8, 0.3)
 		_: return Color.WHITE
 
 func _on_delete_block(block: ScriptBlock):
@@ -1200,6 +2133,7 @@ func _reorder_block_to_index(dragged_block: ScriptBlock, insert_index: int) -> v
 
 	_rebuild_script_sequence_ui()
 	_save_project()
+	_validate_all_blocks()
 
 func _can_drop_data_for_sequence(at_position: Vector2, data: Variant, target_control: Control) -> bool:
 	if is_previewing:
@@ -1351,6 +2285,11 @@ func _save_project():
 
 func _on_export_button_pressed():
 	"""导出工程"""
+	push_error("导出功能已迁移到【工程管理器】中，请返回后在项目详情里使用“导出ZIP / 导入到Mods”。")
+	return
+	if not _validate_all_blocks():
+		push_error("存在脚本块参数错误，无法导出")
+		return
 	if script_blocks.is_empty():
 		push_error("没有脚本块可导出")
 		return
@@ -1400,7 +2339,7 @@ func _generate_gdscript() -> String:
 			BlockType.SHOW_CHARACTER_1:
 				var char_name = block.params.get("character_name", "")
 				var expression = block.params.get("expression", "")
-				var x_pos = block.params.get("x_position", 0.5)
+				var x_pos = block.params.get("x_position", 0.0)
 				if expression.is_empty():
 					code += "\tnovel_interface.show_character(\"%s\", \"\", %.2f)\n" % [char_name, x_pos]
 				else:
@@ -1412,7 +2351,7 @@ func _generate_gdscript() -> String:
 			BlockType.SHOW_CHARACTER_2:
 				var char_name = block.params.get("character_name", "")
 				var expression = block.params.get("expression", "")
-				var x_pos = block.params.get("x_position", 0.5)
+				var x_pos = block.params.get("x_position", 0.0)
 				if expression.is_empty():
 					code += "\tnovel_interface.show_2nd_character(\"%s\", \"\", %.2f)\n" % [char_name, x_pos]
 				else:
@@ -1424,7 +2363,7 @@ func _generate_gdscript() -> String:
 			BlockType.SHOW_CHARACTER_3:
 				var char_name = block.params.get("character_name", "")
 				var expression = block.params.get("expression", "")
-				var x_pos = block.params.get("x_position", 0.5)
+				var x_pos = block.params.get("x_position", 0.0)
 				if expression.is_empty():
 					code += "\tnovel_interface.show_3rd_character(\"%s\", \"\", %.2f)\n" % [char_name, x_pos]
 				else:
@@ -1433,8 +2372,29 @@ func _generate_gdscript() -> String:
 			BlockType.HIDE_CHARACTER_3:
 				code += "\tawait novel_interface.hide_3rd_character()\n"
 
+			BlockType.MOVE_CHARACTER_1_LEFT:
+				var to_xalign = float(block.params.get("to_xalign", -0.25))
+				var duration = float(block.params.get("duration", 0.3))
+				var enable_brightness_change = bool(block.params.get("enable_brightness_change", true))
+				var expression = str(block.params.get("expression", ""))
+				code += "\tawait novel_interface.character_move_left(%.4f, %.4f, %s, \"%s\")\n" % [to_xalign, duration, str(enable_brightness_change).to_lower(), expression.c_escape()]
+
+			BlockType.MOVE_CHARACTER_2_LEFT:
+				var to_xalign = float(block.params.get("to_xalign", -0.25))
+				var duration = float(block.params.get("duration", 0.3))
+				var enable_brightness_change = bool(block.params.get("enable_brightness_change", true))
+				var expression = str(block.params.get("expression", ""))
+				code += "\tawait novel_interface.character_2nd_move_left(%.4f, %.4f, %s, \"%s\")\n" % [to_xalign, duration, str(enable_brightness_change).to_lower(), expression.c_escape()]
+
+			BlockType.MOVE_CHARACTER_3_LEFT:
+				var to_xalign = float(block.params.get("to_xalign", -0.25))
+				var duration = float(block.params.get("duration", 0.3))
+				var enable_brightness_change = bool(block.params.get("enable_brightness_change", true))
+				var expression = str(block.params.get("expression", ""))
+				code += "\tawait novel_interface.character_3rd_move_left(%.4f, %.4f, %s, \"%s\")\n" % [to_xalign, duration, str(enable_brightness_change).to_lower(), expression.c_escape()]
+
 			BlockType.HIDE_ALL_CHARACTERS:
-				code += "\tawait novel_interface.hide_all_character()\n"
+				code += "\tawait novel_interface.hide_all_characters()\n"
 
 			BlockType.BACKGROUND:
 				var bg_path = block.params.get("background_path", "")
@@ -1449,6 +2409,12 @@ func _generate_gdscript() -> String:
 				var fade_time = block.params.get("fade_time", 0.0)
 				code += "\tawait novel_interface.show_background(\"%s\", %.2f)\n" % [bg_path, float(fade_time)]
 
+			BlockType.HIDE_BACKGROUND:
+				code += "\tawait novel_interface.hide_background()\n"
+
+			BlockType.HIDE_BACKGROUND_FADE:
+				code += "\tawait novel_interface.hide_background_with_fade()\n"
+
 			BlockType.CHANGE_MUSIC:
 				var music_path = block.params.get("music_path", "")
 				code += "\tawait novel_interface.change_music(\"%s\")\n" % music_path
@@ -1457,9 +2423,47 @@ func _generate_gdscript() -> String:
 				code += "\tnovel_interface.stop_music()\n"
 				code += "\tawait get_tree().process_frame\n"
 
-			BlockType.EXPRESSION:
-				var expression = block.params.get("expression", "")
-				code += "\tawait novel_interface.change_expression(\"%s\")\n" % expression
+			BlockType.EXPRESSION, BlockType.CHANGE_EXPRESSION_1:
+				var expression = str(block.params.get("expression", ""))
+				if not expression.is_empty():
+					code += "\tnovel_interface.change_expression(\"%s\")\n" % expression.c_escape()
+				code += "\tawait get_tree().process_frame\n"
+
+			BlockType.CHANGE_EXPRESSION_2:
+				var expression = str(block.params.get("expression", ""))
+				if not expression.is_empty():
+					code += "\tnovel_interface.change_2nd_expression(\"%s\")\n" % expression.c_escape()
+				code += "\tawait get_tree().process_frame\n"
+
+			BlockType.CHANGE_EXPRESSION_3:
+				var expression = str(block.params.get("expression", ""))
+				if not expression.is_empty():
+					code += "\tnovel_interface.change_3rd_expression(\"%s\")\n" % expression.c_escape()
+				code += "\tawait get_tree().process_frame\n"
+
+			BlockType.CHARACTER_LIGHT_1:
+				var duration = float(block.params.get("duration", 0.35))
+				var expression = str(block.params.get("expression", ""))
+				code += "\tawait novel_interface.character_light(%.4f, \"%s\")\n" % [duration, expression.c_escape()]
+
+			BlockType.CHARACTER_LIGHT_2:
+				var duration = float(block.params.get("duration", 0.35))
+				var expression = str(block.params.get("expression", ""))
+				code += "\tawait novel_interface.character_2nd_light(%.4f, \"%s\")\n" % [duration, expression.c_escape()]
+
+			BlockType.CHARACTER_LIGHT_3:
+				var duration = float(block.params.get("duration", 0.35))
+				var expression = str(block.params.get("expression", ""))
+				code += "\tawait novel_interface.character_3rd_light(%.4f, \"%s\")\n" % [duration, expression.c_escape()]
+
+			BlockType.CHARACTER_DARK_1:
+				code += "\tawait novel_interface.character_dark()\n"
+
+			BlockType.CHARACTER_DARK_2:
+				code += "\tawait novel_interface.character_2nd_dark()\n"
+
+			BlockType.CHARACTER_DARK_3:
+				code += "\tawait novel_interface.character_3rd_dark()\n"
 
 	code += "\nfunc _on_scene_completed():\n"
 	code += "\tprint(\"Story completed\")\n"
@@ -1480,10 +2484,15 @@ func _generate_scene() -> String:
 func _on_back_button_pressed():
 	"""返回按钮"""
 	_save_project()
+	_stop_music_preview()
+	_resume_main_menu_bgm()
 	queue_free()
 
 func _on_run_button_pressed():
 	"""运行预览按钮"""
+	if not _validate_all_blocks():
+		push_error("存在脚本块参数错误，无法运行预览")
+		return
 	if script_blocks.is_empty():
 		push_error("没有脚本块可运行")
 		return
@@ -1569,7 +2578,7 @@ func _run_preview_script():
 			BlockType.SHOW_CHARACTER_1:
 				var char_name = block.params.get("character_name", "")
 				var expression = block.params.get("expression", "")
-				var x_pos = block.params.get("x_position", 0.5)
+				var x_pos = block.params.get("x_position", 0.0)
 				if expression.is_empty():
 					novel_interface.show_character(char_name, "", x_pos)
 				else:
@@ -1581,7 +2590,7 @@ func _run_preview_script():
 			BlockType.SHOW_CHARACTER_2:
 				var char_name = block.params.get("character_name", "")
 				var expression = block.params.get("expression", "")
-				var x_pos = block.params.get("x_position", 0.5)
+				var x_pos = block.params.get("x_position", 0.0)
 				if expression.is_empty():
 					novel_interface.show_2nd_character(char_name, "", x_pos)
 				else:
@@ -1593,7 +2602,7 @@ func _run_preview_script():
 			BlockType.SHOW_CHARACTER_3:
 				var char_name = block.params.get("character_name", "")
 				var expression = block.params.get("expression", "")
-				var x_pos = block.params.get("x_position", 0.5)
+				var x_pos = block.params.get("x_position", 0.0)
 				if expression.is_empty():
 					novel_interface.show_3rd_character(char_name, "", x_pos)
 				else:
@@ -1602,8 +2611,29 @@ func _run_preview_script():
 			BlockType.HIDE_CHARACTER_3:
 				await novel_interface.hide_3rd_character()
 
+			BlockType.MOVE_CHARACTER_1_LEFT:
+				var to_xalign = float(block.params.get("to_xalign", -0.25))
+				var duration = float(block.params.get("duration", 0.3))
+				var enable_brightness_change = bool(block.params.get("enable_brightness_change", true))
+				var expression = str(block.params.get("expression", ""))
+				await novel_interface.character_move_left(to_xalign, duration, enable_brightness_change, expression)
+
+			BlockType.MOVE_CHARACTER_2_LEFT:
+				var to_xalign = float(block.params.get("to_xalign", -0.25))
+				var duration = float(block.params.get("duration", 0.3))
+				var enable_brightness_change = bool(block.params.get("enable_brightness_change", true))
+				var expression = str(block.params.get("expression", ""))
+				await novel_interface.character_2nd_move_left(to_xalign, duration, enable_brightness_change, expression)
+
+			BlockType.MOVE_CHARACTER_3_LEFT:
+				var to_xalign = float(block.params.get("to_xalign", -0.25))
+				var duration = float(block.params.get("duration", 0.3))
+				var enable_brightness_change = bool(block.params.get("enable_brightness_change", true))
+				var expression = str(block.params.get("expression", ""))
+				await novel_interface.character_3rd_move_left(to_xalign, duration, enable_brightness_change, expression)
+
 			BlockType.HIDE_ALL_CHARACTERS:
-				await novel_interface.hide_all_character()
+				await novel_interface.hide_all_characters()
 
 			BlockType.BACKGROUND:
 				var bg_path = block.params.get("background_path", "")
@@ -1615,6 +2645,12 @@ func _run_preview_script():
 				var fade_time = block.params.get("fade_time", 0.0)
 				if not bg_path.is_empty():
 					await novel_interface.show_background(bg_path, float(fade_time))
+
+			BlockType.HIDE_BACKGROUND:
+				await novel_interface.hide_background()
+
+			BlockType.HIDE_BACKGROUND_FADE:
+				await novel_interface.hide_background_with_fade()
 
 			BlockType.MUSIC:
 				var music_path = block.params.get("music_path", "")
@@ -1630,10 +2666,47 @@ func _run_preview_script():
 				novel_interface.stop_music()
 				await get_tree().process_frame
 
-			BlockType.EXPRESSION:
+			BlockType.EXPRESSION, BlockType.CHANGE_EXPRESSION_1:
 				var expression = block.params.get("expression", "")
 				if not expression.is_empty():
-					await novel_interface.change_expression(expression)
+					novel_interface.change_expression(expression)
+					await get_tree().process_frame
+
+			BlockType.CHANGE_EXPRESSION_2:
+				var expression = block.params.get("expression", "")
+				if not expression.is_empty():
+					novel_interface.change_2nd_expression(expression)
+					await get_tree().process_frame
+
+			BlockType.CHANGE_EXPRESSION_3:
+				var expression = block.params.get("expression", "")
+				if not expression.is_empty():
+					novel_interface.change_3rd_expression(expression)
+					await get_tree().process_frame
+
+			BlockType.CHARACTER_LIGHT_1:
+				var duration = float(block.params.get("duration", 0.35))
+				var expression = str(block.params.get("expression", ""))
+				await novel_interface.character_light(duration, expression)
+
+			BlockType.CHARACTER_LIGHT_2:
+				var duration = float(block.params.get("duration", 0.35))
+				var expression = str(block.params.get("expression", ""))
+				await novel_interface.character_2nd_light(duration, expression)
+
+			BlockType.CHARACTER_LIGHT_3:
+				var duration = float(block.params.get("duration", 0.35))
+				var expression = str(block.params.get("expression", ""))
+				await novel_interface.character_3rd_light(duration, expression)
+
+			BlockType.CHARACTER_DARK_1:
+				await novel_interface.character_dark()
+
+			BlockType.CHARACTER_DARK_2:
+				await novel_interface.character_2nd_dark()
+
+			BlockType.CHARACTER_DARK_3:
+				await novel_interface.character_3rd_dark()
 
 	# 预览结束
 	_stop_preview()

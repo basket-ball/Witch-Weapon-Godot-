@@ -390,7 +390,15 @@ func _load_mod_scene(scene_path: String) -> PackedScene:
 	file.close()
 
 	# 替换所有res://mods/为user://mods/
-	var modified_content = original_content.replace("res://mods/", "user://mods/")
+	var modified_content: String = original_content.replace("res://mods/", "user://mods/")
+
+	# 兼容旧导出：res://export/xxx 需要映射到当前mod目录下的 export/
+	if modified_content.find("res://export/") != -1 and scene_path.begins_with("user://mods/"):
+		var rest: String = scene_path.substr("user://mods/".length())
+		var parts: PackedStringArray = rest.split("/")
+		if parts.size() >= 1 and not parts[0].is_empty():
+			var mod_folder: String = parts[0]
+			modified_content = modified_content.replace("res://export/", "user://mods/%s/export/" % mod_folder)
 
 	# 创建临时文件
 	var temp_path = "user://temp_mod_scene.tscn"
@@ -406,7 +414,7 @@ func _load_mod_scene(scene_path: String) -> PackedScene:
 	var scene = load(temp_path)
 
 	# 删除临时文件
-	DirAccess.remove_absolute(temp_path)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(temp_path))
 
 	return scene
 

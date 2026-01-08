@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://b13827npayiyy"]
+
+[ext_resource type="Script" uid="uid://be8mk75tjaoti" path="res://scripts/character/josette.gd" id="1_vetov"]
+[ext_resource type="Texture2D" uid="uid://dx0vbovtuy3un" path="res://assets/images/role/josette/base.png" id="2_cd2ju"]
+
+[node name="CharacterNode" type="Node2D"]
+script = ExtResource("1_vetov")
+metadata/_custom_type_script = "uid://gy7m5ps10swc"
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="Base" type="Sprite2D" parent="CanvasGroup"]
+position = Vector2(654, 650)
+scale = Vector2(0.96, 0.96)
+texture = ExtResource("2_cd2ju")
+
+[node name="Face" type="Sprite2D" parent="CanvasGroup/Base"]
+position = Vector2(6, -192)

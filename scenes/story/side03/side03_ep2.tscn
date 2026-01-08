@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://jhc7nu75maha"]
+
+[ext_resource type="Script" uid="uid://b3m1w82f0kcoj" path="res://scripts/story/side03/side03_ep2.gd" id="1_vih4d"]
+[ext_resource type="PackedScene" uid="uid://tfmmwjuxwu4x" path="res://scenes/dialog/NovelInterface.tscn" id="2_x6why"]
+
+[node name="Side03Ep2" type="Node2D"]
+script = ExtResource("1_vih4d")
+
+[node name="NovelInterface" parent="." instance=ExtResource("2_x6why")]

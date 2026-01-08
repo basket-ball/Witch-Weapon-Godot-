@@ -36,7 +36,7 @@ extends Control
 # ==================== 常量配置 ====================
 # 故事节点名称到故事ID的映射表
 const STORY_MAPPING: Dictionary = {
-	"Side01": "side01", "Side02": "side02"
+	"Side01": "side01", "Side02": "side02", "Side03": "side03"
 }
 
 # 剧集列表场景的文件路径
@@ -174,7 +174,7 @@ func _setup_back_area():
 
 ## 设置所有故事按钮的点击事件 - 循环创建Side01-Side02的按钮事件
 func _setup_story_buttons():
-	for i in range(2):
+	for i in range(3):
 		var story_node = get_node_or_null("Side%02d" % (i + 1))
 		if story_node:
 			var button = story_node.get_node_or_null("BackNet/TextureRect/TextureButton")
@@ -189,7 +189,7 @@ func _init_background():
 
 ## 初始化所有BackNet和Num节点的透明度和z_index
 func _init_back_nets():
-	for i in range(2):
+	for i in range(3):
 		var story_node = get_node_or_null("Side%02d" % (i + 1))
 		if not story_node:
 			continue
@@ -398,7 +398,7 @@ func _prepare_other_stories_animation(selected_story: Control):
 	var selected_pos = current_back_net.global_position
 	
 	# 遍历所有故事节点，收集非选中故事的动画数据
-	for i in range(2):
+	for i in range(3):
 		var story_node = get_node_or_null("Side%02d" % (i + 1))
 		if not story_node or story_node == selected_story:
 			continue
@@ -486,7 +486,7 @@ func _cache_current_state_for_return():
 func _collect_other_buttons(selected_story: Control):
 	other_stories_buttons.clear()
 	
-	for i in range(2):
+	for i in range(3):
 		var story_node = get_node_or_null("Side%02d" % (i + 1))
 		if story_node and story_node != selected_story:
 			var button = story_node.get_node_or_null("BackNet/TextureRect/TextureButton")
@@ -497,7 +497,7 @@ func _collect_other_buttons(selected_story: Control):
 func _start_black_transition_for_others(selected_story: Control):
 	other_stories_materials.clear()
 	
-	for i in range(2):
+	for i in range(3):
 		var story_node = get_node_or_null("Side%02d" % (i + 1))
 		if story_node and story_node != selected_story:
 			var texture_rect = story_node.get_node_or_null("BackNet/TextureRect")
@@ -668,7 +668,7 @@ func _restore_all_buttons():
 
 ## 恢复其他故事的材质
 func _restore_other_stories_material():
-	for i in range(2):
+	for i in range(3):
 		var story_node = get_node_or_null("Side%02d" % (i + 1))
 		if story_node and story_node != selected_story_node:
 			var texture_rect = story_node.get_node_or_null("BackNet/TextureRect")

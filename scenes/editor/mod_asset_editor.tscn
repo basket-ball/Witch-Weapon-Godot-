@@ -1,0 +1,711 @@
+[gd_scene load_steps=10 format=3 uid="uid://d0qj7p0h3wq8l"]
+
+[ext_resource type="Script" path="res://scripts/editor/mod_asset_editor.gd" id="1_script"]
+[ext_resource type="FontFile" uid="uid://bajyd14et5o6v" path="res://assets/gui/font/方正兰亭准黑_GBK.ttf" id="2_font"]
+
+[sub_resource type="StyleBoxFlat" id="TopBarStyle"]
+bg_color = Color(0.06, 0.06, 0.08, 1)
+border_width_bottom = 3
+border_color = Color(0.72, 0.75, 1.0, 0.9)
+shadow_size = 4
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="InspectorPanelStyle"]
+bg_color = Color(0.16, 0.17, 0.25, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.72, 0.85, 1.0, 0.9)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_size = 6
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="ResourcePanelStyle"]
+bg_color = Color(0.16, 0.17, 0.25, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.72, 0.85, 1.0, 0.9)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_size = 6
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="PreviewPanelStyle"]
+bg_color = Color(0.18, 0.16, 0.28, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.78, 0.72, 1.0, 0.9)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_size = 6
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="SaveButtonStyle"]
+bg_color = Color(0.423529, 0.388235, 1.0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 12
+content_margin_right = 12
+content_margin_top = 8
+content_margin_bottom = 8
+
+[node name="ModAssetEditor" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0.11, 0.11, 0.12, 1)
+
+[node name="TopBar" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 60.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("TopBarStyle")
+
+[node name="BackButton" type="Button" parent="TopBar"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 10.0
+offset_right = 120.0
+offset_bottom = 50.0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "←返回"
+
+[node name="TitleLabel" type="Label" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -14.0
+offset_right = 180.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SaveButton" type="Button" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -190.0
+offset_top = -20.0
+offset_right = -80.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "保存"
+theme_override_styles/normal = SubResource("SaveButtonStyle")
+theme_override_styles/hover = SubResource("SaveButtonStyle")
+theme_override_styles/pressed = SubResource("SaveButtonStyle")
+
+[node name="UnsavedLabel" type="Label" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -78.0
+offset_top = -14.0
+offset_right = -16.0
+offset_bottom = 14.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 0.55, 0.55, 0.95)
+horizontal_alignment = 2
+vertical_alignment = 1
+text = "未保存"
+
+[node name="ProjectLabel" type="Label" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -14.0
+offset_right = -200.0
+offset_bottom = 14.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 2
+vertical_alignment = 1
+text = ""
+
+[node name="MainContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 70.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainContainer"]
+custom_minimum_size = Vector2(330, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="InspectorPanel" type="Panel" parent="MainContainer/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("InspectorPanelStyle")
+
+[node name="InspectorContainer" type="VBoxContainer" parent="MainContainer/LeftPanel/InspectorPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="InspectorTitle" type="Label" parent="MainContainer/LeftPanel/InspectorPanel/InspectorContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+text = "Inspector"
+
+[node name="InspectorSep" type="HSeparator" parent="MainContainer/LeftPanel/InspectorPanel/InspectorContainer"]
+layout_mode = 2
+
+[node name="InspectorScroll" type="ScrollContainer" parent="MainContainer/LeftPanel/InspectorPanel/InspectorContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="InspectorList" type="VBoxContainer" parent="MainContainer/LeftPanel/InspectorPanel/InspectorContainer/InspectorScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="ResourcePanel" type="Panel" parent="MainContainer/LeftPanel"]
+custom_minimum_size = Vector2(0, 380)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("ResourcePanelStyle")
+
+[node name="ResourceContainer" type="VBoxContainer" parent="MainContainer/LeftPanel/ResourcePanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="ResourceTitle" type="Label" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+text = "导入资源"
+
+[node name="ModeTabs" type="TabBar" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+
+[node name="ActionRow" type="HBoxContainer" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PrimaryButton" type="Button" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer/ActionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 36)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "导入"
+
+[node name="DeleteButton" type="Button" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer/ActionRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(110, 36)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "删除"
+
+[node name="CharacterActionRow" type="HBoxContainer" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ImportBaseButton" type="Button" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer/CharacterActionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 36)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "导入Base"
+
+[node name="AddExpressionButton" type="Button" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer/CharacterActionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 36)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "新增表情"
+
+[node name="DeleteExpressionButton" type="Button" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer/CharacterActionRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(110, 36)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "删表情"
+
+[node name="ResourceScroll" type="ScrollContainer" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ResourceList" type="VBoxContainer" parent="MainContainer/LeftPanel/ResourcePanel/ResourceContainer/ResourceScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="CenterPanel" type="Panel" parent="MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("PreviewPanelStyle")
+
+[node name="CenterMargin" type="MarginContainer" parent="MainContainer/CenterPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CenterVBox" type="VBoxContainer" parent="MainContainer/CenterPanel/CenterMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="WorkspaceTabs" type="TabContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+tabs_visible = false
+
+[node name="Background" type="VBoxContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Aspect" type="AspectRatioContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Background"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+ratio = 1.7777778
+stretch_mode = 2
+
+[node name="Frame" type="PanelContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Background/Aspect"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("ResourcePanelStyle")
+
+[node name="BgCanvas" type="Control" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Background/Aspect/Frame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+clip_contents = true
+
+[node name="BgTexture" type="TextureRect" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Background/Aspect/Frame/BgCanvas"]
+layout_mode = 0
+mouse_filter = 2
+stretch_mode = 0
+
+[node name="Music" type="VBoxContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="Info" type="HBoxContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music/Info"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "当前："
+vertical_alignment = 1
+
+[node name="MusicName" type="Label" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music/Info"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "未选择音乐"
+vertical_alignment = 1
+
+[node name="SeekRow" type="HBoxContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="CurrentTime" type="Label" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music/SeekRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "00:00"
+vertical_alignment = 1
+
+[node name="SeekSlider" type="HSlider" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music/SeekRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(520, 0)
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+
+[node name="DurationTime" type="Label" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music/SeekRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "--:--"
+vertical_alignment = 1
+
+[node name="OptionsRow" type="HBoxContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="VolumeLabel" type="Label" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music/OptionsRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "音量"
+vertical_alignment = 1
+
+[node name="VolumeSlider" type="HSlider" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music/OptionsRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(220, 0)
+max_value = 1.0
+step = 0.01
+value = 0.9
+
+[node name="LoopCheck" type="CheckBox" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music/OptionsRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "循环"
+
+[node name="Buttons" type="HBoxContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="PlayButton" type="Button" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music/Buttons"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 40)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "播放"
+
+[node name="StopButton" type="Button" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music/Buttons"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 40)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "停止"
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Music"]
+
+[node name="Character" type="VBoxContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="Hint" type="Label" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Character"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 1, 1, 0.75)
+text = "拖拽：移动图层  滚轮：缩放  右键：重置"
+horizontal_alignment = 1
+
+[node name="Aspect" type="AspectRatioContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Character"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+ratio = 1.7777778
+stretch_mode = 2
+
+[node name="Frame" type="PanelContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Character/Aspect"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("ResourcePanelStyle")
+
+[node name="CharCanvas" type="Control" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Character/Aspect/Frame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+clip_contents = true
+
+[node name="Base" type="TextureRect" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Character/Aspect/Frame/CharCanvas"]
+layout_mode = 0
+mouse_filter = 2
+stretch_mode = 0
+
+[node name="Face" type="TextureRect" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Character/Aspect/Frame/CharCanvas"]
+layout_mode = 0
+mouse_filter = 2
+stretch_mode = 0
+
+[node name="Title" type="VBoxContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="Form" type="VBoxContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Title"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="TitleRow" type="HBoxContainer" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Title/Form"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Title/Form/TitleRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "标题："
+vertical_alignment = 1
+
+[node name="TitleInput" type="LineEdit" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Title/Form/TitleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "请输入标题"
+
+[node name="DescInput" type="TextEdit" parent="MainContainer/CenterPanel/CenterMargin/CenterVBox/WorkspaceTabs/Title/Form"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "简介"
+
+[node name="ImageDialog" type="FileDialog" parent="."]
+visible = false
+
+[node name="AudioDialog" type="FileDialog" parent="."]
+visible = false
+
+[node name="MessageDialog" type="AcceptDialog" parent="."]
+visible = false
+
+[node name="CreateCharacterDialog" type="ConfirmationDialog" parent="."]
+visible = false
+title = "创建人物"
+ok_button_text = "创建"
+cancel_button_text = "取消"
+
+[node name="CreateCharMargin" type="MarginContainer" parent="CreateCharacterDialog"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = 18.0
+offset_right = -18.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CreateCharVBox" type="VBoxContainer" parent="CreateCharacterDialog/CreateCharMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="NameRow" type="HBoxContainer" parent="CreateCharacterDialog/CreateCharMargin/CreateCharVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NameLabel" type="Label" parent="CreateCharacterDialog/CreateCharMargin/CreateCharVBox/NameRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "角色名："
+vertical_alignment = 1
+
+[node name="NameInput" type="LineEdit" parent="CreateCharacterDialog/CreateCharMargin/CreateCharVBox/NameRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "例如 ren"
+
+[node name="OutfitCheck" type="CheckBox" parent="CreateCharacterDialog/CreateCharMargin/CreateCharVBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "有服装拆分"
+
+[node name="OutfitRow" type="HBoxContainer" parent="CreateCharacterDialog/CreateCharMargin/CreateCharVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="OutfitLabel" type="Label" parent="CreateCharacterDialog/CreateCharMargin/CreateCharVBox/OutfitRow"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "服装名："
+vertical_alignment = 1
+
+[node name="OutfitInput" type="LineEdit" parent="CreateCharacterDialog/CreateCharMargin/CreateCharVBox/OutfitRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "例如 battle"
+
+[node name="CreateCharError" type="Label" parent="CreateCharacterDialog/CreateCharMargin/CreateCharVBox"]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 0.35, 0.35, 0.95)
+text = ""
+
+[node name="AddExpressionDialog" type="ConfirmationDialog" parent="."]
+visible = false
+title = "新增表情"
+ok_button_text = "下一步"
+cancel_button_text = "取消"
+
+[node name="AddExprMargin" type="MarginContainer" parent="AddExpressionDialog"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = 18.0
+offset_right = -18.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AddExprVBox" type="VBoxContainer" parent="AddExpressionDialog/AddExprMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="ExprLabel" type="Label" parent="AddExpressionDialog/AddExprMargin/AddExprVBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "表情名："
+
+[node name="ExprInput" type="LineEdit" parent="AddExpressionDialog/AddExprMargin/AddExprVBox"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "例如 normal"
+
+[node name="AddExprError" type="Label" parent="AddExpressionDialog/AddExprMargin/AddExprVBox"]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 0.35, 0.35, 0.95)
+text = ""
+
+[node name="UnsavedConfirmDialog" type="ConfirmationDialog" parent="."]
+visible = false
+title = "未保存"
+ok_button_text = "放弃更改"
+cancel_button_text = "取消"
+text = "当前有未保存的更改，确定要退出吗？"

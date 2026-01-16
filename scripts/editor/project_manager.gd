@@ -50,6 +50,7 @@ extends Control
 const PROJECTS_PATH: String = "user://mod_projects"
 const MODS_PATH: String = "user://mods"
 const EDITOR_SCENE_PATH: String = "res://scenes/editor/mod_editor.tscn"
+const ASSET_EDITOR_SCENE_PATH: String = "res://scenes/editor/mod_asset_editor.tscn"
 const UI_FONT: FontFile = preload("res://assets/gui/font/方正兰亭准黑_GBK.ttf")
 const DEFAULT_PREVIEW_IMAGE: String = "res://assets/gui/main_menu/Story00_Main_01.png"
 const PROJECT_PREVIEW_FILE: String = "preview/cover.png"
@@ -105,7 +106,13 @@ var project_items: Array = []
 var pending_delete_project: String = ""
 
 var _row_style_normal: StyleBoxFlat
+var _row_style_hover: StyleBoxFlat
 var _row_style_selected: StyleBoxFlat
+
+var _project_action_dialog: ConfirmationDialog = null
+var _project_action_dialog_zip_button: Button = null
+var _pending_project_action: String = ""
+var _import_assets_button: Button = null
 
 var _is_loading_details: bool = false
 var _selected_episode_title: String = ""
@@ -133,6 +140,7 @@ func _ready():
 	_init_row_styles()
 	_load_projects()
 	_relayout_project_action_buttons()
+	_ensure_import_assets_button()
 	_apply_delete_button_danger_style()
 	_update_action_buttons_state()
 
@@ -207,6 +215,7 @@ func _ready():
 	_update_action_buttons_state()
 	_configure_detail_scroll_ui()
 	_play_enter_animation()
+	_ensure_project_action_dialog()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _is_transitioning or _is_exiting:
@@ -292,20 +301,16 @@ func _configure_detail_scroll_ui() -> void:
 		detail_scroll.set("horizontal_scroll_mode", 3)
 
 func _relayout_project_action_buttons() -> void:
-	if _footer_actions == null:
-		return
-
-	var insert_after: Node = open_project_button if open_project_button else null
+	# 旧版“底部导出ZIP / 导入到Mods / 删除工程”按钮已迁移到“每个工程行右侧按钮”。
+	# 为避免改动场景文件，这里仅隐藏旧按钮/容器。
 	if export_zip_button:
-		_move_footer_action_button(export_zip_button, insert_after)
-		insert_after = export_zip_button
+		export_zip_button.visible = false
 	if install_to_mods_button:
-		_move_footer_action_button(install_to_mods_button, insert_after)
-		insert_after = install_to_mods_button
-
+		install_to_mods_button.visible = false
+	if delete_project_button:
+		delete_project_button.visible = false
 	if _detail_actions:
 		_detail_actions.visible = false
-		_detail_actions.queue_free()
 
 func _move_footer_action_button(button: Button, after: Node) -> void:
 	if _footer_actions == null or button == null:
@@ -326,6 +331,27 @@ func _move_footer_action_button(button: Button, after: Node) -> void:
 		var idx: int = after.get_index()
 		_footer_actions.move_child(button, idx + 1)
 
+func _ensure_import_assets_button() -> void:
+	if _footer_actions == null or new_project_button == null:
+		return
+
+	if _import_assets_button != null and is_instance_valid(_import_assets_button):
+		return
+
+	var existing := _footer_actions.get_node_or_null("ImportAssetsButton") as Button
+	if existing != null:
+		_import_assets_button = existing
+	else:
+		_import_assets_button = Button.new()
+		_import_assets_button.name = "ImportAssetsButton"
+		_import_assets_button.text = "导入自定义素材"
+		_footer_actions.add_child(_import_assets_button)
+
+	_move_footer_action_button(_import_assets_button, new_project_button)
+	_import_assets_button.tooltip_text = "打开自定义素材导入与编辑界面"
+	if not _import_assets_button.pressed.is_connected(_on_import_assets_pressed):
+		_import_assets_button.pressed.connect(_on_import_assets_pressed)
+
 func _apply_delete_button_danger_style() -> void:
 	if delete_project_button == null:
 		return
@@ -334,20 +360,106 @@ func _apply_delete_button_danger_style() -> void:
 	delete_project_button.add_theme_color_override("font_pressed_color", Color(1, 0.25, 0.25, 1))
 	delete_project_button.add_theme_color_override("font_disabled_color", Color(1, 0.35, 0.35, 0.35))
 
+func _apply_danger_button_style(button: Button) -> void:
+	if button == null:
+		return
+	button.add_theme_color_override("font_color", Color(1, 0.35, 0.35, 1))
+	button.add_theme_color_override("font_hover_color", Color(1, 0.45, 0.45, 1))
+	button.add_theme_color_override("font_pressed_color", Color(1, 0.25, 0.25, 1))
+	button.add_theme_color_override("font_disabled_color", Color(1, 0.35, 0.35, 0.35))
+
+	# Emoji 垃圾桶在部分系统字体中是彩色字形，字体颜色覆盖可能不明显；
+	# 额外加一层红色背景/描边，确保“危险操作”足够醒目。
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(1.0, 0.2, 0.2, 0.10)
+	normal.border_width_left = 1
+	normal.border_width_top = 1
+	normal.border_width_right = 1
+	normal.border_width_bottom = 1
+	normal.border_color = Color(1.0, 0.25, 0.25, 0.25)
+	normal.corner_radius_top_left = 8
+	normal.corner_radius_top_right = 8
+	normal.corner_radius_bottom_left = 8
+	normal.corner_radius_bottom_right = 8
+
+	var hover := normal.duplicate() as StyleBoxFlat
+	if hover:
+		hover.bg_color = Color(1.0, 0.2, 0.2, 0.16)
+		hover.border_color = Color(1.0, 0.35, 0.35, 0.40)
+
+	var pressed := normal.duplicate() as StyleBoxFlat
+	if pressed:
+		pressed.bg_color = Color(1.0, 0.2, 0.2, 0.08)
+		pressed.border_color = Color(1.0, 0.25, 0.25, 0.55)
+
+	var disabled := normal.duplicate() as StyleBoxFlat
+	if disabled:
+		disabled.bg_color = Color(1.0, 0.2, 0.2, 0.04)
+		disabled.border_color = Color(1.0, 0.25, 0.25, 0.12)
+
+	button.add_theme_stylebox_override("normal", normal)
+	if hover:
+		button.add_theme_stylebox_override("hover", hover)
+	if pressed:
+		button.add_theme_stylebox_override("pressed", pressed)
+	if disabled:
+		button.add_theme_stylebox_override("disabled", disabled)
+
+func _apply_primary_action_button_style(button: Button) -> void:
+	if button == null:
+		return
+
+	# 亮眼浅蓝：用于“导入/导出”这种高频动作按钮
+	button.add_theme_color_override("font_color", Color(0.10, 0.20, 0.35, 1.0))
+	button.add_theme_color_override("font_hover_color", Color(0.10, 0.20, 0.35, 1.0))
+	button.add_theme_color_override("font_pressed_color", Color(0.10, 0.20, 0.35, 1.0))
+	button.add_theme_color_override("font_disabled_color", Color(0.10, 0.20, 0.35, 0.35))
+
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.55, 0.82, 1.0, 0.32)
+	normal.border_width_left = 1
+	normal.border_width_top = 1
+	normal.border_width_right = 1
+	normal.border_width_bottom = 1
+	normal.border_color = Color(0.55, 0.82, 1.0, 0.45)
+	normal.corner_radius_top_left = 8
+	normal.corner_radius_top_right = 8
+	normal.corner_radius_bottom_left = 8
+	normal.corner_radius_bottom_right = 8
+
+	var hover := normal.duplicate() as StyleBoxFlat
+	if hover:
+		hover.bg_color = Color(0.55, 0.82, 1.0, 0.42)
+		hover.border_color = Color(0.55, 0.82, 1.0, 0.70)
+
+	var pressed := normal.duplicate() as StyleBoxFlat
+	if pressed:
+		pressed.bg_color = Color(0.55, 0.82, 1.0, 0.22)
+		pressed.border_color = Color(0.55, 0.82, 1.0, 0.85)
+
+	var disabled := normal.duplicate() as StyleBoxFlat
+	if disabled:
+		disabled.bg_color = Color(0.55, 0.82, 1.0, 0.10)
+		disabled.border_color = Color(0.55, 0.82, 1.0, 0.18)
+
+	button.add_theme_stylebox_override("normal", normal)
+	if hover:
+		button.add_theme_stylebox_override("hover", hover)
+	if pressed:
+		button.add_theme_stylebox_override("pressed", pressed)
+	if disabled:
+		button.add_theme_stylebox_override("disabled", disabled)
+
 func _update_action_buttons_state() -> void:
 	var has_project := not selected_project.is_empty()
 	var has_episode := has_project and not _selected_episode_title.is_empty()
 
 	if open_project_button:
 		open_project_button.disabled = not has_episode
-	if delete_project_button:
-		delete_project_button.disabled = not has_project
 	if add_episode_button:
 		add_episode_button.disabled = not has_project
-	if export_zip_button:
-		export_zip_button.disabled = (not EXPORT_ZIP_ENABLED) or (not has_project)
-	if install_to_mods_button:
-		install_to_mods_button.disabled = not has_project
+	if _import_assets_button:
+		_import_assets_button.disabled = not has_project
 
 func _show_new_project_error(message: String) -> void:
 	if new_project_error_label:
@@ -471,6 +583,15 @@ func _init_row_styles() -> void:
 	_row_style_normal.content_margin_top = 10
 	_row_style_normal.content_margin_bottom = 10
 
+	_row_style_hover = _row_style_normal.duplicate() as StyleBoxFlat
+	if _row_style_hover:
+		_row_style_hover.bg_color = Color(1, 1, 1, 0.08)
+		_row_style_hover.border_width_left = 1
+		_row_style_hover.border_width_top = 1
+		_row_style_hover.border_width_right = 1
+		_row_style_hover.border_width_bottom = 1
+		_row_style_hover.border_color = Color(0.8, 0.85, 1.0, 0.20)
+
 	_row_style_selected = StyleBoxFlat.new()
 	_row_style_selected.bg_color = Color(0.35, 0.55, 1.0, 0.16)
 	_row_style_selected.border_width_left = 1
@@ -533,11 +654,13 @@ func _apply_search_filter(query: String) -> void:
 		_clear_project_selection()
 
 func _on_row_gui_input(event: InputEvent, project_name: String) -> void:
-	# 单击行不视为“选择工程”，避免用户未点“选择”按钮也被误选中。
-	# 双击行视为快捷操作：先选择该工程，再尝试打开。
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and event.double_click:
+	# 单击行：直接选择工程
+	# 双击行：快捷打开（保持原逻辑）
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_on_project_selected(project_name)
-		_on_open_project_button_pressed()
+		if event.double_click:
+			_on_open_project_button_pressed()
+		get_viewport().set_input_as_handled()
 
 func _on_project_scroll_gui_input(event: InputEvent) -> void:
 	# 点击列表空白处：取消选择（更符合直觉）
@@ -588,14 +711,24 @@ func _create_project_item(project_name: String):
 	row_panel.custom_minimum_size = Vector2(0, 56)
 	row_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	row_panel.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	if _row_style_normal:
 		row_panel.add_theme_stylebox_override("panel", _row_style_normal)
 	row_panel.gui_input.connect(_on_row_gui_input.bind(project_name))
+	row_panel.mouse_entered.connect(func():
+		row_panel.set_meta("hovered", true)
+		_refresh_project_item_ui()
+	)
+	row_panel.mouse_exited.connect(func():
+		row_panel.set_meta("hovered", false)
+		_refresh_project_item_ui()
+	)
 
 	var item_container := HBoxContainer.new()
 	item_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	item_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	item_container.add_theme_constant_override("separation", 12)
+	item_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	# 工程名称标签
 	var label = Label.new()
@@ -605,42 +738,56 @@ func _create_project_item(project_name: String):
 	label.add_theme_font_override("font", UI_FONT)
 	label.add_theme_font_size_override("font_size", 22)
 	label.add_theme_color_override("font_color", Color(1, 1, 1, 0.92))
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	# 选择按钮
-	var select_button = Button.new()
-	select_button.text = "选择"
-	select_button.pressed.connect(_toggle_project_selection.bind(project_name))
-	select_button.custom_minimum_size = Vector2(56, 34)
-	select_button.add_theme_font_override("font", UI_FONT)
-	select_button.add_theme_font_size_override("font_size", 16)
+	var actions := HBoxContainer.new()
+	actions.size_flags_horizontal = 0
+	actions.add_theme_constant_override("separation", 8)
+	actions.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var export_button := Button.new()
+	export_button.text = "📦"
+	export_button.tooltip_text = "导入到Mods / 导出ZIP"
+	export_button.custom_minimum_size = Vector2(44, 34)
+	export_button.focus_mode = Control.FOCUS_NONE
+	export_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	_apply_primary_action_button_style(export_button)
+	export_button.pressed.connect(_on_project_actions_pressed.bind(project_name))
+
+	var delete_button := Button.new()
+	delete_button.text = "🗑"
+	delete_button.tooltip_text = "删除工程"
+	delete_button.custom_minimum_size = Vector2(44, 34)
+	delete_button.focus_mode = Control.FOCUS_NONE
+	delete_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	_apply_danger_button_style(delete_button)
+	delete_button.pressed.connect(_on_project_delete_row_pressed.bind(project_name))
+
+	actions.add_child(export_button)
+	actions.add_child(delete_button)
 
 	item_container.add_child(label)
-	item_container.add_child(select_button)
+	item_container.add_child(actions)
 	row_panel.add_child(item_container)
 	project_list.add_child(row_panel)
-	project_items.append({"name": project_name, "panel": row_panel, "button": select_button})
+	project_items.append({"name": project_name, "panel": row_panel})
 	_refresh_project_item_ui()
-
-func _toggle_project_selection(project_name: String) -> void:
-	if selected_project == project_name:
-		_clear_project_selection()
-		return
-	_on_project_selected(project_name)
 
 func _refresh_project_item_ui() -> void:
 	for item in project_items:
 		var panel: Control = item.get("panel")
-		var button: Button = item.get("button")
 		var project_name := str(item.get("name", ""))
+		var hovered := false
+		if panel and panel.has_meta("hovered"):
+			hovered = bool(panel.get_meta("hovered"))
 
 		if panel:
 			if project_name == selected_project and _row_style_selected:
 				panel.add_theme_stylebox_override("panel", _row_style_selected)
+			elif hovered and _row_style_hover:
+				panel.add_theme_stylebox_override("panel", _row_style_hover)
 			elif _row_style_normal:
 				panel.add_theme_stylebox_override("panel", _row_style_normal)
-
-		if button:
-			button.text = "取消选择" if project_name == selected_project else "选择"
 
 func _on_project_selected(project_name: String):
 	"""选择工程"""
@@ -656,6 +803,76 @@ func _clear_project_selection() -> void:
 	_refresh_project_item_ui()
 	_show_empty_project_details()
 	_update_action_buttons_state()
+
+func _begin_delete_project(project_name: String) -> void:
+	if project_name.is_empty():
+		return
+
+	pending_delete_project = project_name
+	if delete_confirm_dialog:
+		delete_confirm_dialog.dialog_text = '确定删除工程"%s"？此操作不可撤销。' % pending_delete_project
+		delete_confirm_dialog.popup_centered()
+		return
+
+	_on_delete_confirmed()
+
+func _on_project_delete_row_pressed(project_name: String) -> void:
+	_on_project_selected(project_name)
+	_begin_delete_project(project_name)
+
+func _ensure_project_action_dialog() -> void:
+	if _project_action_dialog != null and is_instance_valid(_project_action_dialog):
+		return
+
+	var dialog := ConfirmationDialog.new()
+	dialog.title = "导入/导出"
+	dialog.dialog_text = "请选择要对该工程执行的操作："
+	dialog.ok_button_text = "导入到Mods"
+	dialog.cancel_button_text = "取消"
+	add_child(dialog)
+
+	_project_action_dialog = dialog
+	if not dialog.confirmed.is_connected(_on_project_action_import_confirmed):
+		dialog.confirmed.connect(_on_project_action_import_confirmed)
+	if dialog.has_signal("custom_action") and not dialog.custom_action.is_connected(_on_project_action_custom_action):
+		dialog.custom_action.connect(_on_project_action_custom_action)
+
+	var zip_btn := dialog.add_button("导出ZIP", true, "export_zip")
+	_project_action_dialog_zip_button = zip_btn
+	_update_project_action_dialog_zip_state()
+
+func _update_project_action_dialog_zip_state() -> void:
+	if _project_action_dialog_zip_button == null:
+		return
+	_project_action_dialog_zip_button.disabled = not EXPORT_ZIP_ENABLED
+	_project_action_dialog_zip_button.tooltip_text = "ZIP功能暂时不可用" if not EXPORT_ZIP_ENABLED else ""
+
+func _on_project_actions_pressed(project_name: String) -> void:
+	_on_project_selected(project_name)
+	_pending_project_action = project_name
+	_ensure_project_action_dialog()
+	_update_project_action_dialog_zip_state()
+	if _project_action_dialog:
+		_project_action_dialog.dialog_text = "工程「%s」：请选择操作（ZIP暂时不可用）。" % project_name
+		_project_action_dialog.popup_centered()
+
+func _on_project_action_import_confirmed() -> void:
+	if _pending_project_action.is_empty():
+		return
+	var project_name := _pending_project_action
+	_pending_project_action = ""
+	_begin_install_to_mods_for_project(project_name)
+
+func _on_project_action_custom_action(action: StringName) -> void:
+	if _pending_project_action.is_empty():
+		return
+	var project_name := _pending_project_action
+	_pending_project_action = ""
+	if action == &"export_zip":
+		if not EXPORT_ZIP_ENABLED:
+			_show_info_dialog("导出ZIP暂时不可用", "导出ZIP功能暂时禁用（目前仍有问题），请先使用“导入到Mods”进行测试。")
+			return
+		_begin_export_zip_for_project(project_name)
 
 func _show_empty_project_details() -> void:
 	_set_right_panel_visible(false)
@@ -1512,24 +1729,53 @@ func _validate_scripts_for_packaging(project_root: String, episode_title: String
 func _packaging_character_exists(project_root: String, character_name: String) -> bool:
 	return _packaging_get_character_scene(project_root, character_name) != null
 
+func _packaging_normalize_project_root(project_root: String) -> String:
+	var root := project_root.replace("\\", "/").trim_suffix("/")
+	return root
+
+func _packaging_resolve_project_absolute(project_root: String, raw_path: String) -> String:
+	var root := _packaging_normalize_project_root(project_root)
+	var raw := raw_path.strip_edges()
+	if root.is_empty() or raw.is_empty():
+		return ""
+	if raw.begins_with("res://") or raw.begins_with("user://"):
+		return raw
+	var rel := raw.replace("\\", "/").trim_prefix("/")
+	return root + "/" + rel
+
+func _packaging_resolve_character_scene_path(project_root: String, character_key: String) -> String:
+	var raw := character_key.strip_edges()
+	if raw.is_empty():
+		return ""
+
+	# 允许直接使用绝对路径（Mod编辑器会对自定义角色写入 user://.../characters/<id>.tscn）
+	if raw.begins_with("res://") or raw.begins_with("user://"):
+		return raw
+
+	# 允许工程相对路径（例如 characters/<id>.tscn）
+	if raw.find("/") != -1:
+		return _packaging_resolve_project_absolute(project_root, raw)
+
+	# 兜底：内置角色名
+	return "res://scenes/character/" + raw + ".tscn"
+
 func _packaging_get_character_scene(project_root: String, character_name: String) -> PackedScene:
 	var cache_key := project_root + "|" + character_name
 	if _packaging_character_scene_cache.has(cache_key):
 		var cached: Variant = _packaging_character_scene_cache[cache_key]
 		return cached as PackedScene
 
-	var scene_path := "res://scenes/character/" + character_name + ".tscn"
-	if ResourceLoader.exists(scene_path):
-		var scene := load(scene_path) as PackedScene
+	var scene_path := _packaging_resolve_character_scene_path(project_root, character_name)
+	if scene_path.is_empty() or not _packaging_resource_exists(scene_path):
+		_packaging_character_scene_cache[cache_key] = null
+		return null
+
+	var scene := load(scene_path) as PackedScene
+	if scene == null and not scene_path.ends_with(".remap"):
+		scene = load(scene_path + ".remap") as PackedScene
+	if scene != null:
 		_packaging_character_scene_cache[cache_key] = scene
 		return scene
-
-	# 尝试自定义角色：user://mod_projects/<project>/characters/<name>.tscn
-	var custom_path := project_root + "/characters/" + character_name + ".tscn"
-	if FileAccess.file_exists(custom_path):
-		var custom_scene := load(custom_path) as PackedScene
-		_packaging_character_scene_cache[cache_key] = custom_scene
-		return custom_scene
 
 	_packaging_character_scene_cache[cache_key] = null
 	return null
@@ -1595,6 +1841,17 @@ func _packaging_is_valid_background_path(project_root: String, input_path: Strin
 	if raw.is_empty():
 		return false
 
+	# 允许直接使用工程目录下的绝对路径（Mod编辑器的自定义资源会写入 user://mod_projects/...）
+	var root := _packaging_normalize_project_root(project_root)
+	if not root.is_empty():
+		var prefix := root + "/"
+		var normalized := raw.replace("\\", "/")
+		if normalized.begins_with(prefix):
+			var rel := normalized.substr(prefix.length())
+			if rel.begins_with("images/"):
+				return FileAccess.file_exists(normalized)
+			return false
+
 	# 支持 mod 相对路径（与 mod_config.json 一致）
 	if raw.begins_with("images/"):
 		return FileAccess.file_exists(project_root + "/" + raw)
@@ -1627,6 +1884,18 @@ func _packaging_is_valid_music_path(project_root: String, input_path: String) ->
 	var raw := input_path.strip_edges()
 	if raw.is_empty():
 		return false
+
+	# 允许直接使用工程目录下的绝对路径（Mod编辑器的自定义资源会写入 user://mod_projects/...）
+	var root := _packaging_normalize_project_root(project_root)
+	if not root.is_empty():
+		var prefix := root + "/"
+		var normalized := raw.replace("\\", "/")
+		if normalized.begins_with(prefix):
+			# 仅接受会被打包拷贝的目录
+			var rel := normalized.substr(prefix.length())
+			if rel.begins_with("music/"):
+				return FileAccess.file_exists(normalized)
+			return false
 
 	# 支持 mod 相对路径（与 mod_config.json 一致）
 	if raw.begins_with("music/"):
@@ -1770,6 +2039,7 @@ func _build_mod_folder(project_name: String, out_root: String, mod_folder: Strin
 		var src: String = _get_project_root(project_name) + "/" + folder_name
 		if DirAccess.open(src) != null:
 			_copy_directory_recursive(src, out_mod_root + "/" + folder_name)
+	_fix_custom_character_scene_script_paths(out_mod_root)
 
 	# 导出剧情节到 story/
 	var story_dir := DirAccess.open(out_mod_root)
@@ -1810,13 +2080,132 @@ func _build_mod_folder(project_name: String, out_root: String, mod_folder: Strin
 		var scripts_any: Variant = episode_data.get("scripts", [])
 		var scripts: Array = scripts_any as Array
 
-		var gd_code := _generate_story_gdscript(scripts)
+		var rewritten_scripts := _packaging_rewrite_scripts_for_mod(_get_project_root(project_name), mod_folder, scripts)
+		var gd_code := _generate_story_gdscript(rewritten_scripts)
 		var gd_path := out_mod_root + "/story/%s.gd" % out_ep_name
 		_write_text_file(gd_path, gd_code)
 		var tscn_code := _generate_story_scene(mod_folder, out_ep_name)
 		var tscn_path := out_mod_root + "/story/%s.tscn" % out_ep_name
 		_write_text_file(tscn_path, tscn_code)
 	return OK
+
+func _packaging_rewrite_resource_path_for_mod(project_root: String, mod_folder: String, raw_path: String) -> String:
+	var raw := raw_path.strip_edges()
+	if raw.is_empty():
+		return raw_path
+
+	var normalized := raw.replace("\\", "/")
+
+	# 已经是 mods 路径：确保统一为 user://（.gd 内不会经过 tscn 的文本替换）
+	if normalized.begins_with("res://mods/"):
+		return normalized.replace("res://mods/", "user://mods/")
+	if normalized.begins_with("user://mods/"):
+		return normalized
+
+	# 工程绝对路径 -> mods 绝对路径
+	var root := _packaging_normalize_project_root(project_root)
+	if not root.is_empty():
+		var prefix := root + "/"
+		if normalized.begins_with(prefix):
+			var rel := normalized.substr(prefix.length()).trim_prefix("/")
+			return ("user://mods/%s/%s" % [mod_folder, rel]).replace("\\", "/")
+
+	# mod 相对路径（与 mod_config.json 一致） -> mods 绝对路径
+	if normalized.begins_with("images/") or normalized.begins_with("music/") or normalized.begins_with("characters/"):
+		return ("user://mods/%s/%s" % [mod_folder, normalized]).replace("\\", "/")
+
+	return raw_path
+
+
+func _packaging_rewrite_scripts_for_mod(project_root: String, mod_folder: String, scripts: Array) -> Array:
+	var out: Array = []
+	for entry_any in scripts:
+		if typeof(entry_any) != TYPE_DICTIONARY:
+			continue
+		var entry := (entry_any as Dictionary).duplicate(true)
+
+		var type_any: Variant = entry.get("type", -1)
+		var block_type: int = -1
+		if typeof(type_any) == TYPE_INT or typeof(type_any) == TYPE_FLOAT:
+			block_type = int(type_any)
+		elif typeof(type_any) == TYPE_STRING:
+			var s := (type_any as String).strip_edges()
+			if s.is_valid_int():
+				block_type = int(s)
+		var params_any: Variant = entry.get("params", {})
+		var params: Dictionary = params_any as Dictionary if typeof(params_any) == TYPE_DICTIONARY else {}
+		params = params.duplicate(true)
+
+		match block_type:
+			BlockType.BACKGROUND, BlockType.SHOW_BACKGROUND:
+				var bg: String = str(params.get("background_path", "")).strip_edges()
+				if not bg.is_empty():
+					params["background_path"] = _packaging_rewrite_resource_path_for_mod(project_root, mod_folder, bg)
+			BlockType.MUSIC, BlockType.CHANGE_MUSIC:
+				var mu: String = str(params.get("music_path", "")).strip_edges()
+				if not mu.is_empty():
+					params["music_path"] = _packaging_rewrite_resource_path_for_mod(project_root, mod_folder, mu)
+			BlockType.SHOW_CHARACTER_1, BlockType.SHOW_CHARACTER_2, BlockType.SHOW_CHARACTER_3:
+				var ch: String = str(params.get("character_name", "")).strip_edges()
+				if not ch.is_empty():
+					params["character_name"] = _packaging_rewrite_resource_path_for_mod(project_root, mod_folder, ch)
+			_:
+				pass
+
+		entry["params"] = params
+		out.append(entry)
+
+	return out
+
+func _fix_custom_character_scene_script_paths(out_mod_root: String) -> void:
+	# 自定义角色会在工程目录生成 characters/<name>.tscn 与 characters/<name>.gd。
+	# 导入到 Mods 时目录会被复制到 user://mods/<mod>/characters/，这里将 .tscn 中的脚本引用重写为新的绝对路径，
+	# 避免继续指向 user://mod_projects/...（用户删除工程后会导致 Mods 内角色失效）。
+	var dir_path := (out_mod_root + "/characters").replace("\\", "/")
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return
+
+	dir.list_dir_begin()
+	var entry := str(dir.get_next())
+	while entry != "":
+		if entry != "." and entry != ".." and not dir.current_is_dir() and entry.ends_with(".tscn"):
+			var scene_path := (dir_path + "/" + entry).replace("\\", "/")
+			var gd_path := (dir_path + "/" + entry.get_basename() + ".gd").replace("\\", "/")
+			if FileAccess.file_exists(gd_path):
+				_rewrite_tscn_script_path(scene_path, gd_path)
+		entry = str(dir.get_next())
+	dir.list_dir_end()
+
+
+func _rewrite_tscn_script_path(scene_path: String, script_path: String) -> void:
+	var f := FileAccess.open(scene_path, FileAccess.READ)
+	if f == null:
+		return
+	var text := f.get_as_text()
+	f.close()
+
+	var marker := "[ext_resource type=\"Script\""
+	var m_idx := text.find(marker)
+	if m_idx == -1:
+		return
+	var p_idx := text.find("path=\"", m_idx)
+	if p_idx == -1:
+		return
+	var p_start := p_idx + "path=\"".length()
+	var p_end := text.find("\"", p_start)
+	if p_end == -1:
+		return
+
+	var new_text := text.substr(0, p_start) + script_path + text.substr(p_end)
+	if new_text == text:
+		return
+
+	var out := FileAccess.open(scene_path, FileAccess.WRITE)
+	if out == null:
+		return
+	out.store_string(new_text)
+	out.close()
 
 func _extract_ep_name_from_path(path: String) -> String:
 	if path.is_empty():
@@ -2422,6 +2811,18 @@ func _on_open_project_button_pressed():
 
 	_transition_to_editor(editor_scene, episode_dir)
 
+func _on_import_assets_pressed() -> void:
+	if selected_project.is_empty():
+		return
+
+	var asset_scene := load(ASSET_EDITOR_SCENE_PATH)
+	if not asset_scene:
+		push_error("无法加载素材编辑器场景: " + ASSET_EDITOR_SCENE_PATH)
+		return
+
+	var root := _get_project_root(selected_project)
+	_transition_to_editor(asset_scene, root)
+
 func _transition_to_editor(editor_scene: PackedScene, episode_dir: String) -> void:
 	if _is_transitioning or _is_exiting:
 		return
@@ -2477,13 +2878,7 @@ func _on_delete_project_button_pressed():
 	if selected_project.is_empty():
 		return
 
-	pending_delete_project = selected_project
-	if delete_confirm_dialog:
-		delete_confirm_dialog.dialog_text = '确定删除工程"%s"？此操作不可撤销。' % pending_delete_project
-		delete_confirm_dialog.popup_centered()
-		return
-
-	_on_delete_confirmed()
+	_begin_delete_project(selected_project)
 
 func _on_delete_confirmed() -> void:
 	if pending_delete_project.is_empty():

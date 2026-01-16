@@ -16,6 +16,8 @@ const MOD_EDITOR_RESOURCE_INDEX_PATH: String = "res://assets/mod_editor_resource
 const PALETTE_ROW_SIDE_PADDING_X: float = 10.0
 const EDITOR_PINS_FILENAME: String = "editor_pins.json"
 const BACKGROUND_STAR_TAB_KEY: String = "__starred__"
+const BACKGROUND_CUSTOM_TAB_KEY: String = "__custom__"
+const CUSTOM_ASSETS_FILENAME: String = "custom_assets.json"
 
 const RESOURCE_ROW_BG: Color = Color(0.12, 0.12, 0.15, 1.0)
 const RESOURCE_ROW_BG_HOVER: Color = Color(0.16, 0.16, 0.20, 1.0)
@@ -700,34 +702,59 @@ func _load_characters_list():
 	_clear_children(_character_rows)
 
 	character_names.sort()
+
+	var custom_entries := _get_custom_character_entries()
+	var custom_display_by_full: Dictionary = {}
+	for e_any in custom_entries:
+		if typeof(e_any) == TYPE_DICTIONARY:
+			var e := e_any as Dictionary
+			custom_display_by_full[str(e.get("full_path", ""))] = str(e.get("display", ""))
+
 	var pinned := _get_pinned_character_names()
 	var pinned_set: Dictionary = {}
 	for entry in pinned:
 		pinned_set[str(entry)] = true
 
-	# 先按置顶顺序添加（仅添加存在的角色）
 	var count_added := 0
-	for pinned_name_any in pinned:
-		var pinned_name := str(pinned_name_any)
-		if unique.has(pinned_name):
-			_add_character_row(_character_rows, pinned_name, true)
+
+	# 先按置顶顺序添加
+	for pinned_any in pinned:
+		var key := str(pinned_any)
+		if unique.has(key):
+			_add_character_row(_character_rows, key, key, true)
+			count_added += 1
+		elif custom_display_by_full.has(key):
+			_add_character_row(_character_rows, str(custom_display_by_full.get(key)), key, true)
 			count_added += 1
 
-	# 再添加未置顶角色（按字母序）
+	# 再添加未置顶的内置角色（按字母序）
 	for character_name in character_names:
 		if pinned_set.has(character_name):
 			continue
-		_add_character_row(_character_rows, character_name, false)
+		_add_character_row(_character_rows, character_name, character_name, false)
 		count_added += 1
 
-	print("Loaded %d characters" % count_added)
+	# 最后追加：当前工程的自定义角色（放在列表最下方，逻辑同音乐）
+	if not custom_entries.is_empty() and _character_rows != null:
+		_add_character_section_label("自定义角色")
+		for e_any in custom_entries:
+			if typeof(e_any) != TYPE_DICTIONARY:
+				continue
+			var e := e_any as Dictionary
+			var key := str(e.get("full_path", "")).strip_edges()
+			if key.is_empty() or pinned_set.has(key):
+				continue
+			_add_character_row(_character_rows, str(e.get("display", "")), key, false)
+			count_added += 1
+
+	print("Loaded %d characters (custom %d)" % [count_added, custom_entries.size()])
 	_refresh_visible_resource_row_styles()
 
-func _add_character_row(parent: VBoxContainer, character_name: String, is_pinned: bool) -> void:
+func _add_character_row(parent: VBoxContainer, display_name: String, character_key: String, is_pinned: bool) -> void:
 	if parent == null:
 		return
 
-	var panel := _make_interactive_resource_row("character", character_name, Callable(self, "_select_character_name").bind(character_name))
+	var panel := _make_interactive_resource_row("character", character_key, Callable(self, "_select_character_name").bind(character_key))
 
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
@@ -742,7 +769,7 @@ func _add_character_row(parent: VBoxContainer, character_name: String, is_pinned
 	texture_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	texture_rect.stretch_mode = TextureRect.STRETCH_SCALE
 	texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	texture_rect.texture = _get_character_thumbnail(character_name)
+	texture_rect.texture = _get_character_thumbnail(character_key)
 	thumb_holder.add_child(texture_rect)
 
 	var star_button := Button.new()
@@ -752,13 +779,13 @@ func _add_character_row(parent: VBoxContainer, character_name: String, is_pinned
 	star_button.focus_mode = Control.FOCUS_NONE
 	star_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	star_button.position = Vector2(4, 4)
-	star_button.pressed.connect(Callable(self, "_on_character_pin_pressed").bind(character_name))
+	star_button.pressed.connect(Callable(self, "_on_character_pin_pressed").bind(character_key))
 	if is_pinned:
 		star_button.modulate = Color(1.0, 0.9, 0.25)
 	thumb_holder.add_child(star_button)
 
 	var label := Label.new()
-	label.text = character_name
+	label.text = display_name
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.clip_text = true
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -767,6 +794,17 @@ func _add_character_row(parent: VBoxContainer, character_name: String, is_pinned
 	row.add_child(label)
 	panel.add_child(row)
 	parent.add_child(panel)
+
+func _add_character_section_label(text: String) -> void:
+	if _character_rows == null:
+		return
+	var label := Label.new()
+	label.text = text
+	label.add_theme_color_override("font_color", Color(1, 1, 1, 0.65))
+	label.add_theme_font_size_override("font_size", 14)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.custom_minimum_size = Vector2(0, 22)
+	_character_rows.add_child(label)
 
 func _expression_key(character_name: String, expression_name: String) -> String:
 	var c := character_name.strip_edges()
@@ -854,6 +892,10 @@ func _refresh_background_tabs() -> void:
 	# 固定星标Tab：用于收纳玩家收藏的背景（不置顶其他Tab）
 	_add_background_tab("★", BACKGROUND_STAR_TAB_KEY)
 
+	# 当前工程的自定义背景（来自 custom_assets.json 的 compiled_path）
+	if not _get_custom_background_tab_entries().is_empty():
+		_add_background_tab("自定义", BACKGROUND_CUSTOM_TAB_KEY)
+
 	var root_files: Array[String] = _collect_files_flat(_background_base_dir, allowed_exts)
 	if root_files.is_empty():
 		root_files = _get_index_background_root_files()
@@ -885,7 +927,12 @@ func _refresh_background_tabs() -> void:
 
 	if background_tabs.get_child_count() > 0:
 		# 默认显示第一个“非星标”tab（更符合挑选资源的直觉）；如果没有则显示星标tab。
-		var default_tab := 1 if background_tabs.get_child_count() > 1 else 0
+		var default_tab := 0
+		for i in range(_background_tab_dirs.size()):
+			var key: String = _background_tab_dirs[i]
+			if key != BACKGROUND_STAR_TAB_KEY and key != BACKGROUND_CUSTOM_TAB_KEY:
+				default_tab = i
+				break
 		background_tabs.current_tab = default_tab
 		_on_background_tab_changed(default_tab)
 
@@ -983,6 +1030,26 @@ func _on_background_tab_changed(tab_index: int) -> void:
 	_clear_children(rows)
 
 	# 星标Tab：直接从项目级收藏列表生成
+	if rel_dir == BACKGROUND_CUSTOM_TAB_KEY:
+		var entries := _get_custom_background_tab_entries()
+		var count_added := 0
+		for e_any in entries:
+			if typeof(e_any) != TYPE_DICTIONARY:
+				continue
+			var e := e_any as Dictionary
+			var full_path := str(e.get("full_path", "")).strip_edges()
+			if full_path.is_empty() or not _resource_exists_with_remap(full_path):
+				continue
+			var display := str(e.get("display", "")).strip_edges()
+			if display.is_empty():
+				display = full_path.get_file()
+			_add_background_thumb_row(rows, display, full_path, _is_background_starred(full_path))
+			count_added += 1
+		_background_tab_loaded[tab_index] = true
+		print("已加载背景分类[自定义] %d 项" % count_added)
+		_refresh_visible_resource_row_styles()
+		return
+
 	if rel_dir == BACKGROUND_STAR_TAB_KEY:
 		var starred := _get_starred_background_paths()
 		var count_added := 0
@@ -1101,6 +1168,266 @@ func _get_index_background_folder_files(folder_name: String) -> Array[String]:
 		results.append(str(entry))
 	return results
 
+func _get_custom_assets() -> Dictionary:
+	if _project_root.is_empty():
+		return {}
+	var path := (_project_root.trim_suffix("/") + "/" + CUSTOM_ASSETS_FILENAME).replace("\\", "/")
+	if not FileAccess.file_exists(path):
+		return {}
+
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return {}
+	var json := JSON.new()
+	var err := json.parse(f.get_as_text())
+	f.close()
+	if err != OK or typeof(json.data) != TYPE_DICTIONARY:
+		return {}
+	return json.data as Dictionary
+
+
+func _get_custom_character_entries() -> Array:
+	var assets := _get_custom_assets()
+	if assets.is_empty():
+		return []
+
+	var chars_any: Variant = assets.get("characters", {})
+	if typeof(chars_any) != TYPE_DICTIONARY:
+		return []
+
+	var results: Array = []
+	var chars := chars_any as Dictionary
+	for cid_any in chars.keys():
+		var cid := str(cid_any).strip_edges()
+		if cid.is_empty():
+			continue
+		if _project_root.is_empty():
+			continue
+		var full := (_project_root.trim_suffix("/") + "/characters/" + cid + ".tscn").replace("\\", "/")
+		if FileAccess.file_exists(full):
+			results.append({"display": cid, "full_path": full})
+
+	results.sort_custom(func(a: Variant, b: Variant) -> bool:
+		return str((a as Dictionary).get("display", "")) < str((b as Dictionary).get("display", ""))
+	)
+	return results
+
+
+func _is_custom_character_key(key: String) -> bool:
+	var s := key.strip_edges()
+	if s.is_empty():
+		return false
+	return s.begins_with("user://") or s.begins_with("res://") or s.find("/") != -1 or s.ends_with(".tscn")
+
+
+func _resolve_character_scene_path(character_key: String) -> String:
+	var raw := character_key.strip_edges()
+	if raw.is_empty():
+		return ""
+
+	if raw.begins_with("res://") or raw.begins_with("user://"):
+		return raw
+
+	# 支持工程相对路径（例如：characters/xxx.tscn）
+	if raw.find("/") != -1:
+		if not _project_root.is_empty():
+			var candidate_project := _project_root.trim_suffix("/") + "/" + raw.replace("\\", "/").trim_prefix("/")
+			if _resource_exists_with_remap(candidate_project):
+				return candidate_project
+		return raw
+
+	# 内置角色：按名称拼出 res://scenes/character/<name>.tscn
+	return "res://scenes/character/" + raw + ".tscn"
+
+
+func _get_custom_character_id_from_key(character_key: String) -> String:
+	var raw := character_key.strip_edges()
+	if raw.is_empty():
+		return ""
+	if raw.ends_with(".tscn") or raw.ends_with(".tscn.remap"):
+		return raw.get_file().get_basename()
+	if raw.find("/") != -1:
+		return raw.get_file().get_basename()
+	return ""
+
+
+func _get_custom_character_data(character_key: String) -> Dictionary:
+	var cid := _get_custom_character_id_from_key(character_key)
+	if cid.is_empty():
+		return {}
+	var assets := _get_custom_assets()
+	if assets.is_empty():
+		return {}
+	var chars_any: Variant = assets.get("characters", {})
+	if typeof(chars_any) != TYPE_DICTIONARY:
+		return {}
+	var data_any: Variant = (chars_any as Dictionary).get(cid, {})
+	return data_any as Dictionary if typeof(data_any) == TYPE_DICTIONARY else {}
+
+
+func _get_custom_character_base_texture(character_key: String) -> Texture2D:
+	var data := _get_custom_character_data(character_key)
+	if data.is_empty() or _project_root.is_empty():
+		return null
+	var rel := str(data.get("base_path", "")).replace("\\", "/").trim_prefix("/")
+	if rel.is_empty():
+		return null
+	var abs := (_project_root.trim_suffix("/") + "/" + rel).replace("\\", "/")
+	if not FileAccess.file_exists(abs):
+		return null
+	var img := Image.new()
+	if img.load(abs) != OK or img.is_empty():
+		return null
+	return ImageTexture.create_from_image(img)
+
+
+func _get_custom_expression_texture(character_key: String, expression_name: String) -> Texture2D:
+	var data := _get_custom_character_data(character_key)
+	if data.is_empty() or _project_root.is_empty():
+		return null
+	var exprs_any: Variant = data.get("expressions", {})
+	if typeof(exprs_any) != TYPE_DICTIONARY:
+		return null
+	var ed_any: Variant = (exprs_any as Dictionary).get(expression_name, {})
+	if typeof(ed_any) != TYPE_DICTIONARY:
+		return null
+	var rel := str((ed_any as Dictionary).get("path", "")).replace("\\", "/").trim_prefix("/")
+	if rel.is_empty():
+		return null
+	var abs := (_project_root.trim_suffix("/") + "/" + rel).replace("\\", "/")
+	if not FileAccess.file_exists(abs):
+		return null
+	var img := Image.new()
+	if img.load(abs) != OK or img.is_empty():
+		return null
+	return ImageTexture.create_from_image(img)
+
+
+func _resolve_custom_bg_full_path(rel_or_path: String) -> String:
+	var raw := rel_or_path.strip_edges()
+	if raw.is_empty():
+		return ""
+
+	if raw.begins_with("res://") or raw.begins_with("user://"):
+		return raw if _resource_exists_with_remap(raw) else ""
+
+	if _project_root.is_empty():
+		return ""
+
+	var rel := raw.replace("\\", "/").trim_prefix("/")
+	var direct := _project_root.trim_suffix("/") + "/" + rel
+	if _resource_exists_with_remap(direct):
+		return direct
+
+	var file := rel.get_file()
+	var png := file.get_basename() + ".png"
+	var candidates: Array[String] = [
+		_project_root + "/images/bg_compiled/" + png,
+		_project_root + "/images/bg_compiled/" + file,
+		_project_root + "/images/bg/" + png,
+		_project_root + "/images/bg/" + file,
+	]
+	for c in candidates:
+		if _resource_exists_with_remap(c):
+			return c
+	return ""
+
+
+func _get_custom_background_tab_entries() -> Array:
+	var assets := _get_custom_assets()
+	if assets.is_empty():
+		return []
+
+	var bgs_any: Variant = assets.get("backgrounds", [])
+	if typeof(bgs_any) != TYPE_ARRAY:
+		return []
+
+	var results: Array = []
+	var unique: Dictionary = {}
+
+	for entry_any in (bgs_any as Array):
+		if typeof(entry_any) != TYPE_DICTIONARY:
+			continue
+		var entry := entry_any as Dictionary
+
+		var compiled_rel := str(entry.get("compiled_path", "")).strip_edges()
+		var src_rel := str(entry.get("path", "")).strip_edges()
+
+		var display := compiled_rel
+		var full := _resolve_custom_bg_full_path(compiled_rel)
+		if full.is_empty():
+			display = src_rel
+			full = _resolve_custom_bg_full_path(src_rel)
+		if full.is_empty() or unique.has(full):
+			continue
+		unique[full] = true
+
+		var d := display.get_file()
+		if d.is_empty():
+			d = full.get_file()
+		results.append({"display": d, "full_path": full})
+
+	results.sort_custom(func(a: Variant, b: Variant) -> bool:
+		return str((a as Dictionary).get("display", "")) < str((b as Dictionary).get("display", ""))
+	)
+	return results
+
+func _resolve_custom_music_full_path(rel_or_path: String) -> String:
+	var raw := rel_or_path.strip_edges()
+	if raw.is_empty():
+		return ""
+
+	if raw.begins_with("res://") or raw.begins_with("user://"):
+		return raw if _resource_exists_with_remap(raw) else ""
+
+	if _project_root.is_empty():
+		return ""
+
+	var rel := raw.replace("\\", "/").trim_prefix("/")
+	var direct := _project_root.trim_suffix("/") + "/" + rel
+	if _resource_exists_with_remap(direct):
+		return direct
+
+	var file := rel.get_file()
+	var candidates: Array[String] = [
+		_project_root + "/music/" + file,
+		_project_root + "/audio/" + file,
+	]
+	for c in candidates:
+		if _resource_exists_with_remap(c):
+			return c
+	return ""
+
+
+func _get_custom_music_entries() -> Array:
+	var assets := _get_custom_assets()
+	if assets.is_empty():
+		return []
+
+	var mus_any: Variant = assets.get("music", [])
+	if typeof(mus_any) != TYPE_ARRAY:
+		return []
+
+	var results: Array = []
+	var unique: Dictionary = {}
+	for entry_any in (mus_any as Array):
+		if typeof(entry_any) != TYPE_DICTIONARY:
+			continue
+		var entry := entry_any as Dictionary
+		var rel := str(entry.get("path", "")).strip_edges()
+		if rel.is_empty():
+			continue
+		var full := _resolve_custom_music_full_path(rel)
+		if full.is_empty() or unique.has(full):
+			continue
+		unique[full] = true
+		results.append({"display": rel.get_file(), "full_path": full})
+
+	results.sort_custom(func(a: Variant, b: Variant) -> bool:
+		return str((a as Dictionary).get("display", "")) < str((b as Dictionary).get("display", ""))
+	)
+	return results
+
 func _get_index_music_files() -> Array[String]:
 	var index := _get_resource_index()
 	var music: Variant = index.get("music", {})
@@ -1172,6 +1499,13 @@ func _load_music_list():
 		rel_files = _get_index_music_files()
 	rel_files.sort()
 
+	var custom_entries := _get_custom_music_entries()
+	var custom_display_by_full: Dictionary = {}
+	for e_any in custom_entries:
+		if typeof(e_any) == TYPE_DICTIONARY:
+			var e := e_any as Dictionary
+			custom_display_by_full[str(e.get("full_path", ""))] = str(e.get("display", ""))
+
 	var pinned_paths := _get_pinned_music_paths()
 	var pinned_set: Dictionary = {}
 	var full_to_rel: Dictionary = {}
@@ -1185,6 +1519,8 @@ func _load_music_list():
 		var p := str(p_any)
 		if full_to_rel.has(p):
 			_add_music_row(str(full_to_rel.get(p)), p, true)
+		elif custom_display_by_full.has(p):
+			_add_music_row(str(custom_display_by_full.get(p)), p, true)
 
 	# 再添加其余
 	for rel_path: String in rel_files:
@@ -1193,7 +1529,18 @@ func _load_music_list():
 			continue
 		_add_music_row(rel_path, full_path, false)
 
-	print("已加载 %d 首音乐" % rel_files.size())
+	if not custom_entries.is_empty() and music_rows != null:
+		_add_music_section_label("自定义音乐")
+		for e_any in custom_entries:
+			if typeof(e_any) != TYPE_DICTIONARY:
+				continue
+			var e := e_any as Dictionary
+			var full_path := str(e.get("full_path", "")).strip_edges()
+			if full_path.is_empty() or pinned_set.has(full_path):
+				continue
+			_add_music_row(str(e.get("display", "")), full_path, false)
+
+	print("已加载 %d 首音乐（自定义 %d）" % [rel_files.size(), custom_entries.size()])
 	_refresh_visible_resource_row_styles()
 
 func _add_music_row(display_name: String, full_path: String, is_pinned: bool = false) -> void:
@@ -1239,6 +1586,16 @@ func _add_music_row(display_name: String, full_path: String, is_pinned: bool = f
 	_music_preview_buttons_by_path[full_path] = preview_button
 	_update_music_preview_buttons()
 
+
+func _add_music_section_label(text: String) -> void:
+	if music_rows == null:
+		return
+	var label := Label.new()
+	label.text = text
+	label.add_theme_color_override("font_color", Color(1, 1, 1, 0.75))
+	label.add_theme_font_size_override("font_size", 14)
+	music_rows.add_child(label)
+
 func _select_music_path(full_path: String) -> void:
 	if current_editing_field == null or current_editing_param != "music_path":
 		return
@@ -1282,9 +1639,7 @@ func _toggle_music_preview(full_path: String) -> void:
 	if _music_preview_current_path != full_path:
 		_music_preview_player.stop()
 		_music_preview_player.stream_paused = false
-		var stream: AudioStream = load(full_path) as AudioStream
-		if stream == null and not full_path.ends_with(".remap"):
-			stream = load(full_path + ".remap") as AudioStream
+		var stream := _load_audio_stream_any(full_path)
 		if stream == null:
 			push_warning("无法加载音乐资源: " + full_path)
 			return
@@ -1299,6 +1654,27 @@ func _toggle_music_preview(full_path: String) -> void:
 			_music_preview_player.play()
 
 	_update_music_preview_buttons()
+
+
+func _load_audio_stream_any(path: String) -> AudioStream:
+	if path.strip_edges().is_empty():
+		return null
+	if path.begins_with("res://"):
+		var stream: AudioStream = load(path) as AudioStream
+		if stream == null and not path.ends_with(".remap"):
+			stream = load(path + ".remap") as AudioStream
+		return stream
+
+	if not FileAccess.file_exists(path):
+		return null
+	var ext := path.get_extension().to_lower()
+	if ext == "ogg" and ClassDB.class_exists("AudioStreamOggVorbis"):
+		return AudioStreamOggVorbis.load_from_file(path)
+	if ext == "mp3" and ClassDB.class_exists("AudioStreamMP3"):
+		return AudioStreamMP3.load_from_file(path)
+	if ext == "wav" and ClassDB.class_exists("AudioStreamWAV"):
+		return AudioStreamWAV.load_from_file(path)
+	return null
 
 func _update_music_preview_buttons() -> void:
 	for key in _music_preview_buttons_by_path.keys():
@@ -1379,6 +1755,14 @@ func _get_character_thumbnail(character_name: String) -> Texture2D:
 	if _character_thumbnail_cache.has(character_name):
 		return _character_thumbnail_cache[character_name]
 
+	if _is_custom_character_key(character_name):
+		var tex := _get_custom_character_base_texture(character_name)
+		if tex != null:
+			var thumb := _get_texture_thumbnail_fit(tex, CHARACTER_ICON_SIZE)
+			_character_thumbnail_cache[character_name] = thumb
+			return thumb
+		return null
+
 	var base_dir := _get_character_base_dir(character_name)
 	if base_dir.is_empty():
 		return null
@@ -1397,6 +1781,14 @@ func _get_expression_thumbnail(character_name: String, expression_name: String) 
 	if _expression_thumbnail_cache.has(key):
 		return _expression_thumbnail_cache[key]
 
+	if _is_custom_character_key(character_name):
+		var tex := _get_custom_expression_texture(character_name, expression_name)
+		if tex != null:
+			var thumb := _get_texture_thumbnail_fit(tex, CHARACTER_ICON_SIZE)
+			_expression_thumbnail_cache[key] = thumb
+			return thumb
+		return null
+
 	var base_dir := _get_character_base_dir(character_name)
 	if base_dir.is_empty():
 		return null
@@ -1414,9 +1806,21 @@ func _get_background_thumbnail(full_path: String) -> Texture2D:
 	if _background_thumbnail_cache.has(full_path):
 		return _background_thumbnail_cache[full_path] as Texture2D
 
-	var texture := load(full_path) as Texture2D
-	if texture == null and not full_path.ends_with(".remap"):
-		texture = load(full_path + ".remap") as Texture2D
+	if not _resource_exists_with_remap(full_path):
+		return null
+
+	var texture: Texture2D = null
+
+	# user:// 下的 PNG 通常没有 import/.remap，直接用 Image 读取，避免 ResourceLoader 报错
+	if full_path.begins_with("user://") or (not full_path.begins_with("res://") and FileAccess.file_exists(full_path)):
+		var raw_path := full_path.trim_suffix(".remap")
+		var img := Image.new()
+		if img.load(raw_path) == OK and not img.is_empty():
+			texture = ImageTexture.create_from_image(img)
+	else:
+		texture = load(full_path) as Texture2D
+		if texture == null and not full_path.ends_with(".remap"):
+			texture = load(full_path + ".remap") as Texture2D
 	if texture == null:
 		return null
 	var thumbnail := _get_texture_thumbnail_fit(texture, BACKGROUND_ICON_SIZE)
@@ -1427,13 +1831,15 @@ func _get_character_scene(character_name: String) -> PackedScene:
 	if _character_scene_cache.has(character_name):
 		return _character_scene_cache[character_name]
 
-	var scene_path := "res://scenes/character/" + character_name + ".tscn"
-	if not ResourceLoader.exists(scene_path):
+	var scene_path := _resolve_character_scene_path(character_name)
+	if scene_path.is_empty() or not _resource_exists_with_remap(scene_path):
+		_character_scene_cache[character_name] = null
 		return null
 
 	var scene := load(scene_path) as PackedScene
-	if scene:
-		_character_scene_cache[character_name] = scene
+	if scene == null and not scene_path.ends_with(".remap"):
+		scene = load(scene_path + ".remap") as PackedScene
+	_character_scene_cache[character_name] = scene
 	return scene
 
 func _get_character_expressions(character_name: String) -> Array[String]:
@@ -1830,11 +2236,13 @@ func _infer_music_state_at_index(start_index: int) -> Dictionary:
 func _resource_exists_with_remap(path: String) -> bool:
 	if path.is_empty():
 		return false
-	if ResourceLoader.exists(path):
+	if ResourceLoader.exists(path) or FileAccess.file_exists(path):
 		return true
 	if path.ends_with(".remap"):
-		return ResourceLoader.exists(path.trim_suffix(".remap"))
-	return ResourceLoader.exists(path + ".remap")
+		var raw := path.trim_suffix(".remap")
+		return ResourceLoader.exists(raw) or FileAccess.file_exists(raw)
+	var remap := path + ".remap"
+	return ResourceLoader.exists(remap) or FileAccess.file_exists(remap)
 
 func _get_background_base_dirs_for_validation() -> Array[String]:
 	var dirs: Array[String] = []
@@ -1862,12 +2270,24 @@ func _resolve_background_path_for_validation(input_path: String) -> String:
 		return ""
 
 	var base_dirs := _get_background_base_dirs_for_validation()
+	if raw.begins_with("user://"):
+		var root := _project_root.trim_suffix("/") + "/"
+		if not _project_root.is_empty() and raw.begins_with(root) and _resource_exists_with_remap(raw):
+			return raw
+		return ""
+
 	if raw.begins_with("res://"):
 		# 只允许背景资源目录内的路径
 		for base_dir in base_dirs:
 			if raw.begins_with(base_dir) and _resource_exists_with_remap(raw):
 				return raw
 		return ""
+
+	# 支持当前工程内的相对路径（例如 images/bg_compiled/xxx.png）
+	if not _project_root.is_empty():
+		var candidate_project := _project_root.trim_suffix("/") + "/" + raw.replace("\\", "/").trim_prefix("/")
+		if _resource_exists_with_remap(candidate_project):
+			return candidate_project
 
 	# 支持用户输入文件名或相对路径（与资源列表显示一致）
 	for base_dir in base_dirs:
@@ -1882,10 +2302,21 @@ func _resolve_music_path_for_validation(input_path: String) -> String:
 		return ""
 
 	var base_dir := "res://assets/audio/music/"
+	if raw.begins_with("user://"):
+		var root := _project_root.trim_suffix("/") + "/"
+		if not _project_root.is_empty() and raw.begins_with(root) and _resource_exists_with_remap(raw):
+			return raw
+		return ""
+
 	if raw.begins_with("res://"):
 		if not raw.begins_with(base_dir):
 			return ""
 		return raw if _resource_exists_with_remap(raw) else ""
+
+	if not _project_root.is_empty():
+		var candidate_project := _project_root.trim_suffix("/") + "/" + raw.replace("\\", "/").trim_prefix("/")
+		if _resource_exists_with_remap(candidate_project):
+			return candidate_project
 
 	# 支持用户输入文件名或相对路径（与资源列表显示一致）
 	var candidate := base_dir + raw

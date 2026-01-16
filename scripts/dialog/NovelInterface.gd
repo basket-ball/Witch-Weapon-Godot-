@@ -379,7 +379,7 @@ func change_expression(expression: String, animated: bool = true) -> void:
 func change_background(bg_path: String, _transition: String = "fade") -> void:
 	"""切换背景"""
 	if bg_sprite and bg_path != "":
-		var texture = load(bg_path)
+		var texture := _load_texture_any(bg_path)
 		if texture:
 			# 立即停止当前的背景切换动画并清理
 			if background_tween:
@@ -433,7 +433,7 @@ func show_special_centered_image(image_path: String, initial_y: float = -1.0, in
 	- duration: 动画时长（默认0.5秒）
 	"""
 	# 加载图片纹理
-	var texture = load(image_path)
+	var texture := _load_texture_any(image_path)
 	if not texture:
 		push_error("无法加载图片: " + image_path)
 		return
@@ -528,12 +528,33 @@ func play_music(music_path: String) -> void:
 	_play_music_internal(music_path)
 	current_music = music_path
 
+func _resolve_character_scene_path(character_key: String) -> String:
+	var raw := character_key.strip_edges()
+	if raw.is_empty():
+		return ""
+	if raw.begins_with("res://") or raw.begins_with("user://"):
+		return raw
+	if raw.find("/") != -1:
+		# 允许直接传入路径（例如 mods 或工程目录下的 user:// 绝对路径）
+		return raw
+	return "res://scenes/character/" + raw + ".tscn"
+
+func _character_scene_exists(path: String) -> bool:
+	var p := path.strip_edges()
+	if p.is_empty():
+		return false
+	if p.begins_with("res://"):
+		return ResourceLoader.exists(p) or ResourceLoader.exists(p + ".remap")
+	if p.begins_with("user://"):
+		return FileAccess.file_exists(p) or FileAccess.file_exists(p + ".remap")
+	return FileAccess.file_exists(p)
+
 func show_character(character_name: String, expression: String = "", initial_position: float = -1.0) -> void:
 	"""显示角色 - 带有0.35秒的渐变效果"""
-	var character_scene_path = "res://scenes/character/" + character_name + ".tscn"
+	var character_scene_path := _resolve_character_scene_path(character_name)
 	
 	# 检查角色场景是否存在
-	if not ResourceLoader.exists(character_scene_path):
+	if not _character_scene_exists(character_scene_path):
 		push_error("角色场景不存在: " + character_scene_path)
 		return
 	
@@ -544,6 +565,8 @@ func show_character(character_name: String, expression: String = "", initial_pos
 	
 	# 加载并实例化新角色
 	var character_scene = load(character_scene_path)
+	if character_scene == null and not character_scene_path.ends_with(".remap"):
+		character_scene = load(character_scene_path + ".remap")
 	if not character_scene:
 		push_error("无法加载角色场景: " + character_scene_path)
 		return
@@ -584,10 +607,10 @@ func show_character(character_name: String, expression: String = "", initial_pos
 
 func show_2nd_character(character_name: String, expression: String = "", initial_position: float = -1.0) -> void:
 	"""显示第二个角色 - 带有0.35秒的渐变效果"""
-	var character_scene_path = "res://scenes/character/" + character_name + ".tscn"
+	var character_scene_path := _resolve_character_scene_path(character_name)
 	
 	# 检查角色场景是否存在
-	if not ResourceLoader.exists(character_scene_path):
+	if not _character_scene_exists(character_scene_path):
 		push_error("角色场景不存在: " + character_scene_path)
 		return
 	
@@ -598,6 +621,8 @@ func show_2nd_character(character_name: String, expression: String = "", initial
 	
 	# 加载并实例化新角色
 	var character_scene = load(character_scene_path)
+	if character_scene == null and not character_scene_path.ends_with(".remap"):
+		character_scene = load(character_scene_path + ".remap")
 	if not character_scene:
 		push_error("无法加载角色场景: " + character_scene_path)
 		return
@@ -638,10 +663,10 @@ func show_2nd_character(character_name: String, expression: String = "", initial
 
 func show_3rd_character(character_name: String, expression: String = "", initial_position: float = -1.0) -> void:
 	"""显示第三个角色 - 带有0.35秒的渐变效果"""
-	var character_scene_path = "res://scenes/character/" + character_name + ".tscn"
+	var character_scene_path := _resolve_character_scene_path(character_name)
 
 	# 检查角色场景是否存在
-	if not ResourceLoader.exists(character_scene_path):
+	if not _character_scene_exists(character_scene_path):
 		push_error("角色场景不存在: " + character_scene_path)
 		return
 
@@ -652,6 +677,8 @@ func show_3rd_character(character_name: String, expression: String = "", initial
 
 	# 加载并实例化新角色
 	var character_scene = load(character_scene_path)
+	if character_scene == null and not character_scene_path.ends_with(".remap"):
+		character_scene = load(character_scene_path + ".remap")
 	if not character_scene:
 		push_error("无法加载角色场景: " + character_scene_path)
 		return
@@ -1242,7 +1269,7 @@ func _show_dialog_content(content: String, speaker: String):
 func _change_background_internal(bg_path: String, _transition: String):
 	"""内部背景切换实现"""
 	if bg_sprite and bg_path != "":
-		var texture = load(bg_path)
+		var texture := _load_texture_any(bg_path)
 		if texture:
 			bg_sprite.texture = texture
 			bg_sprite.visible = true
@@ -1261,7 +1288,7 @@ func _play_music_internal(music_path: String):
 		return
 	
 	# 加载音频资源
-	var audio_resource = load(music_path)
+	var audio_resource := _load_audio_stream_any(music_path)
 	if not audio_resource:
 		push_error("无法加载音频文件: " + music_path)
 		return
@@ -1454,7 +1481,7 @@ func show_background(image_path: String, fade_time: float = 0.0):
 		return
 	
 	# 加载新的背景纹理
-	var texture = load(image_path)
+	var texture := _load_texture_any(image_path)
 	if not texture:
 		push_error("无法加载背景图片: " + image_path)
 		return
@@ -1483,6 +1510,49 @@ func show_background(image_path: String, fade_time: float = 0.0):
 	
 	current_background = image_path
 	print("背景已显示: ", image_path, " 渐变时间: ", fade_time)
+
+
+func _load_texture_any(path: String) -> Texture2D:
+	if path.strip_edges().is_empty():
+		return null
+
+	# user:// 下通常没有 import/.remap，避免 ResourceLoader.load 报错
+	if path.begins_with("user://") or (not path.begins_with("res://") and FileAccess.file_exists(path)):
+		var raw := path.trim_suffix(".remap")
+		if not FileAccess.file_exists(raw):
+			return null
+		var img := Image.new()
+		if img.load(raw) != OK or img.is_empty():
+			return null
+		return ImageTexture.create_from_image(img)
+
+	var tex := load(path) as Texture2D
+	if tex == null and not path.ends_with(".remap"):
+		tex = load(path + ".remap") as Texture2D
+	return tex
+
+
+func _load_audio_stream_any(path: String) -> AudioStream:
+	var p := path.strip_edges()
+	if p.is_empty():
+		return null
+
+	if p.begins_with("res://"):
+		var stream := load(p) as AudioStream
+		if stream == null and not p.ends_with(".remap"):
+			stream = load(p + ".remap") as AudioStream
+		return stream
+
+	if not FileAccess.file_exists(p):
+		return null
+	var ext := p.get_extension().to_lower()
+	if ext == "ogg" and ClassDB.class_exists("AudioStreamOggVorbis"):
+		return AudioStreamOggVorbis.load_from_file(p)
+	if ext == "mp3" and ClassDB.class_exists("AudioStreamMP3"):
+		return AudioStreamMP3.load_from_file(p)
+	if ext == "wav" and ClassDB.class_exists("AudioStreamWAV"):
+		return AudioStreamWAV.load_from_file(p)
+	return null
 
 func show_text(content: String, speaker: String = ""):
 	"""兼容旧接口 - 显示文本"""

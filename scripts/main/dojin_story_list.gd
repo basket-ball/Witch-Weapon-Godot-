@@ -41,6 +41,7 @@ extends Control
 @onready var back_area: Control = $"BackgroundColor/BackArea"
 @onready var editor_button: Button = $"EditorButton"
 @onready var manage_mods_button: Button = get_node_or_null("ManageModsButton") as Button
+@onready var login_button: Button = get_node_or_null("LoginButton") as Button
 
 # ==================== 常量配置 ====================
 # Mod文件夹路径（相对于游戏根目录）
@@ -53,6 +54,7 @@ const MOD_PROJECTS_PATH: String = "user://mod_projects"  # mod工程文件夹
 const EPISODE_LIST_SCENE_PATH: String = "res://scenes/main/episode_story_list.tscn"
 const PROJECT_MANAGER_SCENE_PATH: String = "res://scenes/editor/project_manager.tscn"  # 工程管理器场景
 const MOD_MANAGER_SCENE_PATH: String = "res://scenes/main/mod_manager.tscn"  # 模组管理器场景
+const AUTH_DIALOG_SCENE_PATH: String = "res://scenes/main/auth_dialog.tscn"
 
 # 故事节点间距
 const STORY_SPACING: float = 346.0
@@ -112,6 +114,7 @@ var button_press_pos: Vector2
 
 var _is_project_manager_open: bool = false
 var _is_mod_manager_open: bool = false
+var _is_auth_dialog_open: bool = false
 
 var animation_cache = {
 	"original_position": Vector2.ZERO,
@@ -132,12 +135,14 @@ func _ready():
 	_setup_back_area()
 	_setup_editor_button()
 	_setup_manage_mods_button()
+	_setup_login_button()
 	_init_background()
 	_load_mods()
 	_create_story_nodes()
+	_setup_auth_manager()
 
 func _process(delta):
-	if not _is_list_active() or _is_project_manager_open or _is_mod_manager_open:
+	if not _is_list_active() or _is_project_manager_open or _is_mod_manager_open or _is_auth_dialog_open:
 		is_dragging = false
 		drag_velocity = 0.0
 		return
@@ -151,7 +156,7 @@ func _process(delta):
 		_update_drag_physics()
 
 func _input(event):
-	if not _is_list_active() or _is_project_manager_open or _is_mod_manager_open:
+	if not _is_list_active() or _is_project_manager_open or _is_mod_manager_open or _is_auth_dialog_open:
 		is_dragging = false
 		drag_velocity = 0.0
 		return
@@ -383,6 +388,18 @@ func _setup_manage_mods_button():
 	if manage_mods_button:
 		manage_mods_button.pressed.connect(_on_manage_mods_button_pressed)
 
+func _setup_login_button():
+	if login_button:
+		login_button.pressed.connect(_on_login_button_pressed)
+		login_button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+
+func _setup_auth_manager():
+	if not has_node("/root/AuthManager"):
+		return
+	AuthManager.auth_state_changed.connect(_on_auth_state_changed)
+	AuthManager.profile_changed.connect(_on_auth_profile_changed)
+	_update_login_button()
+
 func _init_background():
 	if background_color:
 		background_color.modulate.a = 0.0
@@ -401,6 +418,58 @@ func _on_manage_mods_button_pressed():
 		push_error("请先退出当前同人故事详情页，再打开“管理模组”。")
 		return
 	_open_mod_manager()
+
+func _on_login_button_pressed():
+	"""打开账号登录/注册窗口"""
+	_open_auth_dialog()
+
+func _open_auth_dialog():
+	if _is_auth_dialog_open:
+		return
+	if is_animating or is_expanded:
+		push_error("请先退出当前同人故事详情页，再打开“登录”。")
+		return
+
+	var auth_scene = load(AUTH_DIALOG_SCENE_PATH)
+	if not auth_scene:
+		push_error("无法加载登录窗口场景: " + AUTH_DIALOG_SCENE_PATH)
+		return
+
+	var auth_dialog = auth_scene.instantiate()
+	_is_auth_dialog_open = true
+	is_dragging = false
+	drag_velocity = 0.0
+
+	auth_dialog.tree_exited.connect(func():
+		_is_auth_dialog_open = false
+		_update_login_button()
+	)
+
+	if auth_dialog is Control:
+		auth_dialog.z_index = 2000
+		auth_dialog.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	get_parent().add_child(auth_dialog)
+	get_parent().move_child(auth_dialog, get_parent().get_child_count() - 1)
+
+func _on_auth_state_changed(_is_logged_in: bool) -> void:
+	_update_login_button()
+
+func _on_auth_profile_changed(_profile: Dictionary) -> void:
+	_update_login_button()
+
+func _update_login_button() -> void:
+	if not login_button:
+		return
+	if not has_node("/root/AuthManager"):
+		login_button.text = "登录"
+		return
+
+	if AuthManager.is_logged_in():
+		var mail := str(AuthManager.email)
+		login_button.text = mail if mail != "" else "已登录"
+	else:
+		login_button.text = "登录"
 
 func _open_project_manager():
 	"""加载并显示工程管理器"""

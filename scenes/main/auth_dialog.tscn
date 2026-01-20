@@ -1,0 +1,211 @@
+[gd_scene load_steps=4 format=3 uid="uid://c0yq5y1xw3k0f"]
+
+[ext_resource type="Script" path="res://scripts/main/auth_dialog.gd" id="1_auth"]
+[ext_resource type="FontFile" uid="uid://bajyd14et5o6v" path="res://assets/gui/font/æ–¹æ­£å…°äº­å‡†é»‘_GBK.ttf" id="2_font"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_window"]
+bg_color = Color(0.16, 0.16, 0.16, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[node name="AuthDialog" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_auth")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.55)
+
+[node name="WindowPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -240.0
+offset_right = 320.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+clip_contents = true
+theme_override_styles/panel = SubResource("StyleBoxFlat_window")
+
+[node name="Margin" type="MarginContainer" parent="WindowPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Content" type="VBoxContainer" parent="WindowPanel/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="WindowPanel/Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="WindowPanel/Margin/Content/Header"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "账号"
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="WindowPanel/Margin/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CloseButton" type="Button" parent="WindowPanel/Margin/Content/Header"]
+layout_mode = 2
+custom_minimum_size = Vector2(96, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "关闭"
+
+[node name="LoggedInRow" type="HBoxContainer" parent="WindowPanel/Margin/Content"]
+layout_mode = 2
+visible = false
+theme_override_constants/separation = 10
+
+[node name="LoggedInLabel" type="Label" parent="WindowPanel/Margin/Content/LoggedInRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+text = "已登录"
+
+[node name="LogoutButton" type="Button" parent="WindowPanel/Margin/Content/LoggedInRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "退出登录"
+
+[node name="Tabs" type="TabContainer" parent="WindowPanel/Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Login" type="VBoxContainer" parent="WindowPanel/Margin/Content/Tabs"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Email" type="LineEdit" parent="WindowPanel/Margin/Content/Tabs/Login"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "邮箱"
+clear_button_enabled = true
+
+[node name="Password" type="LineEdit" parent="WindowPanel/Margin/Content/Tabs/Login"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "密码"
+secret = true
+clear_button_enabled = true
+
+[node name="SendCodeButton" type="Button" parent="WindowPanel/Margin/Content/Tabs/Login"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "发送验证码"
+
+[node name="Code" type="LineEdit" parent="WindowPanel/Margin/Content/Tabs/Login"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "验证码"
+clear_button_enabled = true
+
+[node name="VerifyButton" type="Button" parent="WindowPanel/Margin/Content/Tabs/Login"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "验证并登录"
+
+[node name="Register" type="VBoxContainer" parent="WindowPanel/Margin/Content/Tabs"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Email" type="LineEdit" parent="WindowPanel/Margin/Content/Tabs/Register"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "邮箱"
+clear_button_enabled = true
+
+[node name="Password" type="LineEdit" parent="WindowPanel/Margin/Content/Tabs/Register"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "密码"
+secret = true
+clear_button_enabled = true
+
+[node name="SendCodeButton" type="Button" parent="WindowPanel/Margin/Content/Tabs/Register"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "发送验证码"
+
+[node name="Code" type="LineEdit" parent="WindowPanel/Margin/Content/Tabs/Register"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "验证码"
+clear_button_enabled = true
+
+[node name="VerifyButton" type="Button" parent="WindowPanel/Margin/Content/Tabs/Register"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 34)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+text = "验证并注册"
+
+[node name="StatusLabel" type="Label" parent="WindowPanel/Margin/Content"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 1, 1, 0.85)
+text = ""
+autowrap_mode = 2
+

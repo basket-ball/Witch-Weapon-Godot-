@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://crl6y1g8yyh0g" path="res://scripts/main/dojin_story_list.gd" id="1_dojin"]
 [ext_resource type="Texture2D" uid="uid://sbx2bsq06xs3" path="res://assets/gui/main_menu/storyui_connect.png" id="2_connect"]
 [ext_resource type="Texture2D" uid="uid://d0upq6jsxo1jg" path="res://assets/gui/main_menu/line_contect.png" id="3_line"]
-[ext_resource type="FontFile" uid="uid://bajyd14et5o6v" path="res://assets/gui/font/方正兰亭准黑_GBK.ttf" id="4_font"]
+[ext_resource type="FontFile" uid="uid://bajyd14et5o6v" path="res://assets/gui/font/æ–¹æ­£å…°äº­å‡†é»‘_GBK.ttf" id="4_font"]
 [ext_resource type="Texture2D" uid="uid://cclthvpetg4xi" path="res://assets/gui/main_menu/storyui_back.png" id="5_back"]
 [ext_resource type="Texture2D" uid="uid://705v0cjlcfdu" path="res://assets/gui/main_menu/juqing_bottm_xian.png" id="6_bg"]
 
@@ -53,3 +53,11 @@ offset_top = 640.0
 offset_right = 370.0
 offset_bottom = 690.0
 text = "管理模组"
+
+[node name="LoginButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1080.0
+offset_top = 640.0
+offset_right = 1240.0
+offset_bottom = 690.0
+text = "登录"

@@ -101,13 +101,13 @@ func _request_json(path: String, method: int, payload: Dictionary, extra_headers
 	if err != OK:
 		return {"ok": false, "status": 0, "error": "request_failed_%s" % err}
 
-	var completed := await _http.request_completed
+	var completed: Array = await _http.request_completed
 	var result := int(completed[0])
 	var response_code := int(completed[1])
 	var response_body: PackedByteArray = completed[3]
 
-	var raw := response_body.get_string_from_utf8()
-	var parsed := JSON.parse_string(raw)
+	var raw: String = response_body.get_string_from_utf8()
+	var parsed: Variant = JSON.parse_string(raw)
 	var ok := (result == HTTPRequest.RESULT_SUCCESS) and response_code >= 200 and response_code < 300
 
 	return {

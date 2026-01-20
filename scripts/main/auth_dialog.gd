@@ -61,11 +61,10 @@ func _refresh_logged_in_ui() -> void:
 		logged_in_row.visible = false
 		return
 
-	var am = get_node("/root/AuthManager")
-	var is_in := am.is_logged_in()
+	var is_in: bool = AuthManager.is_logged_in()
 	logged_in_row.visible = is_in
 	if is_in:
-		var mail := str(am.email)
+		var mail: String = str(AuthManager.email)
 		logged_in_label.text = ("已登录：%s" % mail) if mail != "" else "已登录"
 
 func _set_busy(busy: bool) -> void:
@@ -151,4 +150,3 @@ func _extract_error(res: Dictionary) -> String:
 		if data.has("error"):
 			return str(data["error"])
 	return str(res.get("raw", ""))
-

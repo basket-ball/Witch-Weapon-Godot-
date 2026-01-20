@@ -33,6 +33,10 @@ window/stretch/mode="canvas_items"
 
 project/assembly_name="Witch Weapon"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_mcp/plugin.cfg")
+
 [input]
 
 dialog_next={

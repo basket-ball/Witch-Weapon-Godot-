@@ -47,11 +47,19 @@ func verify_code(email_in: String, code: String) -> Dictionary:
 	if not res.get("ok", false):
 		return res
 
-	var data := res.get("data")
-	if typeof(data) == TYPE_DICTIONARY:
-		access_token = str(data.get("access_token", ""))
-		refresh_token = str(data.get("refresh_token", ""))
-		var expires_in := int(data.get("expires_in", 0))
+	var parsed = res.get("data")
+	var token_payload: Dictionary = {}
+	if typeof(parsed) == TYPE_DICTIONARY:
+		# Platform worker returns: { success, message, data: { access_token, refresh_token, expires_in } }
+		if typeof(parsed.get("data")) == TYPE_DICTIONARY:
+			token_payload = parsed["data"]
+		else:
+			token_payload = parsed
+
+	if not token_payload.is_empty():
+		access_token = str(token_payload.get("access_token", ""))
+		refresh_token = str(token_payload.get("refresh_token", ""))
+		var expires_in := int(token_payload.get("expires_in", 0))
 		expires_at_unix = int(Time.get_unix_time_from_system()) + max(expires_in, 0)
 		email = email_in
 		_save_to_config()
@@ -65,8 +73,16 @@ func fetch_profile() -> Dictionary:
 		"Authorization: Bearer %s" % access_token,
 	])
 	var res := await _request_json("/api/user/profile", HTTPClient.METHOD_GET, {}, headers)
-	if res.get("ok", false) and typeof(res.get("data")) == TYPE_DICTIONARY:
-		profile = res["data"]
+	var parsed = res.get("data")
+	var profile_payload: Dictionary = {}
+	if typeof(parsed) == TYPE_DICTIONARY:
+		if typeof(parsed.get("data")) == TYPE_DICTIONARY:
+			profile_payload = parsed["data"]
+		else:
+			profile_payload = parsed
+
+	if res.get("ok", false) and not profile_payload.is_empty():
+		profile = profile_payload
 		_save_to_config()
 		profile_changed.emit(profile)
 	return res
@@ -118,4 +134,3 @@ func _save_to_config() -> void:
 	GameConfig.set_setting("auth", "email", email)
 	GameConfig.set_setting("auth", "profile", profile)
 	GameConfig.save()
-

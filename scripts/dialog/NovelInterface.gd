@@ -24,7 +24,7 @@ class StoryData:
 	var music_path: String = ""
 	var transition_type: String = ""
 	var wait_for_input: bool = true
-	
+
 	func _init(state: StoryState = StoryState.TEXT_ONLY):
 		story_state = state
 
@@ -146,6 +146,8 @@ var name_shake_tween: Tween = null  # 晃动动画
 var current_player_name: String = ""  # 当前输入的玩家姓名
 
 var _interface_initialized: bool = false
+var _log_dragging := false
+var _drag_position := Vector2(0, 0)
 
 func wait_until_initialized() -> void:
 	if _interface_initialized:
@@ -162,32 +164,32 @@ func _ready():
 	# 连接信号
 	if show_text_label and show_text_label.has_signal("typing_finished"):
 		show_text_label.typing_finished.connect(_on_typing_finished)
-	
+
 	if dialog_bg:
 		dialog_bg.gui_input.connect(_on_dialog_bg_input)
-	
+
 	if name_box_bg:
 		name_box_bg.gui_input.connect(_on_name_box_input)
-	
+
 	# 连接跳过按钮信号
 	if skip_button:
 		skip_button.pressed.connect(_on_skip_button_pressed)
-	
+
 	# 连接下一步按钮信号并初始化自动播放功能
 	if next_button:
 		next_button.pressed.connect(_on_next_button_pressed)
 		next_button.mouse_exited.connect(_on_next_button_mouse_exited)
 		_init_auto_play_system()
-	
+
 	# 连接Log按钮信号
 	if log_button:
 		log_button.pressed.connect(_on_log_button_pressed)
-	
+
 	# 连接LogMask点击信号
 	if log_mask:
 		log_mask.gui_input.connect(_on_log_mask_input)
-	
-	# 连接LogScrollContainer点击信号
+
+	# 连接LogScrollContainer滚动信号
 	if log_scroll_container:
 		log_scroll_container.gui_input.connect(_on_log_scroll_container_input)
 
@@ -227,12 +229,12 @@ func _play_entrance_animation() -> void:
 	if not entrance_overlay:
 		push_error("入场遮罩节点未找到")
 		return
-	
+
 	print("开始播放入场动画")
-	
+
 	# 等待一小段时间确保场景完全加载
 	await get_tree().create_timer(0.2).timeout
-	
+
 	# 遮罩淡出动画
 	if entrance_tween:
 		entrance_tween.kill()
@@ -240,9 +242,9 @@ func _play_entrance_animation() -> void:
 	entrance_tween.tween_property(entrance_overlay, "modulate:a", 0.0, ENTRANCE_FADE_DURATION)
 	entrance_tween.set_trans(Tween.TRANS_CUBIC)
 	entrance_tween.set_ease(Tween.EASE_OUT)
-	
+
 	await entrance_tween.finished
-	
+
 	# 动画完成后隐藏遮罩
 	entrance_overlay.visible = false
 	print("入场动画完成 - 黑色遮罩已消失")
@@ -252,7 +254,8 @@ func _input(event: InputEvent):
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		if log_interface and log_interface.visible:
 			# Log界面关闭功能已移除，将由用户自己重写
-			return
+			toggle_log_interface()
+			get_viewport().set_input_as_handled()
 
 	# 处理视频模式下的鼠标输入
 	if is_video_performance_mode:
@@ -263,7 +266,7 @@ func _input(event: InputEvent):
 				is_mouse_pressed = false
 		return  # 在视频模式下，不处理其他输入
 
-	if event.is_action_pressed("dialog_next") and event.pressed:
+	if event.is_action_pressed("dialog_next") and event.pressed and not log_interface.visible:
 		# 如果处于中心文字演出模式，处理点击事件
 		if is_center_performance_mode:
 			_on_center_performance_clicked()
@@ -273,20 +276,16 @@ func _input(event: InputEvent):
 		if is_briefing_performance_mode:
 			return
 
-		# 检查Loginterface是否显示，如果显示则不允许点击跳过对话
-		if log_interface and log_interface.visible:
-			return
-
 		# 只要在等待输入状态，就允许点击背景跳过对话，不依赖背景可见性
-		if waiting_for_input and event is InputEventMouseButton :
+		if waiting_for_input and event is InputEventMouseButton:
 			var dialog_rect = Rect2(Vector2(13, 559), Vector2(1298, 157))
 			var name_rect = Rect2(Vector2(254, 512), Vector2(362, 68))
 			var skip_rect = Rect2(Vector2(1134, 11), Vector2(126, 60))
 			var next_button_rect = Rect2(Vector2(1209, 659), Vector2(35, 28))  # NextButton区域
-			
+
 			# 只有当namebox可见时，才排除namebox区域的点击
 			var exclude_name_area = name_box and name_box.visible and name_rect.has_point(event.position)
-			
+
 			if not dialog_rect.has_point(event.position) and \
 			   not exclude_name_area and \
 			   not skip_rect.has_point(event.position) and \
@@ -297,6 +296,14 @@ func _input(event: InputEvent):
 		if log_interface and not log_interface.visible:
 			print("显示Log界面")
 			toggle_log_interface()
+
+	# 处理鼠标左键松开事件（无论鼠标在哪里）
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		if _log_dragging:
+			_end_drag()
+			# 如果发生了拖拽，阻止按钮点击
+			if _drag_position != event.position:
+				get_viewport().set_input_as_handled()
 
 func _on_dialog_bg_input(event: InputEvent):
 	if event.is_action_pressed("dialog_next") and event.pressed:
@@ -312,7 +319,7 @@ func _on_name_box_input(event: InputEvent):
 func execute_scene(data: StoryData) -> void:
 	"""根据场景状态执行相应的处理逻辑"""
 	print("执行场景操作: ", StoryState.keys()[data.story_state])
-	
+
 	match data.story_state:
 		StoryState.TEXT_ONLY:
 			await _handle_text_only(data)
@@ -332,7 +339,7 @@ func execute_scene(data: StoryData) -> void:
 			_handle_combined(data)
 		_:
 			print("警告: 未处理的场景状态")
-	
+
 	scene_completed.emit()
 
 ## 便捷接口函数
@@ -362,11 +369,11 @@ func change_expression(expression: String, animated: bool = true) -> void:
 	if not current_character_node:
 		push_warning("没有当前角色，无法切换表情")
 		return
-	
+
 	if not current_character_node.has_method("set_expression") and not current_character_node.has_method("set_expression_animated"):
 		push_warning("当前角色不支持表情切换")
 		return
-	
+
 	if animated and current_character_node.has_method("set_expression_animated"):
 		current_character_node.set_expression_animated(expression)
 		print("角色表情已切换（带动画）: ", expression)
@@ -385,12 +392,12 @@ func change_background(bg_path: String, _transition: String = "fade") -> void:
 			if background_tween:
 				background_tween.kill()
 				background_tween = null
-			
+
 			# 清理可能存在的旧的过渡背景精灵
 			for child in get_children():
 				if child is Sprite2D and child != bg_sprite and child.z_index > bg_sprite.z_index:
 					child.queue_free()
-			
+
 			# 创建新的背景精灵用于叠加
 			var new_bg = Sprite2D.new()
 			new_bg.texture = texture
@@ -399,16 +406,16 @@ func change_background(bg_path: String, _transition: String = "fade") -> void:
 			new_bg.modulate.a = 0.0
 			new_bg.z_index = bg_sprite.z_index + 1
 			add_child(new_bg)
-			
+
 			# 开始淡入新背景
 			background_tween = create_tween()
 			background_tween.tween_property(new_bg, "modulate:a", 1.0, 0.5)
 			background_tween.set_trans(Tween.TRANS_CUBIC)
 			background_tween.set_ease(Tween.EASE_OUT)
-			
+
 			# 不使用await，让动画在后台完成
 			background_tween.finished.connect(_on_background_transition_finished.bind(new_bg, texture, bg_path))
-			
+
 			print("背景切换开始: ", bg_path)
 
 func _on_background_transition_finished(new_bg: Sprite2D, texture: Texture2D, bg_path: String):
@@ -552,17 +559,17 @@ func _character_scene_exists(path: String) -> bool:
 func show_character(character_name: String, expression: String = "", initial_position: float = -1.0) -> void:
 	"""显示角色 - 带有0.35秒的渐变效果"""
 	var character_scene_path := _resolve_character_scene_path(character_name)
-	
+
 	# 检查角色场景是否存在
 	if not _character_scene_exists(character_scene_path):
 		push_error("角色场景不存在: " + character_scene_path)
 		return
-	
+
 	# 如果当前有角色，直接移除
 	if current_character_node:
 		current_character_node.queue_free()
 		current_character_node = null
-	
+
 	# 加载并实例化新角色
 	var character_scene = load(character_scene_path)
 	if character_scene == null and not character_scene_path.ends_with(".remap"):
@@ -570,29 +577,29 @@ func show_character(character_name: String, expression: String = "", initial_pos
 	if not character_scene:
 		push_error("无法加载角色场景: " + character_scene_path)
 		return
-	
+
 	var new_character_node = character_scene.instantiate()
 	new_character_node.z_index = 3  # 设置角色的z_index为3，确保在背景之上
 	add_child(new_character_node)
-	
+
 	# 如果指定了表情，设置表情
 	if expression != "" and new_character_node.has_method("set_expression"):
 		new_character_node.set_expression(expression)
-	
+
 	# 新角色初始透明度为0，准备渐变显示
 	new_character_node.set_alpha(0.0)
-	
+
 	# 设置当前角色引用
 	current_character_node = new_character_node
 	current_character = character_name
-	
+
 	# 如果指定了初始位置，移动到该位置
 	if initial_position >= 0.0:
 		var screen_width = get_viewport().get_visible_rect().size.x
 		var target_x = screen_width * initial_position
 		new_character_node.position.x = target_x
 		print("角色初始位置设置为: ", initial_position, " (", target_x, "px)")
-	
+
 	# 角色渐变显示
 	if character_tween:
 		character_tween.kill()
@@ -600,25 +607,25 @@ func show_character(character_name: String, expression: String = "", initial_pos
 	character_tween.tween_method(new_character_node.set_alpha, 0.0, 1.0, 0.35)
 	character_tween.set_trans(Tween.TRANS_CUBIC)
 	character_tween.set_ease(Tween.EASE_OUT)
-	
+
 	await character_tween.finished
-	
+
 	print("角色已显示: ", character_name, " 表情: ", expression, " 初始位置: ", initial_position, " (渐变0.35秒)")
 
 func show_2nd_character(character_name: String, expression: String = "", initial_position: float = -1.0) -> void:
 	"""显示第二个角色 - 带有0.35秒的渐变效果"""
 	var character_scene_path := _resolve_character_scene_path(character_name)
-	
+
 	# 检查角色场景是否存在
 	if not _character_scene_exists(character_scene_path):
 		push_error("角色场景不存在: " + character_scene_path)
 		return
-	
+
 	# 如果当前有第二个角色，直接移除
 	if current_2nd_character_node:
 		current_2nd_character_node.queue_free()
 		current_2nd_character_node = null
-	
+
 	# 加载并实例化新角色
 	var character_scene = load(character_scene_path)
 	if character_scene == null and not character_scene_path.ends_with(".remap"):
@@ -626,29 +633,29 @@ func show_2nd_character(character_name: String, expression: String = "", initial
 	if not character_scene:
 		push_error("无法加载角色场景: " + character_scene_path)
 		return
-	
+
 	var new_character_node = character_scene.instantiate()
-	new_character_node.z_index = 3  # 设置角色的z_index为3，确保在背景之上
+	new_character_node.z_index = 3 # 设置角色的z_index为3，确保在背景之上
 	add_child(new_character_node)
-	
+
 	# 如果指定了表情，设置表情
 	if expression != "" and new_character_node.has_method("set_expression"):
 		new_character_node.set_expression(expression)
-	
+
 	# 新角色初始透明度为0，准备渐变显示
 	new_character_node.set_alpha(0.0)
-	
+
 	# 设置第二个角色引用
 	current_2nd_character_node = new_character_node
 	current_2nd_character = character_name
-	
+
 	# 如果指定了初始位置，移动到该位置
 	if initial_position >= 0.0:
 		var screen_width = get_viewport().get_visible_rect().size.x
 		var target_x = screen_width * initial_position
 		new_character_node.position.x = target_x
 		print("第二个角色初始位置设置为: ", initial_position, " (", target_x, "px)")
-	
+
 	# 角色渐变显示
 	if character2_tween:
 		character2_tween.kill()
@@ -656,9 +663,9 @@ func show_2nd_character(character_name: String, expression: String = "", initial
 	character2_tween.tween_method(new_character_node.set_alpha, 0.0, 1.0, 0.35)
 	character2_tween.set_trans(Tween.TRANS_CUBIC)
 	character2_tween.set_ease(Tween.EASE_OUT)
-	
+
 	await character2_tween.finished
-	
+
 	print("第二个角色已显示: ", character_name, " 表情: ", expression, " 初始位置: ", initial_position, " (渐变0.35秒)")
 
 func show_3rd_character(character_name: String, expression: String = "", initial_position: float = -1.0) -> void:
@@ -757,11 +764,11 @@ func change_2nd_expression(expression: String, animated: bool = true) -> void:
 	if not current_2nd_character_node:
 		push_warning("没有第二个角色，无法切换表情")
 		return
-	
+
 	if not current_2nd_character_node.has_method("set_expression") and not current_2nd_character_node.has_method("set_expression_animated"):
 		push_warning("第二个角色不支持表情切换")
 		return
-	
+
 	if animated and current_2nd_character_node.has_method("set_expression_animated"):
 		current_2nd_character_node.set_expression_animated(expression)
 		print("第二个角色表情已切换（带动画）: ", expression)
@@ -1005,9 +1012,9 @@ func hide_character() -> void:
 		character_tween.tween_method(current_character_node.set_alpha, current_character_node.get_alpha(), 0.0, 0.1)
 		character_tween.set_trans(Tween.TRANS_CUBIC)
 		character_tween.set_ease(Tween.EASE_OUT)
-		
+
 		await character_tween.finished
-		
+
 		current_character_node.queue_free()
 		current_character_node = null
 		current_character = ""
@@ -1023,9 +1030,9 @@ func hide_2nd_character() -> void:
 		character2_tween.tween_method(current_2nd_character_node.set_alpha, current_2nd_character_node.get_alpha(), 0.0, 0.1)
 		character2_tween.set_trans(Tween.TRANS_CUBIC)
 		character2_tween.set_ease(Tween.EASE_OUT)
-		
+
 		await character2_tween.finished
-		
+
 		current_2nd_character_node.queue_free()
 		current_2nd_character_node = null
 		current_2nd_character = ""
@@ -1126,7 +1133,7 @@ func _handle_text_only(data: StoryData) -> void:
 	print("处理纯文本: ", data.text)
 	# 预留：实现纯文本显示逻辑
 	_show_text_content(data.text)
-	
+
 	if data.wait_for_input:
 		await _wait_for_user_input()
 
@@ -1135,7 +1142,7 @@ func _handle_dialog(data: StoryData) -> void:
 	print("处理对话 - 说话人: ", data.speaker, ", 内容: ", data.text)
 	# 预留：实现对话显示逻辑
 	_show_dialog_content(data.text, data.speaker)
-	
+
 	if data.wait_for_input:
 		await _wait_for_user_input()
 
@@ -1178,21 +1185,21 @@ func _handle_combined(data: StoryData) -> void:
 	# 1. 背景切换
 	if data.background_path != "":
 		_change_background_internal(data.background_path, data.transition_type)
-	
+
 	# 2. 音乐切换
 	if data.music_path != "":
 		current_music = data.music_path
 		_play_music_internal(data.music_path)
-	
+
 	# 3. 角色切换
 	if data.character_name != "":
 		current_character = data.character_name
 		show_character(data.character_name, data.character_expression)
-	
+
 	# 4. 显示对话
 	if data.text != "":
 		_show_dialog_content(data.text, data.speaker)
-	
+
 	if data.wait_for_input:
 		await _wait_for_user_input()
 
@@ -1201,10 +1208,10 @@ func _handle_combined(data: StoryData) -> void:
 func _hide_all_elements():
 	"""隐藏所有界面元素"""
 	waiting_for_input = false
-	
+
 	if show_text_label:
 		show_text_label.text = ""
-	
+
 	if dialog_bg:
 		dialog_bg.visible = false
 	if name_box:
@@ -1280,22 +1287,22 @@ func _play_music_internal(music_path: String):
 	if not audio_player:
 		push_error("音频播放器未初始化")
 		return
-	
+
 	if music_path == "":
 		# 停止当前音乐
 		audio_player.stop()
 		print("音乐已停止")
 		return
-	
+
 	# 加载音频资源
 	var audio_resource := _load_audio_stream_any(music_path)
 	if not audio_resource:
 		push_error("无法加载音频文件: " + music_path)
 		return
-	
+
 	# 设置音频流并播放
 	audio_player.stream = audio_resource
-	
+
 	# 检查音频资源类型并设置循环
 	if audio_resource is AudioStreamOggVorbis:
 		audio_resource.loop = true
@@ -1303,7 +1310,7 @@ func _play_music_internal(music_path: String):
 		audio_resource.loop = true
 	elif audio_resource is AudioStreamWAV:
 		audio_resource.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	
+
 	audio_player.play()
 	print("音乐开始循环播放: ", music_path)
 
@@ -1323,11 +1330,11 @@ func set_music_volume(volume: float):
 func _wait_for_user_input() -> void:
 	"""等待用户输入"""
 	waiting_for_input = true
-	
+
 	# 如果打字机效果正在进行，先等待它完成
 	if show_text_label and show_text_label.has_method("skip_typewriter") and show_text_label.get("is_typing"):
 		await show_text_label.typing_finished
-	
+
 	await text_continue_pressed
 	waiting_for_input = false
 
@@ -1336,14 +1343,14 @@ func restore_entrance_overlay(fade_duration: float = 0.5) -> void:
 	if not entrance_overlay:
 		push_error("入场遮罩节点未找到")
 		return
-	
+
 	print("开始恢复入场黑色遮罩")
-	
+
 	# 先显示遮罩并设置为透明
 	entrance_overlay.visible = true
 	entrance_overlay.modulate.a = 0.0
 	entrance_overlay.z_index = 1000  # 确保在最上层
-	
+
 	# 遮罩淡入动画
 	if entrance_tween:
 		entrance_tween.kill()
@@ -1351,9 +1358,9 @@ func restore_entrance_overlay(fade_duration: float = 0.5) -> void:
 	entrance_tween.tween_property(entrance_overlay, "modulate:a", 1.0, fade_duration)
 	entrance_tween.set_trans(Tween.TRANS_CUBIC)
 	entrance_tween.set_ease(Tween.EASE_OUT)
-	
+
 	await entrance_tween.finished
-	
+
 	print("入场黑色遮罩恢复完成")
 
 # ==================== 兼容性接口 ====================
@@ -1479,22 +1486,22 @@ func show_background(image_path: String, fade_time: float = 0.0):
 	if not bg_sprite:
 		push_error("背景精灵节点未找到")
 		return
-	
+
 	# 加载新的背景纹理
 	var texture := _load_texture_any(image_path)
 	if not texture:
 		push_error("无法加载背景图片: " + image_path)
 		return
-	
+
 	# 设置新的背景纹理
 	bg_sprite.texture = texture
 	bg_sprite.visible = true
-	
+
 	# 如果指定了渐变时间，执行渐变效果
 	if fade_time > 0.0:
 		# 开始时设置为透明
 		bg_sprite.modulate.a = 0.0
-		
+
 		# 创建渐变动画
 		if background_tween:
 			background_tween.kill()
@@ -1502,12 +1509,12 @@ func show_background(image_path: String, fade_time: float = 0.0):
 		background_tween.tween_property(bg_sprite, "modulate:a", 1.0, fade_time)
 		background_tween.set_trans(Tween.TRANS_CUBIC)
 		background_tween.set_ease(Tween.EASE_OUT)
-		
+
 		await background_tween.finished
 	else:
 		# 没有渐变时间，直接显示
 		bg_sprite.modulate.a = 1.0
-	
+
 	current_background = image_path
 	print("背景已显示: ", image_path, " 渐变时间: ", fade_time)
 
@@ -1566,12 +1573,12 @@ func show_text(content: String, speaker: String = ""):
 func _on_continue_pressed():
 	# 取消自动播放
 	_cancel_auto_play()
-	
+
 	# 如果打字机效果正在进行，先跳过打字机效果
 	if show_text_label and show_text_label.has_method("skip_typewriter") and show_text_label.get("is_typing"):
 		show_text_label.skip_typewriter()
 		return
-	
+
 	# 如果正在等待用户输入，继续剧情
 	if waiting_for_input:
 		text_continue_pressed.emit()
@@ -1604,23 +1611,18 @@ func _on_log_mask_input(event: InputEvent):
 	"""处理LogMask点击事件"""
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		# 只响应点击，不响应拖拽
-		if log_interface and log_interface.visible:
-			log_interface.visible = false
-			# 关闭log界面时清理滚动条图片
-			if log_scrollbar_texture:
-				log_scrollbar_texture.queue_free()
-				log_scrollbar_texture = null
+		toggle_log_interface()
 
 func _on_log_scroll_container_input(event: InputEvent):
-	"""处理LogScrollContainer点击事件"""
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		# 只响应点击，不响应拖拽
-		if log_interface and log_interface.visible:
-			log_interface.visible = false
-			# 关闭log界面时清理滚动条图片
-			if log_scrollbar_texture:
-				log_scrollbar_texture.queue_free()
-				log_scrollbar_texture = null
+	"""处理LogScrollContainer滚动事件"""
+	# 只处理滚动相关的事件，不处理按钮点击
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		# 处理拖拽开始
+		_start_drag(event.position)
+	elif event is InputEventMouseMotion and _log_dragging:
+		_handle_drag_motion(event.position)
+		# 拖拽时标记为已处理，防止其他控件响应
+		get_viewport().set_input_as_handled()
 
 func _init_skip_ui_hide_timer():
 	"""初始化跳过UI延迟隐藏计时器"""
@@ -1658,18 +1660,18 @@ func _init_auto_play_system():
 	"""初始化自动播放系统"""
 	if not next_button:
 		return
-	
+
 	# 保存原始材质
 	original_normal_texture = next_button.texture_normal
 	original_hover_texture = next_button.texture_hover
-	
+
 	# 创建自动播放计时器
 	auto_play_timer = Timer.new()
 	auto_play_timer.wait_time = 1.0
 	auto_play_timer.one_shot = true
 	auto_play_timer.timeout.connect(_on_auto_play_timeout)
 	add_child(auto_play_timer)
-	
+
 	print("自动播放系统初始化完成")
 
 func _enable_auto_play():
@@ -1677,7 +1679,7 @@ func _enable_auto_play():
 	is_auto_play = true
 	_swap_button_textures()
 	print("自动播放已启用")
-	
+
 	# 如果当前正在等待输入且文本显示完成，立即开始计时
 	if waiting_for_input and show_text_label and not show_text_label.get("is_typing"):
 		_start_auto_play_timer()
@@ -1687,7 +1689,7 @@ func _enable_auto_play_immediate():
 	is_auto_play = true
 	pending_texture_swap = true  # 标记需要切换材质，等待鼠标移出
 	print("自动播放已启用")
-	
+
 	# 如果当前正在等待输入且文本显示完成，立即开始计时
 	if waiting_for_input and show_text_label and not show_text_label.get("is_typing"):
 		_start_auto_play_timer()
@@ -1715,7 +1717,7 @@ func _swap_button_textures():
 	"""交换按钮材质（启用自动播放时）"""
 	if not next_button or not original_normal_texture or not original_hover_texture:
 		return
-	
+
 	next_button.texture_normal = original_hover_texture
 	next_button.texture_hover = original_normal_texture
 
@@ -1723,7 +1725,7 @@ func _restore_button_textures():
 	"""恢复按钮材质（禁用自动播放时）"""
 	if not next_button or not original_normal_texture or not original_hover_texture:
 		return
-	
+
 	next_button.texture_normal = original_normal_texture
 	next_button.texture_hover = original_hover_texture
 
@@ -1738,12 +1740,12 @@ func _start_auto_play_timer():
 	"""开始自动播放计时"""
 	if not auto_play_timer or not show_text_label:
 		return
-	
+
 	# 根据文本长度计算等待时间
 	var text_length = show_text_label.text.length()
 	var base_time = max(text_length * 0.15, 2.0)  # 每个字符0.15秒，最少2秒
 	var wait_time = base_time + 4.0  # 加上4秒冗余时间
-	
+
 	auto_play_timer.wait_time = wait_time
 	auto_play_timer.start()
 	print("自动播放计时开始，等待时间: ", wait_time, "秒 (文本长度: ", text_length, ")")
@@ -1764,11 +1766,23 @@ func _on_skip_button_pressed():
 	print("跳过按钮被点击，结束当前剧情章节")
 	end_story_episode()
 
+func _start_drag(pos: Vector2) -> void:
+	_log_dragging = true
+	_drag_position = pos
+
+func _handle_drag_motion(pos: Vector2) -> void:
+	var delta: float = (pos.y - _drag_position.y)
+	log_scroll_container.get_v_scroll_bar().value -= delta
+	_drag_position = pos
+
+func _end_drag() -> void:
+	_log_dragging = false
+
 func toggle_log_interface():
 	"""切换Log界面显示状态"""
 	if not log_interface:
 		return
-	
+
 	if log_interface.visible:
 		log_interface.visible = false
 		# 关闭log界面时清理滚动条图片
@@ -1783,45 +1797,44 @@ func _populate_log_content():
 	"""填充log内容显示历史记录"""
 	if not log_content:
 		return
-	
-	# 管理滚动条图片显示（当历史记录>=5条时显示）
-	_manage_scrollbar_display()
-	
+
 	# 清空现有内容
 	for child in log_content.get_children():
 		child.queue_free()
-	
+
 	# 加载方正兰亭准黑字体
 	var custom_font = load("res://assets/gui/font/方正兰亭准黑_GBK.ttf")
-	
+
 	# 添加历史记录
 	for record in dialog_history:
 		var label = RichTextLabel.new()
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		label.bbcode_enabled = true
 		label.text = record.text
 		label.fit_content = true
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		
+
 		# 设置renpy风格的文本样式
 		label.add_theme_color_override("default_color", Color("#f7f7f7"))  # 字体颜色
 		label.add_theme_font_size_override("normal_font_size", 28)  # 字体大小28
-		
+
 		# 应用自定义字体（如果加载成功）
 		if custom_font:
 			label.add_theme_font_override("normal_font", custom_font)
-		
+
 		# 设置对齐方式为左对齐（xalign 0）
 		label.text = "[left]" + record.text + "[/left]"
-		
+
 		log_content.add_child(label)
-		
+
 		# 添加行距间距（line_spacing 79的效果）
 		var spacer = Control.new()
+		spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		spacer.custom_minimum_size = Vector2(0, 79)
 		log_content.add_child(spacer)
-	
+
 	# 等待一帧以确保内容已添加，然后滚动到底部
 	await get_tree().process_frame
 	if log_scroll_container:
@@ -1831,7 +1844,7 @@ func _manage_scrollbar_display():
 	"""管理滚动条图片的显示"""
 	if not log_interface:
 		return
-	
+
 	# 滚动条图片创建功能已移除
 	pass
 
@@ -1908,16 +1921,16 @@ func get_dialog_history_count() -> int:
 func end_story_episode(fade_duration: float = 0.5) -> void:
 	"""结束剧情章节并返回主菜单"""
 	print("=== 剧情章节结束 ===")
-	
+
 	"""清空所有历史记录"""
 	clear_dialog_history_static()
-	
+
 	# 隐藏所有界面元素
 	hide_all_story_elements()
-	
+
 	# 恢复黑色遮罩
 	await restore_entrance_overlay(fade_duration)
-	
+
 	# 退回主菜单并重新播放背景音乐
 	var main_menu = get_tree().get_first_node_in_group("main_menu")
 	if main_menu:

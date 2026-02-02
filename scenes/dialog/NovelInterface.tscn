@@ -98,3 +98,4 @@ horizontal_scroll_mode = 0
 [node name="LogContent" type="VBoxContainer" parent="LogInterface/LogScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 2

@@ -89,7 +89,7 @@ func _input(event: InputEvent) -> void:
 		return
 
 	# 处理鼠标左键松开事件（无论鼠标在哪里）
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed and main_menu.story_scene_layer.get_child_count() == 0:
 		if scroll_state.is_dragging:
 			_end_drag()
 			# 如果发生了拖拽，阻止按钮点击
@@ -98,7 +98,7 @@ func _input(event: InputEvent) -> void:
 			return
 
 	# 检查事件是否在滚动区域内
-	if story_list.get_global_rect().has_point(get_global_mouse_position()):
+	if story_list.get_global_rect().has_point(get_global_mouse_position()) and main_menu.story_scene_layer.get_child_count() == 0:
 		# 只处理滚动相关的事件，不处理按钮点击
 		if event is InputEventMouseButton:
 			if event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN:

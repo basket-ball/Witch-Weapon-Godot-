@@ -251,8 +251,32 @@ func _on_switch_complete(hide_list: Control):
 	hide_list.visible = false
 	_is_switching = false
 
+
+func _try_close_active_story_overlay() -> bool:
+	# If the active list is expanded (or has an episode list open), treat top button clicks as "back" first.
+	var active_list: Control = _get_current_active_list()
+	if not is_instance_valid(active_list):
+		return false
+
+	# These variables exist on main_story_list.gd / side_story_list.gd / dojin_story_list.gd
+	var expanded_flag = active_list.get("is_expanded")
+	var episode_instance = active_list.get("episode_list_instance")
+	var is_expanded: bool = (typeof(expanded_flag) == TYPE_BOOL) and expanded_flag
+	var has_episode_list: bool = is_instance_valid(episode_instance)
+
+	if not (is_expanded or has_episode_list):
+		return false
+
+	if active_list.has_method("_on_back_area_pressed"):
+		active_list.call("_on_back_area_pressed")
+		return true
+
+	return false
+
 func _on_main_story_button_pressed() -> void:
 	"""处理主线按钮点击事件"""
+	if _try_close_active_story_overlay():
+		return
 	if _is_switching or _is_main_story_active():
 		return
 
@@ -265,6 +289,8 @@ func _is_main_story_active() -> bool:
 
 func _on_side_story_button_pressed() -> void:
 	"""处理支线按钮点击事件"""
+	if _try_close_active_story_overlay():
+		return
 	if _is_switching or _is_side_story_active():
 		return
 
@@ -273,6 +299,8 @@ func _on_side_story_button_pressed() -> void:
 
 func _on_dojin_button_pressed() -> void:
 	"""处理同人按钮点击事件"""
+	if _try_close_active_story_overlay():
+		return
 	if _is_switching or _is_dojin_story_active():
 		return
 

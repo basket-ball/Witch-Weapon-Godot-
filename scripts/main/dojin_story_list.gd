@@ -225,6 +225,9 @@ func _load_single_mod(folder_name: String):
 		return
 
 	# 加载图标
+	# Repair legacy scene script paths so mods still run after folder rename
+	_repair_story_scene_script_paths(mod_path, config_data)
+
 	var icon_texture = _load_mod_icon(icon_path)
 
 	# 存储mod数据
@@ -253,6 +256,57 @@ func _load_mod_config(config_path: String) -> Dictionary:
 		return {}
 
 	return json.data
+
+func _repair_story_scene_script_paths(mod_root: String, mod_config: Dictionary) -> void:
+	var episodes_any: Variant = mod_config.get("episodes", {})
+	if typeof(episodes_any) != TYPE_DICTIONARY:
+		return
+
+	var episodes: Dictionary = episodes_any as Dictionary
+	for key_any in episodes.keys():
+		var scene_rel: String = str(episodes.get(key_any, "")).strip_edges().replace("\\", "/")
+		if scene_rel.is_empty():
+			continue
+		var scene_abs: String = mod_root + "/" + scene_rel
+		if not FileAccess.file_exists(scene_abs):
+			continue
+		var expected_script_rel: String = scene_rel.get_file().get_basename() + ".gd"
+		if expected_script_rel.is_empty():
+			continue
+		_rewrite_story_scene_script_path(scene_abs, expected_script_rel)
+
+func _rewrite_story_scene_script_path(scene_path: String, expected_script_rel: String) -> void:
+	var file: FileAccess = FileAccess.open(scene_path, FileAccess.READ)
+	if file == null:
+		return
+	var text: String = file.get_as_text()
+	file.close()
+
+	var marker: String = "[ext_resource type=\"Script\""
+	var marker_pos: int = text.find(marker)
+	if marker_pos == -1:
+		return
+
+	var path_key: String = "path=\""
+	var path_pos: int = text.find(path_key, marker_pos)
+	if path_pos == -1:
+		return
+
+	var path_start: int = path_pos + path_key.length()
+	var path_end: int = text.find("\"", path_start)
+	if path_end == -1:
+		return
+
+	var current_path: String = text.substr(path_start, path_end - path_start)
+	if current_path == expected_script_rel:
+		return
+
+	var rewritten: String = text.substr(0, path_start) + expected_script_rel + text.substr(path_end)
+	var out: FileAccess = FileAccess.open(scene_path, FileAccess.WRITE)
+	if out == null:
+		return
+	out.store_string(rewritten)
+	out.close()
 
 func _load_mod_icon(icon_path: String) -> Texture2D:
 	"""加载mod图标"""

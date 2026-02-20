@@ -53,6 +53,7 @@ const EDITOR_SCENE_PATH: String = "res://scenes/editor/mod_editor.tscn"
 const ASSET_EDITOR_SCENE_PATH: String = "res://scenes/editor/mod_asset_editor.tscn"
 const UI_FONT: FontFile = preload("res://assets/gui/font/方正兰亭准黑_GBK.ttf")
 const DEFAULT_PREVIEW_IMAGE: String = "res://assets/gui/main_menu/Story00_Main_01.png"
+const PLATFORM_UPLOAD_PATH: String = "/api/mods/upload"
 const PROJECT_PREVIEW_FILE: String = "preview/cover.png"
 const PROJECT_PREVIEW_SIZE: Vector2i = Vector2i(206, 178)
 
@@ -111,6 +112,7 @@ var _row_style_selected: StyleBoxFlat
 
 var _project_action_dialog: ConfirmationDialog = null
 var _project_action_dialog_zip_button: Button = null
+var _project_action_dialog_upload_button: Button = null
 var _pending_project_action: String = ""
 var _import_assets_button: Button = null
 
@@ -134,8 +136,14 @@ var _episode_dragging: bool = false
 var _episode_drag_start_pos: Vector2 = Vector2.ZERO
 var _episode_drag_panel: PanelContainer = null
 var _episode_drag_moved: bool = false
+var _upload_http: HTTPRequest = null
+var _upload_busy: bool = false
 
 func _ready():
+	_upload_http = HTTPRequest.new()
+	_upload_http.use_threads = true
+	add_child(_upload_http)
+
 	_ensure_projects_root()
 	_init_row_styles()
 	_load_projects()
@@ -825,10 +833,10 @@ func _ensure_project_action_dialog() -> void:
 		return
 
 	var dialog := ConfirmationDialog.new()
-	dialog.title = "导入/导出"
-	dialog.dialog_text = "请选择要对该工程执行的操作："
-	dialog.ok_button_text = "导入到Mods"
-	dialog.cancel_button_text = "取消"
+	dialog.title = "Project Actions"
+	dialog.dialog_text = "Choose an action for this project."
+	dialog.ok_button_text = "Install to Mods"
+	dialog.cancel_button_text = "Cancel"
 	add_child(dialog)
 
 	_project_action_dialog = dialog
@@ -837,15 +845,20 @@ func _ensure_project_action_dialog() -> void:
 	if dialog.has_signal("custom_action") and not dialog.custom_action.is_connected(_on_project_action_custom_action):
 		dialog.custom_action.connect(_on_project_action_custom_action)
 
-	var zip_btn := dialog.add_button("导出ZIP", true, "export_zip")
+	var zip_btn := dialog.add_button("Export ZIP", true, "export_zip")
 	_project_action_dialog_zip_button = zip_btn
+	var upload_btn := dialog.add_button("Upload Platform", true, "upload_platform")
+	_project_action_dialog_upload_button = upload_btn
 	_update_project_action_dialog_zip_state()
 
 func _update_project_action_dialog_zip_state() -> void:
-	if _project_action_dialog_zip_button == null:
-		return
-	_project_action_dialog_zip_button.disabled = not EXPORT_ZIP_ENABLED
-	_project_action_dialog_zip_button.tooltip_text = "ZIP功能暂时不可用" if not EXPORT_ZIP_ENABLED else ""
+	if _project_action_dialog_zip_button != null:
+		_project_action_dialog_zip_button.disabled = not EXPORT_ZIP_ENABLED
+		_project_action_dialog_zip_button.tooltip_text = "ZIP is temporarily unavailable" if not EXPORT_ZIP_ENABLED else ""
+
+	if _project_action_dialog_upload_button != null:
+		_project_action_dialog_upload_button.disabled = _upload_busy
+		_project_action_dialog_upload_button.tooltip_text = "Uploading..." if _upload_busy else ""
 
 func _on_project_actions_pressed(project_name: String) -> void:
 	_on_project_selected(project_name)
@@ -870,9 +883,11 @@ func _on_project_action_custom_action(action: StringName) -> void:
 	_pending_project_action = ""
 	if action == &"export_zip":
 		if not EXPORT_ZIP_ENABLED:
-			_show_info_dialog("导出ZIP暂时不可用", "导出ZIP功能暂时禁用（目前仍有问题），请先使用“导入到Mods”进行测试。")
+			_show_info_dialog("ZIP unavailable", "ZIP export is temporarily disabled. Please use Install to Mods for now.")
 			return
 		_begin_export_zip_for_project(project_name)
+	elif action == &"upload_platform":
+		await _begin_upload_platform_for_project(project_name)
 
 func _show_empty_project_details() -> void:
 	_set_right_panel_visible(false)
@@ -2264,9 +2279,9 @@ func _write_text_file(path: String, content: String) -> void:
 	f.store_string(content)
 	f.close()
 
-func _generate_story_scene(mod_folder: String, episode_name: String) -> String:
+func _generate_story_scene(_mod_folder: String, episode_name: String) -> String:
 	var scene := "[gd_scene load_steps=3 format=3]\n\n"
-	scene += "[ext_resource type=\"Script\" path=\"res://mods/%s/story/%s.gd\" id=\"1_script\"]\n" % [mod_folder, episode_name]
+	scene += "[ext_resource type=\"Script\" path=\"%s.gd\" id=\"1_script\"]\n" % episode_name
 	scene += "[ext_resource type=\"PackedScene\" path=\"res://scenes/dialog/NovelInterface.tscn\" id=\"2_novel\"]\n\n"
 	scene += "[node name=\"Story\" type=\"Node2D\"]\n"
 	scene += "script = ExtResource(\"1_script\")\n\n"
@@ -2917,3 +2932,195 @@ func _delete_directory_recursive(path: String):
 func _on_back_button_pressed():
 	"""返回按钮"""
 	_request_exit_to_menu()
+
+func _set_upload_busy(busy: bool) -> void:
+	_upload_busy = busy
+	_update_project_action_dialog_zip_state()
+
+func _begin_upload_platform_for_project(project_name: String) -> void:
+	if _upload_busy:
+		return
+	if not has_node("/root/AuthManager"):
+		_show_info_dialog("Upload failed", "AuthManager is missing.")
+		return
+	if not await AuthManager.ensure_valid_token():
+		_show_info_dialog("Login required", "Please sign in before uploading mods.")
+		return
+
+	var errors: Array[String] = _validate_project_for_packaging(project_name)
+	if not errors.is_empty():
+		_show_packaging_blocked("Upload blocked", errors)
+		return
+
+	_set_upload_busy(true)
+	var bundle: Dictionary = _build_upload_bundle(project_name)
+	if not bool(bundle.get("ok", false)):
+		_set_upload_busy(false)
+		_show_info_dialog("Upload failed", str(bundle.get("message", "Failed to build upload bundle.")))
+		return
+
+	var upload_result: Dictionary = await _upload_bundle_to_platform(bundle)
+	_cleanup_upload_bundle(bundle)
+	_set_upload_busy(false)
+
+	if bool(upload_result.get("ok", false)):
+		_show_info_dialog("Upload complete", "Project '%s' has been uploaded." % project_name)
+	else:
+		_show_info_dialog("Upload failed", _extract_api_error(upload_result))
+
+func _build_upload_bundle(project_name: String) -> Dictionary:
+	var folder: String = _get_mod_folder_name_for_project(project_name)
+	if folder.is_empty():
+		return {"ok": false, "message": "Cannot resolve a valid mod folder name."}
+
+	var temp_root := "user://__mod_upload_tmp"
+	if DirAccess.open(temp_root) != null:
+		_delete_directory_recursive(temp_root)
+
+	var user_dir: DirAccess = DirAccess.open("user://")
+	if user_dir == null:
+		return {"ok": false, "message": "Cannot open user://."}
+	var mkdir_err: int = user_dir.make_dir("__mod_upload_tmp")
+	if mkdir_err != OK and DirAccess.open(temp_root) == null:
+		return {"ok": false, "message": "Cannot create upload temp directory."}
+
+	var build_err: int = _build_mod_folder(project_name, temp_root, folder)
+	if build_err != OK:
+		_delete_directory_recursive(temp_root)
+		return {"ok": false, "message": "Failed to build mod folder: %d" % build_err}
+
+	var source_folder: String = temp_root + "/" + folder
+	var zip_path: String = temp_root + "/" + folder + ".zip"
+	var zip_err: int = _zip_folder(source_folder, zip_path, folder)
+	if zip_err != OK:
+		_delete_directory_recursive(temp_root)
+		return {"ok": false, "message": "Failed to build ZIP: %d" % zip_err}
+
+	var mod_config: Dictionary = _load_json_file(source_folder + "/mod_config.json")
+	if mod_config.is_empty():
+		_delete_directory_recursive(temp_root)
+		return {"ok": false, "message": "mod_config.json missing in upload bundle."}
+
+	return {
+		"ok": true,
+		"temp_root": temp_root,
+		"zip_path": zip_path,
+		"folder": folder,
+		"mod_config": mod_config,
+	}
+
+func _cleanup_upload_bundle(bundle: Dictionary) -> void:
+	var temp_root: String = str(bundle.get("temp_root", ""))
+	if temp_root.is_empty():
+		return
+	if DirAccess.open(temp_root) != null:
+		_delete_directory_recursive(temp_root)
+
+func _upload_bundle_to_platform(bundle: Dictionary) -> Dictionary:
+	if _upload_http == null:
+		return {"ok": false, "status": 0, "error": "upload_http_unavailable"}
+
+	var zip_path: String = str(bundle.get("zip_path", ""))
+	var folder: String = str(bundle.get("folder", "mod"))
+	var mod_config: Dictionary = bundle.get("mod_config", {}) as Dictionary
+	if zip_path.is_empty() or not FileAccess.file_exists(zip_path):
+		return {"ok": false, "status": 0, "error": "upload_zip_missing"}
+
+	var zip_file: FileAccess = FileAccess.open(zip_path, FileAccess.READ)
+	if zip_file == null:
+		return {"ok": false, "status": 0, "error": "upload_zip_open_failed"}
+	var zip_bytes: PackedByteArray = zip_file.get_buffer(zip_file.get_length())
+	zip_file.close()
+
+	var metadata := {
+		"source": "godot_mod_editor",
+		"project": folder,
+		"uploaded_from": "project_manager",
+	}
+	var fields := {
+		"mod_slug": str(mod_config.get("mod_id", folder)),
+		"mod_name": str(mod_config.get("title", folder)),
+		"description": str(mod_config.get("description", "")),
+		"version": str(mod_config.get("version", "1.0.0")),
+		"author_name": str(mod_config.get("author", "")),
+		"metadata": JSON.stringify(metadata),
+		"mod_config": JSON.stringify(mod_config),
+	}
+
+	var boundary: String = "----GodotModUpload%08d" % int(Time.get_ticks_msec() % 100000000)
+	var body: PackedByteArray = _build_multipart_body(fields, zip_bytes, "%s.zip" % folder, boundary)
+	var headers := PackedStringArray([
+		"Authorization: Bearer %s" % AuthManager.access_token,
+		"Content-Type: multipart/form-data; boundary=%s" % boundary,
+	])
+
+	var response: Dictionary = await _request_with_binary_body(_upload_http, PLATFORM_UPLOAD_PATH, headers, body)
+	if int(response.get("status", 0)) == 401:
+		var refreshed: Dictionary = await AuthManager.refresh_access_token()
+		if bool(refreshed.get("ok", false)):
+			headers = PackedStringArray([
+				"Authorization: Bearer %s" % AuthManager.access_token,
+				"Content-Type: multipart/form-data; boundary=%s" % boundary,
+			])
+			response = await _request_with_binary_body(_upload_http, PLATFORM_UPLOAD_PATH, headers, body)
+
+	return response
+
+func _build_multipart_body(fields: Dictionary, file_bytes: PackedByteArray, file_name: String, boundary: String) -> PackedByteArray:
+	var body := PackedByteArray()
+	for key_any in fields.keys():
+		var key: String = str(key_any)
+		var value: String = str(fields[key_any])
+		body.append_array(("--%s\r\n" % boundary).to_utf8_buffer())
+		body.append_array(("Content-Disposition: form-data; name=\"%s\"\r\n\r\n" % key).to_utf8_buffer())
+		body.append_array(value.to_utf8_buffer())
+		body.append_array("\r\n".to_utf8_buffer())
+
+	body.append_array(("--%s\r\n" % boundary).to_utf8_buffer())
+	body.append_array(("Content-Disposition: form-data; name=\"file\"; filename=\"%s\"\r\n" % file_name).to_utf8_buffer())
+	body.append_array("Content-Type: application/zip\r\n\r\n".to_utf8_buffer())
+	body.append_array(file_bytes)
+	body.append_array("\r\n".to_utf8_buffer())
+	body.append_array(("--%s--\r\n" % boundary).to_utf8_buffer())
+	return body
+
+func _request_with_binary_body(http: HTTPRequest, path: String, headers: PackedStringArray, body: PackedByteArray) -> Dictionary:
+	var url: String = AuthManager.BASE_URL + path
+	if not http.has_method("request_raw"):
+		return {"ok": false, "status": 0, "error": "request_raw_unavailable"}
+
+	var err: int = int(http.call("request_raw", url, headers, HTTPClient.METHOD_POST, body))
+	if err != OK:
+		return {"ok": false, "status": 0, "error": "request_failed_%s" % err}
+
+	var completed: Array = await http.request_completed
+	var result_code: int = int(completed[0])
+	var status_code: int = int(completed[1])
+	var response_body: PackedByteArray = completed[3]
+	var raw: String = response_body.get_string_from_utf8()
+	var parsed: Variant = JSON.parse_string(raw)
+	var ok: bool = (result_code == HTTPRequest.RESULT_SUCCESS) and status_code >= 200 and status_code < 300
+
+	return {
+		"ok": ok,
+		"result": result_code,
+		"status": status_code,
+		"data": parsed,
+		"raw": raw,
+	}
+
+func _extract_api_error(response: Dictionary) -> String:
+	if response.has("error"):
+		return str(response["error"])
+	var parsed: Variant = response.get("data")
+	if typeof(parsed) == TYPE_DICTIONARY:
+		var root: Dictionary = parsed
+		if root.has("error"):
+			return str(root["error"])
+		if root.has("message") and str(root["message"]).strip_edges() != "":
+			return str(root["message"])
+		if typeof(root.get("data")) == TYPE_DICTIONARY:
+			var payload: Dictionary = root["data"]
+			if payload.has("error"):
+				return str(payload["error"])
+	return str(response.get("raw", "request_failed"))

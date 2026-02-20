@@ -441,16 +441,27 @@ func _load_mod_scene(scene_path: String) -> PackedScene:
 	var original_content = file.get_as_text()
 	file.close()
 
+	# New mod exports use relative script paths (for example: ep01.gd).
+	# If no legacy res://mods or res://export references exist, load directly.
+	var needs_rewrite: bool = original_content.find("res://mods/") != -1 or original_content.find("res://export/") != -1
+	if not needs_rewrite:
+		return load(scene_path)
+
 	# 替换所有res://mods/为user://mods/
 	var modified_content: String = original_content.replace("res://mods/", "user://mods/")
 
-	# 兼容旧导出：res://export/xxx 需要映射到当前mod目录下的 export/
-	if modified_content.find("res://export/") != -1 and scene_path.begins_with("user://mods/"):
+	# Legacy export remap: res://export/* -> current mod export folder
+	if scene_path.begins_with("user://mods/"):
 		var rest: String = scene_path.substr("user://mods/".length())
 		var parts: PackedStringArray = rest.split("/")
 		if parts.size() >= 1 and not parts[0].is_empty():
 			var mod_folder: String = parts[0]
-			modified_content = modified_content.replace("res://export/", "user://mods/%s/export/" % mod_folder)
+			if modified_content.find("res://export/") != -1:
+				modified_content = modified_content.replace("res://export/", "user://mods/%s/export/" % mod_folder)
+			# Normalize hardcoded old mod folder to the current mod folder
+			var re := RegEx.new()
+			if re.compile("user://mods/[^/]+/") == OK:
+				modified_content = re.sub(modified_content, "user://mods/%s/" % mod_folder, true)
 
 	# 创建临时文件
 	var temp_path = "user://temp_mod_scene.tscn"

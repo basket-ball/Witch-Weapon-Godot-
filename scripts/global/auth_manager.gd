@@ -22,6 +22,14 @@ func _ready() -> void:
 func is_logged_in() -> bool:
 	return access_token != "" and Time.get_unix_time_from_system() < expires_at_unix
 
+func is_admin() -> bool:
+	var role_any: Variant = profile.get("role", "")
+	if typeof(role_any) == TYPE_STRING:
+		return str(role_any).to_lower() == "admin"
+	if typeof(role_any) == TYPE_INT:
+		return int(role_any) == 1
+	return false
+
 func logout() -> void:
 	access_token = ""
 	refresh_token = ""
@@ -47,7 +55,7 @@ func verify_code(email_in: String, code: String) -> Dictionary:
 	if not res.get("ok", false):
 		return res
 
-	var parsed = res.get("data")
+	var parsed: Variant = res.get("data")
 	var token_payload: Dictionary = {}
 	if typeof(parsed) == TYPE_DICTIONARY:
 		# Platform worker returns: { success, message, data: { access_token, refresh_token, expires_in } }
@@ -66,14 +74,50 @@ func verify_code(email_in: String, code: String) -> Dictionary:
 		auth_state_changed.emit(is_logged_in())
 	return res
 
+func ensure_valid_token() -> bool:
+	if is_logged_in():
+		return true
+	if refresh_token.strip_edges().is_empty():
+		return false
+	var refresh_res: Dictionary = await refresh_access_token()
+	return bool(refresh_res.get("ok", false)) and is_logged_in()
+
+func refresh_access_token() -> Dictionary:
+	if refresh_token.strip_edges().is_empty():
+		return {"ok": false, "status": 401, "error": "refresh_token_missing"}
+
+	var payload := {"refresh_token": refresh_token}
+	var res := await _request_json("/api/auth/refresh", HTTPClient.METHOD_POST, payload, PackedStringArray())
+	if not res.get("ok", false):
+		return res
+
+	var parsed: Variant = res.get("data")
+	var token_payload: Dictionary = {}
+	if typeof(parsed) == TYPE_DICTIONARY:
+		if typeof(parsed.get("data")) == TYPE_DICTIONARY:
+			token_payload = parsed["data"]
+		else:
+			token_payload = parsed
+
+	var new_access_token: String = str(token_payload.get("access_token", ""))
+	if new_access_token.is_empty():
+		return {"ok": false, "status": 500, "error": "refresh_response_missing_access_token", "data": parsed}
+
+	access_token = new_access_token
+	var expires_in: int = int(token_payload.get("expires_in", 0))
+	expires_at_unix = int(Time.get_unix_time_from_system()) + max(expires_in, 0)
+	_save_to_config()
+	auth_state_changed.emit(is_logged_in())
+	return res
+
 func fetch_profile() -> Dictionary:
-	if not is_logged_in():
-		return {"ok": false, "status": 0, "error": "not_logged_in"}
+	if not await ensure_valid_token():
+		return {"ok": false, "status": 401, "error": "not_logged_in"}
 	var headers := PackedStringArray([
 		"Authorization: Bearer %s" % access_token,
 	])
 	var res := await _request_json("/api/user/profile", HTTPClient.METHOD_GET, {}, headers)
-	var parsed = res.get("data")
+	var parsed: Variant = res.get("data")
 	var profile_payload: Dictionary = {}
 	if typeof(parsed) == TYPE_DICTIONARY:
 		if typeof(parsed.get("data")) == TYPE_DICTIONARY:

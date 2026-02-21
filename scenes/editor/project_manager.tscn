@@ -217,23 +217,13 @@ theme_override_constants/separation = 8
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="ExportZipButton" type="Button" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailMargin/DetailForm/ProjectActions"]
-layout_mode = 2
-size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 38)
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 18
-disabled = true
-tooltip_text = "导出ZIP功能暂时禁用"
-text = "导出ZIP"
-
 [node name="InstallToModsButton" type="Button" parent="WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailMargin/DetailForm/ProjectActions"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 38)
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 18
-text = "导入到Mods"
+text = "导入到Mod"
 
 [node name="Footer" type="HBoxContainer" parent="WindowPanel/Margin/Content"]
 layout_mode = 2
@@ -398,16 +388,10 @@ file_mode = 0
 access = 2
 filters = PackedStringArray("*.png ; PNG", "*.jpg, *.jpeg ; JPG", "*.webp ; WEBP")
 
-[node name="ExportZipDialog" type="FileDialog" parent="."]
-title = "导出为ZIP"
-visible = false
-file_mode = 4
-access = 2
-filters = PackedStringArray("*.zip ; ZIP")
 
 [node name="InstallModsConfirmDialog" type="ConfirmationDialog" parent="."]
-title = "覆盖Mods"
+title = "覆盖Mod"
 size = Vector2i(520, 240)
 ok_button_text = "覆盖"
 cancel_button_text = "取消"
-text = "目标Mods已存在，是否覆盖？"
+text = "目标Mod已存在，是否覆盖？"

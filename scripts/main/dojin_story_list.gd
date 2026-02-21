@@ -41,6 +41,7 @@ extends Control
 @onready var back_area: Control = $"BackgroundColor/BackArea"
 @onready var editor_button: Button = $"EditorButton"
 @onready var manage_mods_button: Button = get_node_or_null("ManageModsButton") as Button
+@onready var online_mods_button: Button = get_node_or_null("OnlineModsButton") as Button
 @onready var login_button: Button = get_node_or_null("LoginButton") as Button
 
 # ==================== 常量配置 ====================
@@ -54,7 +55,9 @@ const MOD_PROJECTS_PATH: String = "user://mod_projects"  # mod工程文件夹
 const EPISODE_LIST_SCENE_PATH: String = "res://scenes/main/episode_story_list.tscn"
 const PROJECT_MANAGER_SCENE_PATH: String = "res://scenes/editor/project_manager.tscn"  # 工程管理器场景
 const MOD_MANAGER_SCENE_PATH: String = "res://scenes/main/mod_manager.tscn"  # 模组管理器场景
+const ONLINE_MODS_MANAGER_SCENE_PATH: String = "res://scenes/main/online_mods_manager.tscn"  # 在线模组场景
 const AUTH_DIALOG_SCENE_PATH: String = "res://scenes/main/auth_dialog.tscn"
+const ONLINE_MODS_MANAGER_SCRIPT: Script = preload("res://scripts/main/online_mods_manager.gd")
 
 # 故事节点间距
 const STORY_SPACING: float = 346.0
@@ -114,6 +117,7 @@ var button_press_pos: Vector2
 
 var _is_project_manager_open: bool = false
 var _is_mod_manager_open: bool = false
+var _is_online_mods_manager_open: bool = false
 var _is_auth_dialog_open: bool = false
 
 var animation_cache = {
@@ -135,14 +139,16 @@ func _ready():
 	_setup_back_area()
 	_setup_editor_button()
 	_setup_manage_mods_button()
+	_setup_online_mods_button()
 	_setup_login_button()
 	_init_background()
 	_load_mods()
 	_create_story_nodes()
 	_setup_auth_manager()
+	call_deferred("_warmup_online_mods_cache")
 
 func _process(delta):
-	if not _is_list_active() or _is_project_manager_open or _is_mod_manager_open or _is_auth_dialog_open:
+	if not _is_list_active() or _is_project_manager_open or _is_mod_manager_open or _is_online_mods_manager_open or _is_auth_dialog_open:
 		is_dragging = false
 		drag_velocity = 0.0
 		return
@@ -156,7 +162,7 @@ func _process(delta):
 		_update_drag_physics()
 
 func _input(event):
-	if not _is_list_active() or _is_project_manager_open or _is_mod_manager_open or _is_auth_dialog_open:
+	if not _is_list_active() or _is_project_manager_open or _is_mod_manager_open or _is_online_mods_manager_open or _is_auth_dialog_open:
 		is_dragging = false
 		drag_velocity = 0.0
 		return
@@ -442,6 +448,10 @@ func _setup_manage_mods_button():
 	if manage_mods_button:
 		manage_mods_button.pressed.connect(_on_manage_mods_button_pressed)
 
+func _setup_online_mods_button():
+	if online_mods_button:
+		online_mods_button.pressed.connect(_on_online_mods_button_pressed)
+
 func _setup_login_button():
 	if login_button:
 		login_button.pressed.connect(_on_login_button_pressed)
@@ -465,13 +475,22 @@ func _on_editor_button_pressed():
 	_open_project_manager()
 
 func _on_manage_mods_button_pressed():
-	"""打开模组管理器（查看信息 / 删除 / 导入ZIP）"""
-	if _is_mod_manager_open:
+	"""打开模组管理器"""
+	if _is_mod_manager_open or _is_online_mods_manager_open:
 		return
 	if is_animating or is_expanded:
 		push_error("请先退出当前同人故事详情页，再打开“管理模组”。")
 		return
 	_open_mod_manager()
+
+func _on_online_mods_button_pressed():
+	"""打开在线模组下载窗口"""
+	if _is_mod_manager_open or _is_online_mods_manager_open:
+		return
+	if is_animating or is_expanded:
+		push_error("请先退出当前同人故事详情页，再打开“在线模组”。")
+		return
+	_open_online_mods_manager()
 
 func _on_login_button_pressed():
 	"""打开账号登录/注册窗口"""
@@ -508,9 +527,17 @@ func _open_auth_dialog():
 
 func _on_auth_state_changed(_is_logged_in: bool) -> void:
 	_update_login_button()
+	_warmup_online_mods_cache()
 
 func _on_auth_profile_changed(_profile: Dictionary) -> void:
 	_update_login_button()
+	_warmup_online_mods_cache()
+
+func _warmup_online_mods_cache() -> void:
+	if not has_node("/root/AuthManager"):
+		return
+	# Let warmup_public_mods handle token refresh/login state internally.
+	ONLINE_MODS_MANAGER_SCRIPT.warmup_public_mods(self, "new")
 
 func _update_login_button() -> void:
 	if not login_button:
@@ -580,6 +607,31 @@ func _open_mod_manager():
 
 	get_parent().add_child(mod_manager)
 	get_parent().move_child(mod_manager, get_parent().get_child_count() - 1)
+
+
+func _open_online_mods_manager():
+	"""加载并显示在线模组管理器"""
+	var online_scene = load(ONLINE_MODS_MANAGER_SCENE_PATH)
+	if not online_scene:
+		push_error("无法加载在线模组场景: " + ONLINE_MODS_MANAGER_SCENE_PATH)
+		return
+
+	var online_manager = online_scene.instantiate()
+	_is_online_mods_manager_open = true
+	is_dragging = false
+	drag_velocity = 0.0
+
+	online_manager.tree_exited.connect(func():
+		_is_online_mods_manager_open = false
+		_reload_mods_and_story_nodes()
+	)
+
+	if online_manager is Control:
+		online_manager.z_index = 2000
+		online_manager.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	get_parent().add_child(online_manager)
+	get_parent().move_child(online_manager, get_parent().get_child_count() - 1)
 
 func _reload_mods_and_story_nodes():
 	# 管理模组关闭后刷新同人列表

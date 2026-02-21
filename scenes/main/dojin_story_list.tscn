@@ -44,7 +44,7 @@ offset_left = 40.0
 offset_top = 640.0
 offset_right = 200.0
 offset_bottom = 690.0
-text = "打开编辑器"
+text = "编辑器"
 
 [node name="ManageModsButton" type="Button" parent="."]
 layout_mode = 0
@@ -52,7 +52,15 @@ offset_left = 210.0
 offset_top = 640.0
 offset_right = 370.0
 offset_bottom = 690.0
-text = "管理模组"
+text = "模组管理"
+
+[node name="OnlineModsButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 380.0
+offset_top = 640.0
+offset_right = 540.0
+offset_bottom = 690.0
+text = "在线模组"
 
 [node name="LoginButton" type="Button" parent="."]
 layout_mode = 0

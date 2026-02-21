@@ -1,6 +1,18 @@
-[gd_scene load_steps=2 format=3 uid="uid://c2m7u5y3a7r2k"]
+[gd_scene load_steps=3 format=3 uid="uid://c2m7u5y3a7r2k"]
 
 [ext_resource type="Script" uid="uid://d4p6u2w8h9k1s" path="res://scripts/main/mod_manager.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_window"]
+bg_color = Color(0.16, 0.16, 0.16, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
 
 [node name="ModManager" type="Control"]
 layout_mode = 3
@@ -20,20 +32,22 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
-color = Color(0, 0, 0, 0.65)
+color = Color(0, 0, 0, 0.55)
 
-[node name="Window" type="Panel" parent="."]
+[node name="Window" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -520.0
-offset_top = -300.0
-offset_right = 520.0
-offset_bottom = 300.0
+offset_left = -500.0
+offset_top = -290.0
+offset_right = 500.0
+offset_bottom = 290.0
 mouse_filter = 0
+clip_contents = true
+theme_override_styles/panel = SubResource("StyleBoxFlat_window")
 
 [node name="Margin" type="MarginContainer" parent="Window"]
 layout_mode = 1
@@ -42,16 +56,20 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-offset_left = 14.0
-offset_top = 14.0
-offset_right = -14.0
-offset_bottom = -14.0
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
 
 [node name="Root" type="VBoxContainer" parent="Window/Margin"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
 
 [node name="Header" type="HBoxContainer" parent="Window/Margin/Root"]
 layout_mode = 2
+theme_override_constants/separation = 10
 
 [node name="TitleLabel" type="Label" parent="Window/Margin/Root/Header"]
 layout_mode = 2
@@ -63,34 +81,38 @@ size_flags_horizontal = 3
 
 [node name="CloseButton" type="Button" parent="Window/Margin/Root/Header"]
 layout_mode = 2
+custom_minimum_size = Vector2(96, 34)
 text = "关闭"
 
 [node name="Body" type="HBoxContainer" parent="Window/Margin/Root"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/separation = 12
 
 [node name="LeftColumn" type="VBoxContainer" parent="Window/Margin/Root/Body"]
 layout_mode = 2
-custom_minimum_size = Vector2(360, 0)
+custom_minimum_size = Vector2(320, 0)
 size_flags_vertical = 3
 
 [node name="ModList" type="ItemList" parent="Window/Margin/Root/Body/LeftColumn"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="LeftButtons" type="HBoxContainer" parent="Window/Margin/Root/Body/LeftColumn"]
 layout_mode = 2
-
-[node name="ImportZipButton" type="Button" parent="Window/Margin/Root/Body/LeftColumn/LeftButtons"]
-layout_mode = 2
-text = "导入ZIP"
+theme_override_constants/separation = 8
 
 [node name="RefreshButton" type="Button" parent="Window/Margin/Root/Body/LeftColumn/LeftButtons"]
 layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 38)
 text = "刷新"
 
 [node name="DeleteButton" type="Button" parent="Window/Margin/Root/Body/LeftColumn/LeftButtons"]
 layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 38)
 disabled = true
 text = "删除"
 
@@ -101,10 +123,11 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_constants/separation = 10
 
 [node name="Icon" type="TextureRect" parent="Window/Margin/Root/Body/RightColumn"]
 layout_mode = 2
-custom_minimum_size = Vector2(160, 160)
+custom_minimum_size = Vector2(206, 178)
 stretch_mode = 5
 
 [node name="ModTitleLabel" type="Label" parent="Window/Margin/Root/Body/RightColumn"]
@@ -124,8 +147,3 @@ title = "提示"
 [node name="ConfirmDeleteDialog" type="ConfirmationDialog" parent="."]
 title = "确认删除"
 
-[node name="ImportZipDialog" type="FileDialog" parent="."]
-title = "选择要导入的 ZIP"
-file_mode = 1
-access = 2
-filters = PackedStringArray("*.zip ; ZIP 文件")

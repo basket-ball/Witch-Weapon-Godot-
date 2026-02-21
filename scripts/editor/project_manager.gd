@@ -1,4 +1,4 @@
-# =============================================================================
+﻿# =============================================================================
 # Mod工程管理器 (Project Manager)
 # =============================================================================
 # 功能概述：
@@ -28,7 +28,6 @@ extends Control
 @onready var search_input: LineEdit = get_node_or_null("WindowPanel/Margin/Content/Header/SearchInput") as LineEdit
 @onready var delete_confirm_dialog: ConfirmationDialog = get_node_or_null("DeleteConfirmDialog") as ConfirmationDialog
 @onready var preview_file_dialog: FileDialog = get_node_or_null("PreviewFileDialog") as FileDialog
-@onready var export_zip_dialog: FileDialog = get_node_or_null("ExportZipDialog") as FileDialog
 @onready var install_mods_confirm_dialog: ConfirmationDialog = get_node_or_null("InstallModsConfirmDialog") as ConfirmationDialog
 
 @onready var project_title_input: LineEdit = get_node_or_null("WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailMargin/DetailForm/NameRow/ProjectTitleInput") as LineEdit
@@ -36,7 +35,6 @@ extends Control
 @onready var project_desc_input: TextEdit = get_node_or_null("WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailMargin/DetailForm/ProjectDescInput") as TextEdit
 @onready var episode_list: VBoxContainer = get_node_or_null("WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailMargin/DetailForm/EpisodeList") as VBoxContainer
 @onready var add_episode_button: Button = get_node_or_null("WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailMargin/DetailForm/EpisodesHeader/AddEpisodeButton") as Button
-@onready var export_zip_button: Button = get_node_or_null("WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailMargin/DetailForm/ProjectActions/ExportZipButton") as Button
 @onready var install_to_mods_button: Button = get_node_or_null("WindowPanel/Margin/Content/Body/RightPanel/DetailScroll/DetailMargin/DetailForm/ProjectActions/InstallToModsButton") as Button
 @onready var right_panel: Control = get_node_or_null("WindowPanel/Margin/Content/Body/RightPanel") as Control
 @onready var _footer_actions: HBoxContainer = get_node_or_null("WindowPanel/Margin/Content/Footer") as HBoxContainer
@@ -57,16 +55,15 @@ const PLATFORM_UPLOAD_PATH: String = "/api/mods/upload"
 const PROJECT_PREVIEW_FILE: String = "preview/cover.png"
 const PROJECT_PREVIEW_SIZE: Vector2i = Vector2i(206, 178)
 
-const ENTER_ANIMATION_DURATION: float = 0.18
-const EXIT_ANIMATION_DURATION: float = 0.16
-const TRANSITION_ANIMATION_DURATION: float = 0.18
+const ENTER_ANIMATION_DURATION: float = 0.24
+const EXIT_ANIMATION_DURATION: float = 0.20
+const TRANSITION_ANIMATION_DURATION: float = 0.22
 const MAX_PROJECT_FOLDER_NAME_LENGTH: int = 24
 const MAX_PROJECT_TITLE_LENGTH: int = 24
 const MAX_PROJECT_DESC_LENGTH: int = 120
 const MAX_EPISODE_TITLE_LENGTH: int = 24
 const MAX_PROJECT_DESC_LINES: int = 3
 const EPISODE_DRAG_THRESHOLD: float = 6.0
-const EXPORT_ZIP_ENABLED: bool = false  # 暂时禁用：导出ZIP功能仍有问题，避免误用
 
 # 与 mod_editor.gd 的 enum BlockType 保持一致（用于导出/打包）
 enum BlockType {
@@ -111,7 +108,6 @@ var _row_style_hover: StyleBoxFlat
 var _row_style_selected: StyleBoxFlat
 
 var _project_action_dialog: ConfirmationDialog = null
-var _project_action_dialog_zip_button: Button = null
 var _project_action_dialog_upload_button: Button = null
 var _pending_project_action: String = ""
 var _import_assets_button: Button = null
@@ -120,7 +116,6 @@ var _is_loading_details: bool = false
 var _selected_episode_title: String = ""
 var _selected_episode_path: String = ""
 var _last_preview_dir: String = ""
-var _pending_export_project: String = ""
 var _pending_install_project: String = ""
 var _is_exiting: bool = false
 var _is_transitioning: bool = false
@@ -152,8 +147,6 @@ func _ready():
 	_apply_delete_button_danger_style()
 	_update_action_buttons_state()
 
-	if export_zip_button:
-		export_zip_button.tooltip_text = "导出ZIP功能暂时禁用"
 
 	if project_scroll and not project_scroll.gui_input.is_connected(_on_project_scroll_gui_input):
 		project_scroll.gui_input.connect(_on_project_scroll_gui_input)
@@ -188,8 +181,6 @@ func _ready():
 
 	if preview_file_dialog and not preview_file_dialog.file_selected.is_connected(_on_preview_file_selected):
 		preview_file_dialog.file_selected.connect(_on_preview_file_selected)
-	if export_zip_dialog and not export_zip_dialog.file_selected.is_connected(_on_export_zip_path_selected):
-		export_zip_dialog.file_selected.connect(_on_export_zip_path_selected)
 	if install_mods_confirm_dialog and not install_mods_confirm_dialog.confirmed.is_connected(_on_install_mods_confirmed):
 		install_mods_confirm_dialog.confirmed.connect(_on_install_mods_confirmed)
 
@@ -201,8 +192,6 @@ func _ready():
 		add_episode_button.pressed.connect(_on_add_episode_pressed)
 	if project_preview and not project_preview.gui_input.is_connected(_on_project_preview_gui_input):
 		project_preview.gui_input.connect(_on_project_preview_gui_input)
-	if export_zip_button and not export_zip_button.pressed.is_connected(_on_export_zip_pressed):
-		export_zip_button.pressed.connect(_on_export_zip_pressed)
 	if install_to_mods_button and not install_to_mods_button.pressed.is_connected(_on_install_to_mods_pressed):
 		install_to_mods_button.pressed.connect(_on_install_to_mods_pressed)
 
@@ -237,15 +226,15 @@ func _play_enter_animation() -> void:
 		background.modulate.a = 0.0
 	if window_panel:
 		window_panel.modulate.a = 0.0
-		window_panel.scale = Vector2(0.985, 0.985)
+		window_panel.scale = Vector2(0.975, 0.975)
 
 	var tween := create_tween()
 	tween.set_parallel(true)
 	if background:
-		tween.tween_property(background, "modulate:a", 1.0, ENTER_ANIMATION_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween.tween_property(background, "modulate:a", 1.0, ENTER_ANIMATION_DURATION).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 	if window_panel:
-		tween.tween_property(window_panel, "modulate:a", 1.0, ENTER_ANIMATION_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		tween.tween_property(window_panel, "scale", Vector2.ONE, ENTER_ANIMATION_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween.tween_property(window_panel, "modulate:a", 1.0, ENTER_ANIMATION_DURATION).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+		tween.tween_property(window_panel, "scale", Vector2.ONE, ENTER_ANIMATION_DURATION).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 
 func _request_exit_to_menu() -> void:
 	if _is_exiting or _is_transitioning:
@@ -262,9 +251,10 @@ func _request_exit_to_menu() -> void:
 	var tween := create_tween()
 	tween.set_parallel(true)
 	if window_panel:
-		tween.tween_property(window_panel, "modulate:a", 0.0, EXIT_ANIMATION_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+		tween.tween_property(window_panel, "modulate:a", 0.0, EXIT_ANIMATION_DURATION).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_IN)
+		tween.tween_property(window_panel, "scale", Vector2(0.97, 0.97), EXIT_ANIMATION_DURATION).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_IN)
 	if background:
-		tween.tween_property(background, "modulate:a", 0.0, EXIT_ANIMATION_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+		tween.tween_property(background, "modulate:a", 0.0, EXIT_ANIMATION_DURATION).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_IN)
 	tween.chain().tween_callback(queue_free)
 
 func _set_project_manager_visible_for_editor(visible_flag: bool) -> void:
@@ -309,10 +299,8 @@ func _configure_detail_scroll_ui() -> void:
 		detail_scroll.set("horizontal_scroll_mode", 3)
 
 func _relayout_project_action_buttons() -> void:
-	# 旧版“底部导出ZIP / 导入到Mods / 删除工程”按钮已迁移到“每个工程行右侧按钮”。
+	# 旧版“底部导入到Mod / 删除工程”按钮已迁移到“每个工程行右侧按钮”。
 	# 为避免改动场景文件，这里仅隐藏旧按钮/容器。
-	if export_zip_button:
-		export_zip_button.visible = false
 	if install_to_mods_button:
 		install_to_mods_button.visible = false
 	if delete_project_button:
@@ -734,7 +722,7 @@ func _create_project_item(project_name: String):
 
 	var item_container := HBoxContainer.new()
 	item_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	item_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	item_container.alignment = BoxContainer.ALIGNMENT_BEGIN
 	item_container.add_theme_constant_override("separation", 12)
 	item_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -746,6 +734,9 @@ func _create_project_item(project_name: String):
 	label.add_theme_font_override("font", UI_FONT)
 	label.add_theme_font_size_override("font_size", 22)
 	label.add_theme_color_override("font_color", Color(1, 1, 1, 0.92))
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.tooltip_text = project_name
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var actions := HBoxContainer.new()
@@ -754,8 +745,8 @@ func _create_project_item(project_name: String):
 	actions.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var export_button := Button.new()
-	export_button.text = "📦"
-	export_button.tooltip_text = "导入到Mods / 导出ZIP"
+	export_button.text = "↗"
+	export_button.tooltip_text = "导入到Mod / 上传平台"
 	export_button.custom_minimum_size = Vector2(44, 34)
 	export_button.focus_mode = Control.FOCUS_NONE
 	export_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -833,59 +824,53 @@ func _ensure_project_action_dialog() -> void:
 		return
 
 	var dialog := ConfirmationDialog.new()
-	dialog.title = "Project Actions"
-	dialog.dialog_text = "Choose an action for this project."
-	dialog.ok_button_text = "Install to Mods"
-	dialog.cancel_button_text = "Cancel"
+	dialog.title = "工程操作"
+	dialog.dialog_text = "请选择当前工程的操作。"
+	dialog.ok_button_text = "导入到Mod"
+	dialog.cancel_button_text = "取消"
 	add_child(dialog)
 
 	_project_action_dialog = dialog
-	if not dialog.confirmed.is_connected(_on_project_action_import_confirmed):
-		dialog.confirmed.connect(_on_project_action_import_confirmed)
 	if dialog.has_signal("custom_action") and not dialog.custom_action.is_connected(_on_project_action_custom_action):
 		dialog.custom_action.connect(_on_project_action_custom_action)
 
-	var zip_btn := dialog.add_button("Export ZIP", true, "export_zip")
-	_project_action_dialog_zip_button = zip_btn
-	var upload_btn := dialog.add_button("Upload Platform", true, "upload_platform")
+	var ok_btn := dialog.get_ok_button()
+	if ok_btn:
+		ok_btn.visible = false
+	var cancel_btn := dialog.get_cancel_button()
+	if cancel_btn:
+		cancel_btn.visible = false
+
+	dialog.add_button("导入到Mod", false, "import_mod")
+	var upload_btn := dialog.add_button("上传平台", false, "upload_platform")
 	_project_action_dialog_upload_button = upload_btn
-	_update_project_action_dialog_zip_state()
+	dialog.add_button("取消", true, "cancel")
+	_update_project_action_dialog_state()
 
-func _update_project_action_dialog_zip_state() -> void:
-	if _project_action_dialog_zip_button != null:
-		_project_action_dialog_zip_button.disabled = not EXPORT_ZIP_ENABLED
-		_project_action_dialog_zip_button.tooltip_text = "ZIP is temporarily unavailable" if not EXPORT_ZIP_ENABLED else ""
-
+func _update_project_action_dialog_state() -> void:
 	if _project_action_dialog_upload_button != null:
 		_project_action_dialog_upload_button.disabled = _upload_busy
-		_project_action_dialog_upload_button.tooltip_text = "Uploading..." if _upload_busy else ""
+		_project_action_dialog_upload_button.tooltip_text = "上传中..." if _upload_busy else ""
 
 func _on_project_actions_pressed(project_name: String) -> void:
 	_on_project_selected(project_name)
 	_pending_project_action = project_name
 	_ensure_project_action_dialog()
-	_update_project_action_dialog_zip_state()
+	_update_project_action_dialog_state()
 	if _project_action_dialog:
-		_project_action_dialog.dialog_text = "工程「%s」：请选择操作（ZIP暂时不可用）。" % project_name
+		_project_action_dialog.dialog_text = "工程「%s」：请选择操作。" % project_name
 		_project_action_dialog.popup_centered()
-
-func _on_project_action_import_confirmed() -> void:
-	if _pending_project_action.is_empty():
-		return
-	var project_name := _pending_project_action
-	_pending_project_action = ""
-	_begin_install_to_mods_for_project(project_name)
 
 func _on_project_action_custom_action(action: StringName) -> void:
 	if _pending_project_action.is_empty():
 		return
 	var project_name := _pending_project_action
 	_pending_project_action = ""
-	if action == &"export_zip":
-		if not EXPORT_ZIP_ENABLED:
-			_show_info_dialog("ZIP unavailable", "ZIP export is temporarily disabled. Please use Install to Mods for now.")
-			return
-		_begin_export_zip_for_project(project_name)
+	if _project_action_dialog:
+		_project_action_dialog.hide()
+
+	if action == &"import_mod":
+		_begin_install_to_mods_for_project(project_name)
 	elif action == &"upload_platform":
 		await _begin_upload_platform_for_project(project_name)
 
@@ -904,8 +889,6 @@ func _show_empty_project_details() -> void:
 			child.queue_free()
 	if add_episode_button:
 		add_episode_button.disabled = true
-	if export_zip_button:
-		export_zip_button.disabled = true
 	if install_to_mods_button:
 		install_to_mods_button.disabled = true
 	_selected_episode_title = ""
@@ -1284,56 +1267,6 @@ func _on_preview_file_selected(path: String) -> void:
 	if project_preview:
 		project_preview.texture = ImageTexture.create_from_image(thumb)
 
-func _on_export_zip_pressed() -> void:
-	if not EXPORT_ZIP_ENABLED:
-		_show_info_dialog("导出ZIP暂时不可用", "导出ZIP功能暂时禁用（目前仍有问题），请先使用“导入到Mods”进行测试。")
-		return
-	if selected_project.is_empty():
-		return
-	_begin_export_zip_for_project(selected_project)
-
-func _on_export_zip_project_pressed(project_name: String) -> void:
-	if not EXPORT_ZIP_ENABLED:
-		_show_info_dialog("导出ZIP暂时不可用", "导出ZIP功能暂时禁用（目前仍有问题），请先使用“导入到Mods”进行测试。")
-		return
-	_begin_export_zip_for_project(project_name)
-
-func _begin_export_zip_for_project(project_name: String) -> void:
-	if not EXPORT_ZIP_ENABLED:
-		return
-	if export_zip_dialog == null:
-		return
-
-	var errors: Array[String] = _validate_project_for_packaging(project_name)
-	if not errors.is_empty():
-		_show_packaging_blocked("无法导出ZIP", errors)
-		_pending_export_project = ""
-		return
-
-	_pending_export_project = project_name
-	var config := _ensure_mod_config(project_name)
-	var mod_id: String = str(config.get("mod_id", project_name)).strip_edges()
-	var file_name: String = _sanitize_folder_name(mod_id)
-	if file_name.is_empty():
-		file_name = _sanitize_folder_name(project_name)
-	export_zip_dialog.current_file = "%s.zip" % file_name
-	export_zip_dialog.popup_centered_ratio(0.8)
-
-func _on_export_zip_path_selected(path: String) -> void:
-	if _pending_export_project.is_empty():
-		return
-	var project_name: String = _pending_export_project
-	_pending_export_project = ""
-
-	var errors: Array[String] = _validate_project_for_packaging(project_name)
-	if not errors.is_empty():
-		_show_packaging_blocked("无法导出ZIP", errors)
-		return
-
-	var err := _export_project_zip(project_name, path)
-	if err != OK:
-		push_error("导出ZIP失败: " + str(err))
-
 func _on_install_to_mods_pressed() -> void:
 	if selected_project.is_empty():
 		return
@@ -1347,7 +1280,7 @@ func _begin_install_to_mods_for_project(project_name: String) -> void:
 
 	var errors: Array[String] = _validate_project_for_packaging(project_name)
 	if not errors.is_empty():
-		_show_packaging_blocked("无法导入到Mods", errors)
+		_show_packaging_blocked("无法导入到Mod", errors)
 		_pending_install_project = ""
 		return
 
@@ -1372,7 +1305,7 @@ func _on_install_mods_confirmed() -> void:
 
 	var errors: Array[String] = _validate_project_for_packaging(project_name)
 	if not errors.is_empty():
-		_show_packaging_blocked("无法导入到Mods", errors)
+		_show_packaging_blocked("无法导入到Mod", errors)
 		return
 
 	var target_folder := _get_mod_folder_name_for_project(project_name)
@@ -1384,7 +1317,7 @@ func _on_install_mods_confirmed() -> void:
 		_delete_directory_recursive(target_path)
 	var err := _build_mod_folder(project_name, MODS_PATH, target_folder)
 	if err != OK:
-		push_error("导入到Mods失败: " + str(err))
+		push_error("导入到Mod失败: " + str(err))
 
 func _sanitize_folder_name(raw_name: String) -> String:
 	var s := raw_name.strip_edges()
@@ -2858,7 +2791,7 @@ func _transition_to_editor(editor_scene: PackedScene, episode_dir: String) -> vo
 		parent.move_child(overlay, parent.get_child_count() - 1)
 
 	var tween_in := create_tween()
-	tween_in.tween_property(overlay, "modulate:a", 1.0, TRANSITION_ANIMATION_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tween_in.tween_property(overlay, "modulate:a", 1.0, TRANSITION_ANIMATION_DURATION).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_IN)
 	await tween_in.finished
 
 	# 打开编辑器
@@ -2879,7 +2812,7 @@ func _transition_to_editor(editor_scene: PackedScene, episode_dir: String) -> vo
 	# 注意：tween 若挂在本节点上，在 queue_free() 后会被引擎停止，导致遮罩不消失（黑屏）。
 	# 这里把 tween 挂在 overlay 上，确保即使本节点释放也能正常淡出。
 	var tween_out := overlay.create_tween()
-	tween_out.tween_property(overlay, "modulate:a", 0.0, TRANSITION_ANIMATION_DURATION).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween_out.tween_property(overlay, "modulate:a", 0.0, TRANSITION_ANIMATION_DURATION).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 	tween_out.tween_callback(func(): overlay.queue_free())
 
 	# 不销毁工程管理器：返回按钮应回到工程管理器（更符合“上一页”的直觉）。
@@ -2935,28 +2868,28 @@ func _on_back_button_pressed():
 
 func _set_upload_busy(busy: bool) -> void:
 	_upload_busy = busy
-	_update_project_action_dialog_zip_state()
+	_update_project_action_dialog_state()
 
 func _begin_upload_platform_for_project(project_name: String) -> void:
 	if _upload_busy:
 		return
 	if not has_node("/root/AuthManager"):
-		_show_info_dialog("Upload failed", "AuthManager is missing.")
+		_show_info_dialog("上传失败", "缺少AuthManager。")
 		return
 	if not await AuthManager.ensure_valid_token():
-		_show_info_dialog("Login required", "Please sign in before uploading mods.")
+		_show_info_dialog("需要登录", "上传前请先登录。")
 		return
 
 	var errors: Array[String] = _validate_project_for_packaging(project_name)
 	if not errors.is_empty():
-		_show_packaging_blocked("Upload blocked", errors)
+		_show_packaging_blocked("上传已阻止", errors)
 		return
 
 	_set_upload_busy(true)
 	var bundle: Dictionary = _build_upload_bundle(project_name)
 	if not bool(bundle.get("ok", false)):
 		_set_upload_busy(false)
-		_show_info_dialog("Upload failed", str(bundle.get("message", "Failed to build upload bundle.")))
+		_show_info_dialog("上传失败", str(bundle.get("message", "构建上传包失败。")))
 		return
 
 	var upload_result: Dictionary = await _upload_bundle_to_platform(bundle)
@@ -2964,9 +2897,9 @@ func _begin_upload_platform_for_project(project_name: String) -> void:
 	_set_upload_busy(false)
 
 	if bool(upload_result.get("ok", false)):
-		_show_info_dialog("Upload complete", "Project '%s' has been uploaded." % project_name)
+		_show_info_dialog("上传完成", "工程'%s'已上传。" % project_name)
 	else:
-		_show_info_dialog("Upload failed", _extract_api_error(upload_result))
+		_show_info_dialog("上传失败", _extract_api_error(upload_result))
 
 func _build_upload_bundle(project_name: String) -> Dictionary:
 	var folder: String = _get_mod_folder_name_for_project(project_name)

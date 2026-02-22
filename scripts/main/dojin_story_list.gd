@@ -271,7 +271,7 @@ func _repair_story_scene_script_paths(mod_root: String, mod_config: Dictionary) 
 	var episodes: Dictionary = episodes_any as Dictionary
 	for key_any in episodes.keys():
 		var scene_rel: String = str(episodes.get(key_any, "")).strip_edges().replace("\\", "/")
-		if scene_rel.is_empty():
+		if scene_rel.is_empty() or not _is_safe_relative_mod_path(scene_rel):
 			continue
 		var scene_abs: String = mod_root + "/" + scene_rel
 		if not FileAccess.file_exists(scene_abs):
@@ -280,6 +280,18 @@ func _repair_story_scene_script_paths(mod_root: String, mod_config: Dictionary) 
 		if expected_script_rel.is_empty():
 			continue
 		_rewrite_story_scene_script_path(scene_abs, expected_script_rel)
+
+func _is_safe_relative_mod_path(path: String) -> bool:
+	var normalized: String = path.strip_edges().replace("\\", "/")
+	if normalized.is_empty():
+		return false
+	if normalized.begins_with("/") or normalized.find(":") != -1:
+		return false
+	var parts: PackedStringArray = normalized.split("/", false)
+	for part in parts:
+		if part.is_empty() or part == "..":
+			return false
+	return true
 
 func _rewrite_story_scene_script_path(scene_path: String, expected_script_rel: String) -> void:
 	var file: FileAccess = FileAccess.open(scene_path, FileAccess.READ)

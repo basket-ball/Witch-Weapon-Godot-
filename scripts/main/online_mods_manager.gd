@@ -1232,12 +1232,13 @@ func _import_zip(zip_path: String) -> Dictionary:
 
 	var config_entry: String = ""
 	for entry in entries:
-		if entry.ends_with("/") or entry.is_empty():
+		var entry_norm: String = entry.replace("\\", "/")
+		if entry_norm.ends_with("/") or entry_norm.is_empty():
 			continue
-		if entry.get_file() == MOD_CONFIG_FILENAME:
+		if entry_norm.get_file() == MOD_CONFIG_FILENAME:
 			if not config_entry.is_empty():
-				return {"ok": false, "message": "ZIP 内存在多个 %s，无法判断模组根目录。" % MOD_CONFIG_FILENAME}
-			config_entry = entry
+				return {"ok": false, "message": "ZIP ????? %s???????????" % MOD_CONFIG_FILENAME}
+			config_entry = entry_norm
 
 	if config_entry.is_empty():
 		return {"ok": false, "message": "ZIP 内缺少 %s。" % MOD_CONFIG_FILENAME}
@@ -1278,14 +1279,15 @@ func _import_zip(zip_path: String) -> Dictionary:
 	var prefix: String = top_folder + "/" if not top_folder.is_empty() else ""
 
 	for entry in entries:
-		if entry.is_empty():
+		var entry_norm: String = entry.replace("\\", "/")
+		if entry_norm.is_empty():
 			continue
-		if not prefix.is_empty() and not entry.begins_with(prefix):
+		if not prefix.is_empty() and not entry_norm.begins_with(prefix):
 			continue
 
-		var rel: String = entry
+		var rel: String = entry_norm
 		if not prefix.is_empty():
-			rel = entry.substr(prefix.length())
+			rel = entry_norm.substr(prefix.length())
 
 		if rel.is_empty():
 			continue
@@ -1297,19 +1299,20 @@ func _import_zip(zip_path: String) -> Dictionary:
 			var err_dir: int = user_dir.make_dir_recursive(rel_dir)
 			if err_dir != OK:
 				_delete_directory_recursive(dest_mod_path)
-				return {"ok": false, "message": "创建目录失败（错误码 %d）。" % err_dir}
+				return {"ok": false, "message": "?????????? %d??" % err_dir}
 
-		if entry.ends_with("/"):
+		if entry_norm.ends_with("/"):
 			continue
 
 		var data: PackedByteArray = zip.read_file(entry)
 		var out: FileAccess = FileAccess.open(dest_path, FileAccess.WRITE)
 		if not out:
 			_delete_directory_recursive(dest_mod_path)
-			return {"ok": false, "message": "写入文件失败：%s" % rel}
+			return {"ok": false, "message": "???????%s" % rel}
 		out.store_buffer(data)
 		out.close()
 		extracted_any = true
+
 
 	if not extracted_any:
 		_delete_directory_recursive(dest_mod_path)
@@ -1332,7 +1335,7 @@ func _repair_story_scene_script_paths(mod_root: String, mod_config: Dictionary) 
 	var episodes: Dictionary = episodes_any as Dictionary
 	for key_any in episodes.keys():
 		var scene_rel: String = str(episodes.get(key_any, "")).strip_edges().replace("\\", "/")
-		if scene_rel.is_empty():
+		if scene_rel.is_empty() or not _is_safe_relative_mod_path(scene_rel):
 			continue
 		var scene_abs: String = mod_root + "/" + scene_rel
 		if not FileAccess.file_exists(scene_abs):
@@ -1341,6 +1344,18 @@ func _repair_story_scene_script_paths(mod_root: String, mod_config: Dictionary) 
 		if expected_script_rel.is_empty():
 			continue
 		_rewrite_story_scene_script_path(scene_abs, expected_script_rel)
+
+func _is_safe_relative_mod_path(path: String) -> bool:
+	var normalized: String = path.strip_edges().replace("\\", "/")
+	if normalized.is_empty():
+		return false
+	if normalized.begins_with("/") or normalized.find(":") != -1:
+		return false
+	var parts: PackedStringArray = normalized.split("/", false)
+	for part in parts:
+		if part.is_empty() or part == "..":
+			return false
+	return true
 
 func _rewrite_story_scene_script_path(scene_path: String, expected_script_rel: String) -> void:
 	var file: FileAccess = FileAccess.open(scene_path, FileAccess.READ)
@@ -1376,13 +1391,14 @@ func _rewrite_story_scene_script_path(scene_path: String, expected_script_rel: S
 	out.close()
 
 func _is_safe_zip_entry(entry: String) -> bool:
-	if entry.begins_with("/") or entry.begins_with("\\"):
+	var normalized: String = entry.strip_edges().replace("\\", "/")
+	if normalized.is_empty():
 		return false
-	if entry.find(":") != -1:
+	if normalized.begins_with("/") or normalized.find(":") != -1:
 		return false
-	var parts: PackedStringArray = entry.split("/", false)
+	var parts: PackedStringArray = normalized.split("/", false)
 	for part in parts:
-		if part == "..":
+		if part.is_empty() or part == "..":
 			return false
 	return true
 

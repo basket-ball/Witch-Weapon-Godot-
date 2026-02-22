@@ -423,16 +423,33 @@ func set_mod_story(mod_title: String, episodes: Dictionary, mod_path: String) ->
 		episode_name_label.text = mod_title
 
 	# 更新剧集列表（需要处理mod路径）
+	# ???????????mod???
 	var full_path_episodes := {}
 	for episode_name in episodes:
-		var relative_path: String = episodes[episode_name]
-		# 将相对路径转换为绝对路径
+		var relative_path: String = str(episodes[episode_name]).strip_edges().replace("\\", "/")
+		if not _is_safe_mod_episode_rel_path(relative_path):
+			push_warning("??????????: %s" % relative_path)
+			continue
+		# ????????????
 		var full_path := mod_path + "/" + relative_path
 		full_path_episodes[episode_name] = full_path
 
 	_update_episode_list(full_path_episodes)
 
 ## 更新剧集列表
+
+func _is_safe_mod_episode_rel_path(path: String) -> bool:
+	var normalized: String = path.strip_edges().replace("\\", "/")
+	if normalized.is_empty():
+		return false
+	if normalized.begins_with("/") or normalized.find(":") != -1:
+		return false
+	var parts: PackedStringArray = normalized.split("/", false)
+	for part in parts:
+		if part.is_empty() or part == "..":
+			return false
+	return true
+
 func _update_episode_list(episodes: Dictionary) -> void:
 	# 清空现有列表
 	for child in story_list_container.get_children():

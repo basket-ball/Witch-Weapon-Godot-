@@ -65,7 +65,27 @@ const MAX_EPISODE_TITLE_LENGTH: int = 24
 const MAX_PROJECT_DESC_LINES: int = 3
 const EPISODE_DRAG_THRESHOLD: float = 6.0
 
-# 与 mod_editor.gd 的 enum BlockType 保持一致（用于导出/打包）
+const UPLOAD_GDSCRIPT_FORBIDDEN_RULES := [
+	{"pattern": "os.execute(", "reason": "OS.execute external command"},
+	{"pattern": "os.create_process(", "reason": "OS.create_process external process"},
+	{"pattern": "java_class_wrapper", "reason": "JavaClassWrapper access"},
+	{"pattern": "engine.register_singleton(", "reason": "Engine.register_singleton"},
+	{"pattern": "httprequest.new(", "reason": "HTTPRequest network request"},
+	{"pattern": "httpclient.new(", "reason": "HTTPClient network request"},
+	{"pattern": "websocketpeer.new(", "reason": "WebSocket connection"},
+	{"pattern": "streampeertcp.new(", "reason": "TCP connection"},
+	{"pattern": "packetpeerudp.new(", "reason": "UDP socket"},
+	{"pattern": "tcpserver.new(", "reason": "TCP server listener"},
+	{"pattern": "multiplayerpeer", "reason": "Multiplayer networking API"},
+]
+const UPLOAD_GDSCRIPT_FORBIDDEN_WRITE_FLAGS := [
+	"fileaccess.write",
+	"fileaccess.read_write",
+	"fileaccess.write_read",
+	"fileaccess.append",
+]
+
+# Keep in sync with mod_editor.gd BlockType enum (export/packaging).
 enum BlockType {
 	TEXT_ONLY,
 	DIALOG,
@@ -2119,9 +2139,11 @@ func _fix_custom_character_scene_script_paths(out_mod_root: String) -> void:
 	while entry != "":
 		if entry != "." and entry != ".." and not dir.current_is_dir() and entry.ends_with(".tscn"):
 			var scene_path := (dir_path + "/" + entry).replace("\\", "/")
-			var gd_path := (dir_path + "/" + entry.get_basename() + ".gd").replace("\\", "/")
-			if FileAccess.file_exists(gd_path):
-				_rewrite_tscn_script_path(scene_path, gd_path)
+			var gd_abs_path := (dir_path + "/" + entry.get_basename() + ".gd").replace("\\", "/")
+			if FileAccess.file_exists(gd_abs_path):
+				# Use relative script path so upload bundles do not capture temp absolute paths.
+				var gd_rel_path := entry.get_basename() + ".gd"
+				_rewrite_tscn_script_path(scene_path, gd_rel_path)
 		entry = str(dir.get_next())
 	dir.list_dir_end()
 
@@ -2892,6 +2914,13 @@ func _begin_upload_platform_for_project(project_name: String) -> void:
 		_show_info_dialog("上传失败", str(bundle.get("message", "构建上传包失败。")))
 		return
 
+	var security_errors: Array[String] = _validate_upload_bundle_security(bundle)
+	if not security_errors.is_empty():
+		_cleanup_upload_bundle(bundle)
+		_set_upload_busy(false)
+		_show_packaging_blocked("Upload blocked", security_errors)
+		return
+
 	var upload_result: Dictionary = await _upload_bundle_to_platform(bundle)
 	_cleanup_upload_bundle(bundle)
 	_set_upload_busy(false)
@@ -2938,9 +2967,184 @@ func _build_upload_bundle(project_name: String) -> Dictionary:
 		"ok": true,
 		"temp_root": temp_root,
 		"zip_path": zip_path,
+		"source_folder": source_folder,
 		"folder": folder,
 		"mod_config": mod_config,
 	}
+
+func _validate_upload_bundle_security(bundle: Dictionary) -> Array[String]:
+	var errors: Array[String] = []
+	var source_folder: String = str(bundle.get("source_folder", "")).replace("\\", "/").trim_suffix("/")
+	if source_folder.is_empty():
+		errors.append("Upload bundle folder is empty.")
+		return errors
+	if DirAccess.open(source_folder) == null:
+		errors.append("Upload bundle folder does not exist.")
+		return errors
+
+	var all_files: Array[String] = []
+	_collect_files_recursive(source_folder, all_files)
+	all_files.sort()
+	for abs_path in all_files:
+		if abs_path.length() <= source_folder.length() + 1:
+			continue
+		var rel_path: String = abs_path.substr(source_folder.length() + 1).replace("\\", "/")
+		var safe_rel_path: String = _normalize_upload_bundle_rel_path(rel_path)
+		if safe_rel_path.is_empty():
+			errors.append("Illegal path in upload bundle: %s" % rel_path)
+			continue
+
+		var lower_rel: String = safe_rel_path.to_lower()
+		if lower_rel.ends_with(".gd"):
+			var gd_errors: Array[String] = _validate_upload_gd_script(abs_path, safe_rel_path)
+			for err_text in gd_errors:
+				errors.append(err_text)
+		elif lower_rel.ends_with(".tscn"):
+			var tscn_errors: Array[String] = _validate_upload_tscn_script_paths(abs_path, safe_rel_path, source_folder)
+			for err_text in tscn_errors:
+				errors.append(err_text)
+
+	var mod_config_any: Variant = bundle.get("mod_config", {})
+	var mod_config: Dictionary = mod_config_any as Dictionary if typeof(mod_config_any) == TYPE_DICTIONARY else {}
+	var config_errors: Array[String] = _validate_upload_mod_config_paths(mod_config, source_folder)
+	for err_text in config_errors:
+		errors.append(err_text)
+	return errors
+
+func _normalize_upload_bundle_rel_path(path: String) -> String:
+	var normalized: String = path.strip_edges().replace("\\", "/")
+	if normalized.is_empty():
+		return ""
+	if normalized.begins_with("/") or normalized.find(":") != -1:
+		return ""
+	var raw_parts: PackedStringArray = normalized.split("/", false)
+	var parts: Array[String] = []
+	for part in raw_parts:
+		var piece: String = str(part).strip_edges()
+		if piece.is_empty() or piece == "." or piece == "..":
+			return ""
+		parts.append(piece)
+	return "/".join(parts)
+
+func _validate_upload_gd_script(abs_path: String, rel_path: String) -> Array[String]:
+	var errors: Array[String] = []
+	var file: FileAccess = FileAccess.open(abs_path, FileAccess.READ)
+	if file == null:
+		errors.append("Cannot read script: %s" % rel_path)
+		return errors
+	var script_text: String = file.get_as_text()
+	file.close()
+	var lower_text: String = script_text.to_lower()
+
+	for rule_any in UPLOAD_GDSCRIPT_FORBIDDEN_RULES:
+		if typeof(rule_any) != TYPE_DICTIONARY:
+			continue
+		var rule: Dictionary = rule_any as Dictionary
+		var pattern: String = str(rule.get("pattern", ""))
+		if pattern.is_empty():
+			continue
+		if lower_text.find(pattern) != -1:
+			var reason: String = str(rule.get("reason", pattern))
+			errors.append("High-risk API in script %s: %s" % [rel_path, reason])
+
+	if lower_text.find("fileaccess.open(") != -1:
+		for flag_any in UPLOAD_GDSCRIPT_FORBIDDEN_WRITE_FLAGS:
+			var flag: String = str(flag_any)
+			if flag.is_empty():
+				continue
+			if lower_text.find(flag) != -1:
+				errors.append("File write capability in script %s: %s" % [rel_path, flag])
+				break
+
+	var destructive_calls: Array[String] = [
+		"diraccess.remove(",
+		"diraccess.remove_absolute(",
+		"diraccess.rename(",
+		"diraccess.rename_absolute(",
+		"diraccess.copy(",
+		"diraccess.copy_absolute(",
+		"diraccess.make_dir_absolute(",
+	]
+	for call_name in destructive_calls:
+		if call_name.is_empty():
+			continue
+		if lower_text.find(call_name) != -1:
+			errors.append("Destructive filesystem API in script %s: %s" % [rel_path, call_name])
+	return errors
+
+func _validate_upload_tscn_script_paths(abs_path: String, scene_rel_path: String, source_folder: String) -> Array[String]:
+	var errors: Array[String] = []
+	var file: FileAccess = FileAccess.open(abs_path, FileAccess.READ)
+	if file == null:
+		errors.append("Cannot read scene: %s" % scene_rel_path)
+		return errors
+	var text: String = file.get_as_text()
+	file.close()
+
+	var lines: PackedStringArray = text.split("\n", false)
+	for line_idx in range(lines.size()):
+		var line: String = str(lines[line_idx]).strip_edges()
+		if line.find("[ext_resource") == -1 or line.find("type=\"Script\"") == -1:
+			continue
+		var key: String = "path=\""
+		var path_pos: int = line.find(key)
+		if path_pos == -1:
+			errors.append("Invalid Script ext_resource in scene %s at line %d" % [scene_rel_path, line_idx + 1])
+			continue
+		var path_start: int = path_pos + key.length()
+		var path_end: int = line.find("\"", path_start)
+		if path_end == -1:
+			errors.append("Invalid Script path in scene %s at line %d" % [scene_rel_path, line_idx + 1])
+			continue
+		var script_path_raw: String = line.substr(path_start, path_end - path_start).strip_edges()
+		var resolved_rel: String = _resolve_scene_script_rel_path_for_upload(scene_rel_path, script_path_raw)
+		if resolved_rel.is_empty():
+			errors.append("Unsafe script path in scene %s: %s" % [scene_rel_path, script_path_raw])
+			continue
+		var script_abs: String = source_folder + "/" + resolved_rel
+		if not FileAccess.file_exists(script_abs):
+			errors.append("Missing script in scene %s: %s" % [scene_rel_path, script_path_raw])
+	return errors
+
+func _resolve_scene_script_rel_path_for_upload(scene_rel_path: String, script_path_raw: String) -> String:
+	var script_rel: String = script_path_raw.strip_edges().replace("\\", "/")
+	if script_rel.is_empty():
+		return ""
+	if script_rel.begins_with("res://") or script_rel.begins_with("user://"):
+		return ""
+	if script_rel.begins_with("/") or script_rel.find(":") != -1:
+		return ""
+	var scene_dir: String = scene_rel_path.get_base_dir()
+	var combined: String = script_rel
+	if not scene_dir.is_empty():
+		combined = scene_dir + "/" + script_rel
+	var normalized: String = _normalize_upload_bundle_rel_path(combined)
+	if normalized.is_empty() or not normalized.to_lower().ends_with(".gd"):
+		return ""
+	return normalized
+
+func _validate_upload_mod_config_paths(mod_config: Dictionary, source_folder: String) -> Array[String]:
+	var errors: Array[String] = []
+	var episodes_any: Variant = mod_config.get("episodes", {})
+	if typeof(episodes_any) != TYPE_DICTIONARY:
+		errors.append("Invalid mod_config.episodes.")
+		return errors
+
+	var episodes: Dictionary = episodes_any as Dictionary
+	for title_any in episodes.keys():
+		var title: String = str(title_any).strip_edges()
+		var raw_path: String = str(episodes.get(title_any, "")).strip_edges()
+		var normalized: String = _normalize_upload_bundle_rel_path(raw_path)
+		if normalized.is_empty():
+			errors.append("Unsafe episode path for %s: %s" % [title, raw_path])
+			continue
+		if not normalized.begins_with("story/") or not normalized.to_lower().ends_with(".tscn"):
+			errors.append("Episode path must be story/*.tscn for %s: %s" % [title, normalized])
+			continue
+		var abs_path: String = source_folder + "/" + normalized
+		if not FileAccess.file_exists(abs_path):
+			errors.append("Episode scene not found for %s: %s" % [title, normalized])
+	return errors
 
 func _cleanup_upload_bundle(bundle: Dictionary) -> void:
 	var temp_root: String = str(bundle.get("temp_root", ""))

@@ -2,7 +2,32 @@ import { successResponse, errorResponse, forbiddenResponse, notFoundResponse } f
 
 const DEFAULT_MAX_FILE_SIZE = 50 * 1024 * 1024;
 const MAX_LIST_LIMIT = 50;
-const ALLOWED_FILE_TYPES = new Set(['zip', 'rar', '7z']);
+const ALLOWED_FILE_TYPES = new Set(['zip']);
+const SCRIPT_SCAN_MAX_BYTES = 2 * 1024 * 1024;
+const MAX_SECURITY_FINDINGS = 20;
+const GDSCRIPT_DANGEROUS_RULES = [
+  { pattern: 'os.execute(', reason: 'OS.execute external command' },
+  { pattern: 'os.create_process(', reason: 'OS.create_process external process' },
+  { pattern: 'java_class_wrapper', reason: 'JavaClassWrapper access' },
+  { pattern: 'engine.register_singleton(', reason: 'Engine.register_singleton' },
+  { pattern: 'httprequest.new(', reason: 'HTTPRequest network request' },
+  { pattern: 'httpclient.new(', reason: 'HTTPClient network request' },
+  { pattern: 'websocketpeer.new(', reason: 'WebSocket connection' },
+  { pattern: 'streampeertcp.new(', reason: 'TCP connection' },
+  { pattern: 'packetpeerudp.new(', reason: 'UDP socket' },
+  { pattern: 'tcpserver.new(', reason: 'TCP server listener' },
+  { pattern: 'multiplayerpeer', reason: 'Multiplayer networking API' },
+];
+const GDSCRIPT_WRITE_FLAGS = ['fileaccess.write', 'fileaccess.read_write', 'fileaccess.write_read', 'fileaccess.append'];
+const GDSCRIPT_DESTRUCTIVE_CALLS = [
+  'diraccess.remove(',
+  'diraccess.remove_absolute(',
+  'diraccess.rename(',
+  'diraccess.rename_absolute(',
+  'diraccess.copy(',
+  'diraccess.copy_absolute(',
+  'diraccess.make_dir_absolute(',
+];
 
 export async function uploadMod(request, env, user) {
   if (!env.MOD_FILES) {
@@ -12,6 +37,10 @@ export async function uploadMod(request, env, user) {
   const schemaError = await ensureModsSchema(env);
   if (schemaError) {
     return schemaError;
+  }
+
+  if (!user || !user.user_id) {
+    return errorResponse('Login required to upload mods', 401);
   }
 
   const contentType = (request.headers.get('Content-Type') || '').toLowerCase();
@@ -36,7 +65,7 @@ export async function uploadMod(request, env, user) {
   const fileType = getFileExtension(fileName);
 
   if (!ALLOWED_FILE_TYPES.has(fileType)) {
-    return errorResponse('Only zip/rar/7z packages are allowed');
+    return errorResponse('Only ZIP packages are allowed');
   }
 
   const maxFileSize = getMaxUploadSize(env);
@@ -92,7 +121,7 @@ export async function uploadMod(request, env, user) {
       return errorResponse(`Failed to read mod_config.json from ZIP: ${error.message}`);
     }
   } else if (!providedModConfig) {
-    return errorResponse('RAR/7z upload must provide `mod_config` JSON in form data');
+    return errorResponse('Only ZIP packages are supported for upload scanning');
   }
 
   const sourceModConfig = packageModConfig || providedModConfig || {};
@@ -109,6 +138,12 @@ export async function uploadMod(request, env, user) {
 
     if (missingEpisodeFiles.length > 0) {
       return errorResponse(`ZIP package is missing episode scenes: ${missingEpisodeFiles.join(', ')}`);
+    }
+
+    const securityCheck = await validateZipUploadSecurity(fileBuffer, zipEntries, normalizedModConfig);
+    if (!securityCheck.ok) {
+      const findings = securityCheck.findings.slice(0, 5).join(' ; ');
+      return errorResponse(`Upload blocked by security policy: ${findings}`, 400, 'MOD_SECURITY_BLOCKED');
     }
   }
 
@@ -470,7 +505,11 @@ export async function reviewMod(request, env, admin) {
   }, 'Mod review updated');
 }
 
-export async function downloadMod(request, env) {
+export async function downloadMod(request, env, user) {
+  if (!user || !user.user_id) {
+    return errorResponse('Login required to download mods', 401);
+  }
+
   if (!env.MOD_FILES) {
     return errorResponse('MOD_FILES bucket is not configured on this worker', 500);
   }
@@ -636,7 +675,10 @@ function normalizeEpisodes(value) {
       continue;
     }
 
-    const normalizedPath = path.replace(/\\/g, '/').replace(/^\.\//, '').replace(/^\//, '');
+    const normalizedPath = normalizeZipPath(path);
+    if (!normalizedPath) {
+      continue;
+    }
     output[title] = normalizedPath;
   }
 
@@ -848,6 +890,199 @@ async function insertDownloadLogIfAvailable(env, request, modId) {
   }
 }
 
+async function validateZipUploadSecurity(fileBuffer, zipEntries, normalizedModConfig) {
+  const findings = [];
+
+  const pushFinding = (message) => {
+    if (findings.length < MAX_SECURITY_FINDINGS) {
+      findings.push(message);
+    }
+  };
+
+  for (const entry of zipEntries) {
+    const normalizedEntryPath = normalizeZipPath(entry.fileName);
+    if (!normalizedEntryPath) {
+      pushFinding(`Illegal ZIP entry path: ${entry.fileName}`);
+    }
+  }
+
+  for (const [episodeTitle, episodePath] of Object.entries(normalizedModConfig.episodes || {})) {
+    const normalizedEpisodePath = normalizeZipPath(episodePath);
+    if (!normalizedEpisodePath) {
+      pushFinding(`Unsafe episode path for ${episodeTitle}: ${episodePath}`);
+      continue;
+    }
+    if (!normalizedEpisodePath.startsWith('story/') || !normalizedEpisodePath.toLowerCase().endsWith('.tscn')) {
+      pushFinding(`Episode path must be story/*.tscn for ${episodeTitle}: ${normalizedEpisodePath}`);
+      continue;
+    }
+    if (!findZipEntryByPath(zipEntries, normalizedEpisodePath)) {
+      pushFinding(`Episode scene file missing: ${normalizedEpisodePath}`);
+    }
+  }
+
+  for (const entry of zipEntries) {
+    if (findings.length >= MAX_SECURITY_FINDINGS) {
+      break;
+    }
+
+    const relPath = normalizeZipPath(entry.fileName);
+    if (!relPath) {
+      continue;
+    }
+
+    const lowerPath = relPath.toLowerCase();
+    if (!lowerPath.endsWith('.gd') && !lowerPath.endsWith('.tscn')) {
+      continue;
+    }
+
+    let bytes;
+    try {
+      bytes = await readZipEntryBytes(fileBuffer, entry);
+    } catch (error) {
+      pushFinding(`Failed to read ${relPath}: ${error.message}`);
+      continue;
+    }
+
+    if (bytes.byteLength > SCRIPT_SCAN_MAX_BYTES) {
+      pushFinding(`Script file too large: ${relPath}`);
+      continue;
+    }
+
+    const sourceText = new TextDecoder().decode(bytes);
+
+    if (lowerPath.endsWith('.gd')) {
+      const scriptFindings = validateGdScriptText(sourceText, relPath);
+      for (const finding of scriptFindings) {
+        pushFinding(finding);
+      }
+      continue;
+    }
+
+    const sceneFindings = validateTscnScriptRefs(sourceText, relPath, zipEntries);
+    for (const finding of sceneFindings) {
+      pushFinding(finding);
+    }
+  }
+
+  return {
+    ok: findings.length === 0,
+    findings,
+  };
+}
+
+function validateGdScriptText(sourceText, relPath) {
+  const findings = [];
+  const lower = String(sourceText || '').toLowerCase();
+
+  for (const rule of GDSCRIPT_DANGEROUS_RULES) {
+    if (lower.includes(rule.pattern)) {
+      findings.push(`High-risk API in script ${relPath}: ${rule.reason}`);
+    }
+  }
+
+  if (lower.includes('fileaccess.open(')) {
+    for (const flag of GDSCRIPT_WRITE_FLAGS) {
+      if (lower.includes(flag)) {
+        findings.push(`File write capability in script ${relPath}: ${flag}`);
+        break;
+      }
+    }
+  }
+
+  for (const callName of GDSCRIPT_DESTRUCTIVE_CALLS) {
+    if (lower.includes(callName)) {
+      findings.push(`Destructive filesystem API in script ${relPath}: ${callName}`);
+    }
+  }
+
+  return findings;
+}
+
+function validateTscnScriptRefs(sceneText, scenePath, zipEntries) {
+  const findings = [];
+  const regex = /\[ext_resource[^\n]*type="Script"[^\n]*path="([^"]+)"/g;
+  let match;
+
+  while ((match = regex.exec(sceneText)) !== null) {
+    const scriptRawPath = String(match[1] || '').trim();
+    const resolvedPath = resolveSceneScriptPath(scenePath, scriptRawPath);
+    if (!resolvedPath) {
+      findings.push(`Unsafe script path in scene ${scenePath}: ${scriptRawPath}`);
+      continue;
+    }
+    if (!findZipEntryByPath(zipEntries, resolvedPath)) {
+      findings.push(`Missing script referenced by scene ${scenePath}: ${scriptRawPath}`);
+    }
+  }
+
+  return findings;
+}
+
+function resolveSceneScriptPath(scenePath, scriptPath) {
+  const normalizedScript = String(scriptPath || '').trim().replace(/\\/g, '/');
+  if (!normalizedScript) {
+    return '';
+  }
+  if (normalizedScript.startsWith('res://') || normalizedScript.startsWith('user://')) {
+    return '';
+  }
+  if (normalizedScript.startsWith('/') || normalizedScript.includes(':')) {
+    return '';
+  }
+
+  const sceneDir = normalizeZipPath(scenePath).split('/').slice(0, -1).join('/');
+  const combined = sceneDir ? `${sceneDir}/${normalizedScript}` : normalizedScript;
+  const normalized = normalizeZipPath(combined);
+  if (!normalized || !normalized.toLowerCase().endsWith('.gd')) {
+    return '';
+  }
+  return normalized;
+}
+
+function normalizeZipPath(rawPath) {
+  const source = String(rawPath || '').trim().replace(/\\/g, '/');
+  if (!source) {
+    return '';
+  }
+
+  const withoutPrefix = source.replace(/^\.\//, '').replace(/^\//, '');
+  if (!withoutPrefix || withoutPrefix.includes(':')) {
+    return '';
+  }
+
+  const parts = withoutPrefix.split('/');
+  const safeParts = [];
+  for (const part of parts) {
+    const clean = part.trim();
+    if (!clean || clean === '.' || clean === '..') {
+      return '';
+    }
+    safeParts.push(clean);
+  }
+
+  return safeParts.join('/');
+}
+
+function findZipEntryByPath(entries, expectedPath) {
+  const expected = normalizeZipPath(expectedPath).toLowerCase();
+  if (!expected) {
+    return null;
+  }
+
+  for (const entry of entries) {
+    const normalized = normalizeZipPath(entry.fileName).toLowerCase();
+    if (!normalized) {
+      continue;
+    }
+    if (normalized === expected || normalized.endsWith(`/${expected}`)) {
+      return entry;
+    }
+  }
+
+  return null;
+}
+
 function parseZipEntries(arrayBuffer) {
   const view = new DataView(arrayBuffer);
   const eocdOffset = findEocdOffset(view);
@@ -953,23 +1188,5 @@ function isModConfigPath(fileName) {
 }
 
 function hasZipPath(entries, expectedPath) {
-  const expected = String(expectedPath || '')
-    .replace(/\\/g, '/')
-    .replace(/^\.\//, '')
-    .replace(/^\//, '')
-    .toLowerCase();
-
-  if (!expected) {
-    return false;
-  }
-
-  return entries.some((entry) => {
-    const normalized = entry.fileName
-      .replace(/\\/g, '/')
-      .replace(/^\.\//, '')
-      .replace(/^\//, '')
-      .toLowerCase();
-
-    return normalized === expected || normalized.endsWith(`/${expected}`);
-  });
+  return findZipEntryByPath(entries, expectedPath) !== null;
 }

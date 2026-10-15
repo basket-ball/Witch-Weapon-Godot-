@@ -3541,15 +3541,15 @@ func _show_choice_ui(options: Array) -> void:
 		var btn = Button.new()
 		btn.text = options[i]
 		btn.flat = true
-		btn.focus_mode = Control.FOCUS_ALL
+		btn.focus_mode = Control.FOCUS_CLICK
 		btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		btn.custom_minimum_size = Vector2(400, 50)
 
-		var outline = StyleBoxEmpty.new()
-		btn.add_theme_stylebox_override("normal", outline)
-		btn.add_theme_stylebox_override("hover", outline)
-		btn.add_theme_stylebox_override("pressed", outline)
-		btn.add_theme_stylebox_override("focus", outline)
+		#var outline = StyleBoxEmpty.new()
+		#btn.add_theme_stylebox_override("normal", outline)
+		#btn.add_theme_stylebox_override("hover", outline)
+		#btn.add_theme_stylebox_override("pressed", outline)
+		#btn.add_theme_stylebox_override("focus", outline)
 
 		var idx = i
 		btn.pressed.connect(_on_choice_button_pressed.bind(idx))
